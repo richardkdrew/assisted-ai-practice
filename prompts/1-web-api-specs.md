@@ -17,6 +17,7 @@ The prompt should:
 | Validation           | Pydantic   | 2.11.7  |
 | Service config       | Pydantic   | 2.11.7  |
 | Testing framework    | pytest     | 8.4.1   |
+| Test Coverage helper | pytest-cov | 6.2.1.  |
 | Testing HTTP helper  | httpx      | 0.28.1  |
 | Database engine      | PostgreSQL | v16     |
 | Python DB adapter    | psycopg2   | 2.9.10  |
@@ -58,7 +59,7 @@ Should be prefixed with `/api/v1`
 
 ## Data Persistence
 
-This project will NOT be using an ORM. Rather, it will manage and issue SQL statements.
+This project will NOT be using an ORM. Rather, it will manage and issue SQL statements. Use the Repository for data access.
 
 The connection pool should use the following components:
 - psycopg2.pool.ThreadedConnectionPool
@@ -76,10 +77,35 @@ Implement a migration system that includes:
 - A `migrations.py` file to implement the migration system
 - A `migrations_test.py` file to test the migration system
 
+## Dates and times
+
+Use the most up-to-date Python documentation for date and time operations to ensure we don't use deprecated APIs. Use the web to validate code with these docs: https://docs.python.org/3/library/time.html
+
+## Automated Testing
+
+- ALL code files MUST have an associated unit test (NOT `__init__.py` files) that focuses on 80% of the most important scenarios in the file it is testing.
+- ALL unit tests will have a `_test.py` suffix and be located in the same folder as the unit under test.
+- If we must have a `test/` folder, it should only contain test helpers, widely used mocks, and/or integration tests. Do not create this folder until it is needed.
+
 ## Service Configuration
 
 Use a `.env` file to store environment variables, such as the database configuration string, logging level, etc. Use pydantic-settings (>=2.0.0,<3.0.0) to parse/validate the environment variables.
 
 ## Developer Experience
 
-Use `pipenv` for managing virtual environments, external dependencies, and script running. Do NOT use `pip` or `uv` - only pipenv directly (e.g. `pipenv install`).
+Use `pipenv` for managing virtual environments, external dependencies, and script running. Do NOT use `pip` or `uv` - only pipenv directly (e.g. `pipenv install` for each dependency).
+
+Use an appropriate .gitignore file to make sure we're avoiding unnecessary files in version control.
+
+## Notes
+
+1. Focus on dynamic architecture
+2. Clean interfaces
+3. Optimal performance
+4. Use design patterns
+5. Follow clean code principles
+6. Separation of concerns
+7. Modular and testable code
+8. Ensure scalability for future growth
+9. Use comments when needed
+
