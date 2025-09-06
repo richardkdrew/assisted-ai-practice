@@ -63,4 +63,25 @@ Prompt: lets move the compose file to the config-service folder, move the README
 - Cost: $0.2120
 - Reflections: Worked really well - though it seemed like a lot of api calls.
 
+Prompt: app has error when trying to run it
+- Mode: Act
+- Context: Clean
+- Model: Claude 4 Sonnet 20250514
+- Cost: $0.3506
+- Reflections: Assistant fixed up the migrations and got teh app working. Looks like it deleted some criticla enviroenmtn variables as part of the exercise too.
+
+Prompt: app has error when trying to run it
+- Mode: Act
+- Context: Clean
+- Model: Claude 4 Sonnet 20250514
+- Cost: $0.3506
+- Reflections: Assistant fixed up the migrations and got teh app working. Looks like it deleted some criticla enviroenmtn variables as part of the exercise too.
+
+Prompt: Lets align docker compose envrionenmnt variable naming with the format in teh .env file, i.e. DATABASE_DB as opposed to POSTGRES_DB. Also add defautl values.
+- Mode: Act
+- Context: Clean
+- Model: Claude 4 Sonnet 20250514
+- Cost: $0.2198
+- Reflections: Worked really well.
+
 
