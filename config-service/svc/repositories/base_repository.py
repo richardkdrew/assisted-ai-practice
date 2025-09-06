@@ -6,8 +6,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Dict, Any, List, Optional, TypeVar, Generic
 
-from pydantic_extra_types.ulid import ULID
-from ulid import ULID as ULIDGenerator
+from ulid import ULID
 
 from database.connection import DatabaseManager
 
@@ -35,7 +34,7 @@ class BaseRepository(ABC, Generic[T]):
         Returns:
             New ULID instance
         """
-        return ULIDGenerator()
+        return ULID()
 
     def serialize_json_field(self, data: Dict[str, Any]) -> str:
         """Serialize dictionary to JSON string for database storage.

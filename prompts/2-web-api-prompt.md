@@ -20,6 +20,9 @@ Please create a comprehensive implementation plan for a Config Service REST Web 
 
 ## Project Architecture Requirements
 
+### Project Structure Requirements
+**CRITICAL**: With the exception of README and .gitignore files, create ALL other files inside a top-level `svc/` folder of the `config-service` parent folder (e.g., `config-service/svc/`).
+
 ### Core Principles
 1. **NO ORM**: Implement direct SQL statement management via Repository pattern
 2. Create modular, scalable architecture with clear separation of concerns

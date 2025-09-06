@@ -4,7 +4,7 @@ import json
 import logging
 from typing import Dict, Any, List, Optional
 
-from pydantic_extra_types.ulid import ULID
+from ulid import ULID
 
 from database.connection import db_manager
 from models.configuration import ConfigurationEntity

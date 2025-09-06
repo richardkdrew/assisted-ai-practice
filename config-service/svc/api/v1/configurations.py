@@ -4,7 +4,7 @@ import logging
 from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, status, Query, Path
-from pydantic_extra_types.ulid import ULID
+from ulid import ULID
 from typing import Annotated
 
 from models.configuration import (
@@ -78,15 +78,20 @@ async def get_configuration(
         HTTPException: 500 if retrieval fails
     """
     try:
-        configuration = await configuration_service.get_configuration_by_id(
-            configuration_id
-        )
+        ulid_id = ULID.from_str(configuration_id)
+        configuration = await configuration_service.get_configuration_by_id(ulid_id)
         if not configuration:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Configuration with ID '{configuration_id}' not found",
             )
         return configuration
+    except ValueError as e:
+        logger.warning(f"Invalid ULID format: {configuration_id}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid ULID format: {configuration_id}",
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -124,8 +129,9 @@ async def update_configuration(
         HTTPException: 500 if update fails
     """
     try:
+        ulid_id = ULID.from_str(configuration_id)
         configuration = await configuration_service.update_configuration(
-            configuration_id, configuration_data
+            ulid_id, configuration_data
         )
         if not configuration:
             raise HTTPException(
@@ -134,8 +140,16 @@ async def update_configuration(
             )
         return configuration
     except ValueError as e:
-        logger.warning(f"Configuration update validation error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        # Check if it's a ULID format error or business logic error
+        if "Invalid ULID" in str(e) or "ULID" in str(e):
+            logger.warning(f"Invalid ULID format: {configuration_id}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid ULID format: {configuration_id}",
+            )
+        else:
+            logger.warning(f"Configuration update validation error: {e}")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except HTTPException:
         raise
     except Exception as e:
@@ -205,12 +219,19 @@ async def delete_configuration(
         HTTPException: 500 if deletion fails
     """
     try:
-        deleted = await configuration_service.delete_configuration(configuration_id)
+        ulid_id = ULID.from_str(configuration_id)
+        deleted = await configuration_service.delete_configuration(ulid_id)
         if not deleted:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Configuration with ID '{configuration_id}' not found",
             )
+    except ValueError as e:
+        logger.warning(f"Invalid ULID format: {configuration_id}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid ULID format: {configuration_id}",
+        )
     except HTTPException:
         raise
     except Exception as e:

@@ -91,9 +91,17 @@ Use the most up-to-date Python documentation for date and time operations to ens
 
 Use a `.env` file to store environment variables, such as the database configuration string, logging level, etc. Use pydantic-settings (>=2.0.0,<3.0.0) to parse/validate the environment variables.
 
+## Project Structure
+
+With exception to the README nd the .gitignore file, creaet all other files inside a top level svc folder of the config-service parent folder e.g. config-service/svc/
+
+# Database Environment
+
+Use Docker for the database dependencies
+
 ## Developer Experience
 
-Use `pipenv` for managing virtual environments, external dependencies, and script running. Do NOT use `pip` or `uv` - only pipenv directly (e.g. `pipenv install` for each dependency).
+Use `pipenv` for managing virtual environments, external dependencies, and script running. Do NOT use `pip` or `uv` - only pipenv directly (e.g. `pipenv install` for each dependency). Make sure to run `pipenv install` for each dependency
 
 Use an appropriate .gitignore file to make sure we're avoiding unnecessary files in version control.
 

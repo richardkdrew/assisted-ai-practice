@@ -84,4 +84,23 @@ Prompt: Lets align docker compose envrionenmnt variable naming with the format i
 - Cost: $0.2198
 - Reflections: Worked really well.
 
+Prompt: lets focus on applications. create an integration test for the create application flow. make sure to test the application exists after creation
+- Mode: Act
+- Context: Clean
+- Model: Claude 4 Sonnet 20250514
+- Cost: $2.2105
+- Reflections: Lots of work, seemed to create a test, work with it an drealise that is t had brokena bunch of other tests. Fixed those first then created workign intergation tests based on that learning. Expensive and long, drawn out but got there in the end.
 
+Prompt: when i test the api and the databse using the docker compose file, i can create an application but when i query for teh same application id i get: INFO:     127.0.0.1:59259 - "GET /api/v1/applications/01K4GGEZJ3MPNN12XD1BY1QVB3 HTTP/1.1" 404 Not Found
+- Mode: Act
+- Context: Clean
+- Model: Claude 4 Sonnet 20250514
+- Cost: $0.5759
+- Reflections: Did a reqally good job of testing the applciation 'manually', post and getting from teh api to make sure all flows worked correctly.
+
+Prompt: lets focus on configurations. create an integration test for the create configuration flow. make sure to test the configuration exists after creation
+- Mode: Act
+- Context: Clean
+- Model: Claude 4 Sonnet 20250514
+- Cost: $0.4960
+- Reflections: Worked really well.

@@ -7,6 +7,9 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     # Database Configuration
+    database_db: str
+    database_user: str
+    database_password: str
     database_url: str
     database_test_url: str
 

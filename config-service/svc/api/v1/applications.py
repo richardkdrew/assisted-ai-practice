@@ -4,7 +4,7 @@ import logging
 from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, status, Query, Path
-from pydantic_extra_types.ulid import ULID
+from ulid import ULID
 from typing import Annotated
 
 from models.application import ApplicationCreate, ApplicationUpdate, ApplicationResponse
@@ -74,13 +74,20 @@ async def get_application(
         HTTPException: 500 if retrieval fails
     """
     try:
-        application = await application_service.get_application_by_id(application_id)
+        ulid_id = ULID.from_str(application_id)
+        application = await application_service.get_application_by_id(ulid_id)
         if not application:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Application with ID '{application_id}' not found",
             )
         return application
+    except ValueError as e:
+        logger.warning(f"Invalid ULID format: {application_id}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid ULID format: {application_id}",
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -116,8 +123,9 @@ async def update_application(
         HTTPException: 500 if update fails
     """
     try:
+        ulid_id = ULID.from_str(application_id)
         application = await application_service.update_application(
-            application_id, application_data
+            ulid_id, application_data
         )
         if not application:
             raise HTTPException(
@@ -126,8 +134,16 @@ async def update_application(
             )
         return application
     except ValueError as e:
-        logger.warning(f"Application update validation error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        # Check if it's a ULID format error or business logic error
+        if "Invalid ULID" in str(e) or "ULID" in str(e):
+            logger.warning(f"Invalid ULID format: {application_id}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid ULID format: {application_id}",
+            )
+        else:
+            logger.warning(f"Application update validation error: {e}")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except HTTPException:
         raise
     except Exception as e:
@@ -206,12 +222,21 @@ async def list_configurations_by_application(
         HTTPException: 500 if retrieval fails
     """
     try:
+        ulid_id = ULID.from_str(application_id)
         return await configuration_service.get_configurations_by_application_id(
-            application_id, limit=limit, offset=offset
+            ulid_id, limit=limit, offset=offset
         )
     except ValueError as e:
-        logger.warning(f"Configuration listing validation error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        # Check if it's a ULID format error or business logic error
+        if "Invalid ULID" in str(e) or "ULID" in str(e):
+            logger.warning(f"Invalid ULID format: {application_id}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid ULID format: {application_id}",
+            )
+        else:
+            logger.warning(f"Configuration listing validation error: {e}")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         logger.error(
             f"Failed to list configurations for application {application_id}: {e}"
@@ -241,12 +266,19 @@ async def delete_application(
         HTTPException: 500 if deletion fails
     """
     try:
-        deleted = await application_service.delete_application(application_id)
+        ulid_id = ULID.from_str(application_id)
+        deleted = await application_service.delete_application(ulid_id)
         if not deleted:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Application with ID '{application_id}' not found",
             )
+    except ValueError as e:
+        logger.warning(f"Invalid ULID format: {application_id}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid ULID format: {application_id}",
+        )
     except HTTPException:
         raise
     except Exception as e:

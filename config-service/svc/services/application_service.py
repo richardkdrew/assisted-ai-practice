@@ -3,7 +3,7 @@
 import logging
 from typing import List, Optional
 
-from pydantic_extra_types.ulid import ULID
+from ulid import ULID
 
 from models.application import ApplicationCreate, ApplicationUpdate, ApplicationResponse
 from repositories.application_repository import application_repository

@@ -2,7 +2,7 @@
 
 from typing import Optional, Dict, Any
 from pydantic import Field
-from pydantic_extra_types.ulid import ULID
+from ulid import ULID
 
 from models.base import BaseCreateModel, BaseUpdateModel, BaseResponseModel
 
