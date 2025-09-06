@@ -48,3 +48,19 @@ Prompt: Get all tests to pass
 - Model: Claude 4 Sonnet 20250514
 - Cost: $2.3670
 - Reflections: The tests are all passing but the intial quality fo the solution meant taht the config, set up and soem basic taggign of reutes all made it really complicated fior my assisstant to find and fix the problems. It wasa costly exercise - maybe try and keep the scope smaller in future?
+
+Prompt: Let's use docker for the database runtime for this project. create a docker compose file that sets up postgresql
+- Mode: Plan
+- Context: Clean
+- Model: Claude 3.5 Haiku 20241022
+- Cost: $
+- Reflections: Worked really well.
+
+Prompt: lets move the compose file to the config-service folder, move the README and gitignore files to the root folder and move and combine the .env file into the config-service folder.
+- Mode: Act
+- Context: Clean
+- Model: Claude 4 Sonnet 20250514
+- Cost: $0.2120
+- Reflections: Worked really well - though it seemed like a lot of api calls.
+
+
