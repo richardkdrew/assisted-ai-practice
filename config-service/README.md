@@ -1,9 +1,18 @@
 # Config Service
 
+A complete application configuration management system with REST API service and modern web admin interface.
+
+## Components
+
+### Backend API Service
 A REST API service for managing application configurations built with Python 3.13.5 and FastAPI 0.116.1.
+
+### Admin Web Interface
+A modern web-based admin interface built with TypeScript, Web Components, and native browser APIs.
 
 ## Features
 
+### Backend Features
 - **Applications Management**: Create, read, update, and delete applications
 - **Configurations Management**: Manage configuration data for applications with JSONB storage
 - **ULID Primary Keys**: Uses ULID (Universally Unique Lexicographically Sortable Identifier) for all entities
@@ -13,6 +22,15 @@ A REST API service for managing application configurations built with Python 3.1
 - **Connection Pooling**: Efficient database connection management with ThreadedConnectionPool
 - **Clean Architecture**: Separation of concerns with repository, service, and API layers
 - **Docker Support**: PostgreSQL database with pgAdmin for easy database management
+
+### Frontend Features
+- **Application Management**: Create, read, update, and delete applications via web interface
+- **Configuration Management**: Manage key-value configuration pairs for each application
+- **Dynamic Configuration Editor**: Support for string, number, boolean, and JSON object types
+- **Responsive Design**: Works on desktop and mobile devices
+- **Real-time Validation**: Client-side form validation with helpful error messages
+- **Pagination**: Efficient handling of large datasets
+- **Modern Architecture**: Built with Web Components and Shadow DOM
 
 ## Tech Stack
 
@@ -224,6 +242,64 @@ The container includes a health check that verifies the database is ready to acc
 docker-compose ps
 ```
 
+## Admin Web Interface
+
+The Config Service includes a modern web-based admin interface for managing applications and configurations.
+
+### UI Technology Stack
+
+- **TypeScript**: Strongly typed JavaScript for better development experience
+- **Web Components**: Native browser components with Shadow DOM encapsulation
+- **Fetch API**: Native browser HTTP client for API communication
+- **CSS**: Modern CSS with flexbox and grid layouts
+- **Vite**: Fast build tool and development server
+- **Vitest**: Unit testing framework
+- **Playwright**: End-to-end testing framework
+
+### UI Quick Start
+
+1. Navigate to the UI directory:
+   ```bash
+   cd config-service/ui
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+4. Open your browser to `http://localhost:3001`
+
+### UI Features
+
+- **Application Management**: Create, read, update, and delete applications via web interface
+- **Configuration Management**: Manage key-value configuration pairs for each application
+- **Dynamic Configuration Editor**: Support for string, number, boolean, and JSON object types
+- **Responsive Design**: Works on desktop and mobile devices
+- **Real-time Validation**: Client-side form validation with helpful error messages
+- **Pagination**: Efficient handling of large datasets
+
+### UI Testing
+
+```bash
+# Unit tests
+npm test
+
+# End-to-end tests
+npm run test:e2e
+
+# Type checking
+npm run type-check
+
+# Linting
+npm run lint
+```
+
 ## API Documentation
 
 Once the server is running, you can access:
@@ -231,6 +307,7 @@ Once the server is running, you can access:
 - **Interactive API Documentation**: `http://localhost:8000/docs`
 - **Alternative API Documentation**: `http://localhost:8000/redoc`
 - **Health Check**: `http://localhost:8000/health`
+- **Admin Web Interface**: `http://localhost:3001` (when UI server is running)
 
 ## Architecture
 
@@ -240,16 +317,32 @@ The application follows clean architecture principles with clear separation of c
 config-service/
 ├── README.md               # Documentation
 ├── .gitignore             # Git ignore rules
-└── svc/                   # All service code
-    ├── main.py            # Application entry point
-    ├── docker-compose.yml # Docker configuration
-    ├── Pipfile            # Python dependencies
-    ├── config/            # Application configuration
-    ├── database/          # Database connection and migrations
-    ├── models/            # Pydantic data models
-    ├── api/               # API layer (FastAPI routers)
-    ├── services/          # Business logic layer
-    └── repositories/      # Data access layer
+├── svc/                   # Backend API service
+│   ├── main.py            # Application entry point
+│   ├── docker-compose.yml # Docker configuration
+│   ├── Pipfile            # Python dependencies
+│   ├── config/            # Application configuration
+│   ├── database/          # Database connection and migrations
+│   ├── models/            # Pydantic data models
+│   ├── api/               # API layer (FastAPI routers)
+│   ├── services/          # Business logic layer
+│   └── repositories/      # Data access layer
+└── ui/                    # Frontend admin interface
+    ├── src/               # Source code
+    │   ├── components/    # Web Components
+    │   ├── services/      # API service layer
+    │   ├── models/        # TypeScript interfaces
+    │   ├── styles/        # CSS stylesheets
+    │   ├── index.html     # Entry point
+    │   └── main.ts        # Application bootstrap
+    ├── tests/             # Test files
+    │   ├── unit/          # Unit tests
+    │   ├── e2e/           # End-to-end tests
+    │   └── setup.ts       # Test configuration
+    ├── package.json       # Dependencies and scripts
+    ├── tsconfig.json      # TypeScript configuration
+    ├── vite.config.ts     # Build tool configuration
+    └── playwright.config.ts # E2E test configuration
 ```
 
 ### Key Design Patterns

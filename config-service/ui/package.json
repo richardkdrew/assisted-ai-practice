@@ -1,0 +1,28 @@
+{
+  "name": "config-service-admin-ui",
+  "version": "1.0.0",
+  "description": "Admin UI for Config Service",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "lint": "eslint src --ext ts,html --report-unused-disable-directives --max-warnings 0",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.45.0",
+    "typescript": "^5.0.2",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "dependencies": {}
+}

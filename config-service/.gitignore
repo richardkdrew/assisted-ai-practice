@@ -133,7 +133,40 @@ dmypy.json
 .idea/
 *.swp
 *.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Frontend/UI Dependencies (Node.js)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Frontend Build outputs
+ui/dist/
+ui/build/
+
+# Frontend Environment files
+ui/.env.local
+ui/.env.development.local
+ui/.env.test.local
+ui/.env.production.local
+
+# Frontend Test outputs
+ui/coverage/
+ui/test-results/
+ui/playwright-report/
+ui/playwright/.cache/
+
+# Frontend Runtime data
+ui/pids/
+ui/*.pid
+ui/*.seed
+ui/*.pid.lock
+
+# Frontend Temporary files
+ui/.tmp/
+ui/.temp/
