@@ -102,8 +102,10 @@ class DatabaseManager:
         async with self.get_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(query, params)
-                # Commit the transaction for INSERT/UPDATE/DELETE operations
-                conn.commit()
+                # Only commit for INSERT/UPDATE/DELETE operations, not SELECT
+                query_upper = query.strip().upper()
+                if query_upper.startswith(("INSERT", "UPDATE", "DELETE")):
+                    conn.commit()
                 if cursor.description:
                     return cursor.fetchone()
                 return {}
@@ -123,8 +125,10 @@ class DatabaseManager:
         async with self.get_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(query, params)
-                # Commit the transaction for INSERT/UPDATE/DELETE operations
-                conn.commit()
+                # Only commit for INSERT/UPDATE/DELETE operations, not SELECT
+                query_upper = query.strip().upper()
+                if query_upper.startswith(("INSERT", "UPDATE", "DELETE")):
+                    conn.commit()
                 if cursor.description:
                     return cursor.fetchall()
                 return []

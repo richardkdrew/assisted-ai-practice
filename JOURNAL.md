@@ -131,13 +131,21 @@ Prompt: Read @/prompts/4-admin-ui-prompt.md and follow the instructions at the t
 - Input: prompts/5-admin-ui-plan.md
 - Reflections: lots of work to fix imports and set up additioanl test mocks. e2e still not running due to `npm playright install` not being run. also ui doesnt seem to work for basci acreate application flow.
 
-- Prompt: ui loads ok, shows internal server error and doesnet work when adding an aplication.
+- Prompt: ui loads ok, shows internal server error and doesnet work when adding an application.
 - Tool: Cline
 - Mode: Act
 - Context: Clean
 - Model: Claude Sonnet 4
 - Cost: $0.8938
 - Reflections: Lots of examinations... took ages and went through a lot of stuff but worked out in the end.
+
+- Prompt: lets focus on the configurations area. when i add a new config it says it already exists, even when it doesnt
+- Tool: Cline
+- Mode: Act
+- Context: Clean
+- Model: Claude Sonnet 4
+- Cost: $1.7989
+- Reflections: Lots of examinations... took ages and went through a lot of stuff but worked out in the end. Included thorough testing to validate the isseu was fixed.
 
 
 

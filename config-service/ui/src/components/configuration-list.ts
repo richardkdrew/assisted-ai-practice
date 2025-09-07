@@ -10,6 +10,7 @@ export class ConfigurationList extends HTMLElement {
   private showForm = false;
   private editingConfiguration: ConfigurationListItem | null = null;
   private applicationId: string | null = null;
+  private submitting = false;
 
   constructor() {
     super();
@@ -102,8 +103,16 @@ export class ConfigurationList extends HTMLElement {
   }
 
   private async handleFormSubmit(event: Event): Promise<void> {
+    // Prevent multiple simultaneous submissions
+    if (this.submitting) {
+      return;
+    }
+
     const customEvent = event as CustomEvent;
     const formData = customEvent.detail;
+    
+    this.submitting = true;
+    this.error = null;
     
     try {
       let response;
@@ -128,6 +137,8 @@ export class ConfigurationList extends HTMLElement {
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to save configuration';
       this.render();
+    } finally {
+      this.submitting = false;
     }
   }
 
