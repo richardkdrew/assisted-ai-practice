@@ -1,15 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ApplicationService } from '../../src/services/application-service.js';
-import { ApiService } from '../../src/services/api-service.js';
+import { ApplicationService } from '../../src/services/application-service';
+import { apiService } from '../../src/services/api-service';
 
 // Mock the API service
-vi.mock('../../src/services/api-service.js', () => ({
-  ApiService: vi.fn().mockImplementation(() => ({
-    get: vi.fn(),
-    post: vi.fn(),
-    put: vi.fn(),
-    delete: vi.fn(),
-  })),
+vi.mock('../../src/services/api-service', () => ({
   apiService: {
     get: vi.fn(),
     post: vi.fn(),
@@ -24,7 +18,7 @@ describe('ApplicationService', () => {
 
   beforeEach(() => {
     applicationService = new ApplicationService();
-    mockApiService = vi.mocked(require('../../src/services/api-service.js').apiService);
+    mockApiService = vi.mocked(apiService);
     vi.clearAllMocks();
   });
 

@@ -20,9 +20,9 @@
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.45.0",
+    "jsdom": "^26.1.0",
     "typescript": "^5.0.2",
     "vite": "^5.0.0",
     "vitest": "^1.0.0"
-  },
-  "dependencies": {}
+  }
 }

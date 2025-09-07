@@ -1,5 +1,5 @@
-import { apiService, ApiResponse } from './api-service.js';
-import { ApplicationCreate, ApplicationUpdate, ApplicationResponse, ApplicationListItem } from '../models/application.js';
+import { apiService, ApiResponse } from './api-service';
+import { ApplicationCreate, ApplicationUpdate, ApplicationResponse, ApplicationListItem } from '../models/application';
 
 export class ApplicationService {
   async getAll(limit?: number, offset?: number): Promise<ApiResponse<ApplicationResponse[]>> {

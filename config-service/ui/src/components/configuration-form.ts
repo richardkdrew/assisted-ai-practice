@@ -1,5 +1,5 @@
-import { ConfigurationListItem, ConfigKeyValue } from '../models/configuration.js';
-import { configurationService } from '../services/configuration-service.js';
+import { ConfigurationListItem, ConfigKeyValue } from '../models/configuration';
+import { configurationService } from '../services/configuration-service';
 
 export class ConfigurationForm extends HTMLElement {
   private configuration: ConfigurationListItem | null = null;

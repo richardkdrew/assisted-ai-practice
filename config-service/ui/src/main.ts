@@ -1,5 +1,5 @@
-import './components/app-root.js';
-import './components/application-list.js';
-import './components/application-form.js';
-import './components/configuration-list.js';
-import './components/configuration-form.js';
+import './components/app-root';
+import './components/application-list';
+import './components/application-form';
+import './components/configuration-list';
+import './components/configuration-form';

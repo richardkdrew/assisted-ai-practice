@@ -1,5 +1,5 @@
-import { configurationService } from '../services/configuration-service.js';
-import { ConfigurationListItem } from '../models/configuration.js';
+import { configurationService } from '../services/configuration-service';
+import { ConfigurationListItem } from '../models/configuration';
 
 export class ConfigurationList extends HTMLElement {
   private configurations: ConfigurationListItem[] = [];

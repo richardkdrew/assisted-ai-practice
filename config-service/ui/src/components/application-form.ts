@@ -1,4 +1,4 @@
-import { ApplicationListItem } from '../models/application.js';
+import { ApplicationListItem } from '../models/application';
 
 export class ApplicationForm extends HTMLElement {
   private application: ApplicationListItem | null = null;
@@ -7,6 +7,7 @@ export class ApplicationForm extends HTMLElement {
     comments: ''
   };
   private errors: Record<string, string> = {};
+  private submitting = false;
 
   constructor() {
     super();
@@ -56,7 +57,15 @@ export class ApplicationForm extends HTMLElement {
   private handleSubmit(event: Event): void {
     event.preventDefault();
     
+    // Prevent multiple submissions
+    if (this.submitting) {
+      return;
+    }
+    
     if (this.validateForm()) {
+      this.submitting = true;
+      this.render();
+      
       const submitEvent = new CustomEvent('form-submit', {
         detail: {
           name: this.formData.name.trim(),
@@ -69,6 +78,12 @@ export class ApplicationForm extends HTMLElement {
     } else {
       this.render();
     }
+  }
+
+  // Method to reset submitting state (called by parent component)
+  resetSubmitting(): void {
+    this.submitting = false;
+    this.render();
   }
 
   private handleCancel(): void {
@@ -258,10 +273,10 @@ export class ApplicationForm extends HTMLElement {
           </div>
           
           <div class="form-actions">
-            <button type="submit" class="btn btn-primary">
-              ${isEditing ? 'Update Application' : 'Create Application'}
+            <button type="submit" class="btn btn-primary" ${this.submitting ? 'disabled' : ''}>
+              ${this.submitting ? 'Saving...' : (isEditing ? 'Update Application' : 'Create Application')}
             </button>
-            <button type="button" class="btn btn-secondary" id="cancel-btn">
+            <button type="button" class="btn btn-secondary" id="cancel-btn" ${this.submitting ? 'disabled' : ''}>
               Cancel
             </button>
           </div>

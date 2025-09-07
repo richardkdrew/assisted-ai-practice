@@ -1,5 +1,5 @@
-import { apiService, ApiResponse } from './api-service.js';
-import { ConfigurationCreate, ConfigurationUpdate, ConfigurationResponse, ConfigurationListItem } from '../models/configuration.js';
+import { apiService, ApiResponse } from './api-service';
+import { ConfigurationCreate, ConfigurationUpdate, ConfigurationResponse, ConfigurationListItem } from '../models/configuration';
 
 export class ConfigurationService {
   async getAll(limit?: number, offset?: number): Promise<ApiResponse<ConfigurationResponse[]>> {

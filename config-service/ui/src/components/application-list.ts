@@ -1,5 +1,5 @@
-import { applicationService } from '../services/application-service.js';
-import { ApplicationListItem } from '../models/application.js';
+import { applicationService } from '../services/application-service';
+import { ApplicationListItem } from '../models/application';
 
 export class ApplicationList extends HTMLElement {
   private applications: ApplicationListItem[] = [];
@@ -9,6 +9,7 @@ export class ApplicationList extends HTMLElement {
   private pageSize = 10;
   private showForm = false;
   private editingApplication: ApplicationListItem | null = null;
+  private submitting = false;
 
   constructor() {
     super();
@@ -89,8 +90,17 @@ export class ApplicationList extends HTMLElement {
   }
 
   private async handleFormSubmit(event: Event): Promise<void> {
+    // Prevent multiple simultaneous submissions
+    if (this.submitting) {
+      return;
+    }
+
     const customEvent = event as CustomEvent;
     const formData = customEvent.detail;
+    
+    this.submitting = true;
+    this.error = null;
+    this.render();
     
     try {
       let response;
@@ -109,6 +119,9 @@ export class ApplicationList extends HTMLElement {
       }
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to save application';
+      this.render();
+    } finally {
+      this.submitting = false;
       this.render();
     }
   }
