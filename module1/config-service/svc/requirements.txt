@@ -1,0 +1,11 @@
+fastapi==0.116.1
+pydantic==2.11.7
+pydantic-extra-types
+pytest-asyncio
+httpx==0.28.1
+pytest-cov==6.2.1
+psycopg2-binary==2.9.10
+pydantic-settings<3.0.0,>=2.0.0
+python-ulid<3.0.0,>=2.0.0
+uvicorn
+pytest==8.4.1

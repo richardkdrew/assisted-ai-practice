@@ -72,7 +72,7 @@ All endpoints are prefixed with `/api/v1`.
 
 - Python 3.13.5
 - Docker and Docker Compose
-- pipenv
+- uv (Python package installer)
 
 ### Installation
 
@@ -81,14 +81,21 @@ All endpoints are prefixed with `/api/v1`.
    cd config-service/svc
    ```
 
-2. Install dependencies using pipenv:
+2. Install uv if you haven't already:
    ```bash
-   pipenv install
+   pip install uv
    ```
 
-3. Activate the virtual environment:
+3. Create and activate a virtual environment with uv:
    ```bash
-   pipenv shell
+   uv venv
+   source .venv/bin/activate  # On Unix/macOS
+   # .venv\Scripts\activate   # On Windows
+   ```
+
+4. Install dependencies:
+   ```bash
+   uv pip install -r requirements.txt
    ```
 
 4. Copy the environment template and configure your database:
@@ -146,12 +153,12 @@ docker-compose down -v
 
 5. Run database migrations:
    ```bash
-   pipenv run migrate
+   python -c "from database.migrations import run_migrations; run_migrations()"
    ```
 
 6. Start the development server:
    ```bash
-   pipenv run dev
+   python main.py
    ```
 
 The API will be available at `http://localhost:8000`.
@@ -184,14 +191,27 @@ PGADMIN_PASSWORD=admin
 
 ### Available Scripts
 
-- `pipenv run dev` - Start development server with auto-reload
-- `pipenv run test` - Run tests with coverage report
-- `pipenv run migrate` - Run database migrations
+With uv, you can run scripts directly or use the project scripts defined in pyproject.toml:
+
+- `python main.py` - Start development server with auto-reload
+- `pytest` - Run tests
+- `pytest --cov=. --cov-report=html --cov-report=term` - Run tests with coverage report
+- `python -c "from database.migrations import run_migrations; run_migrations()"` - Run database migrations
+
+Or use uv to run project scripts:
+- `uv run dev` - Start development server
+- `uv run test` - Run tests
+- `uv run test-cov` - Run tests with coverage
 
 ### Running Tests
 
 ```bash
-pipenv run test
+pytest
+```
+
+Or with uv:
+```bash
+uv run test
 ```
 
 This will run all tests with coverage reporting. Test files are co-located with their corresponding source files using the `_test.py` suffix.
@@ -202,7 +222,7 @@ The migration system automatically tracks and applies database schema changes:
 
 ```bash
 # Run pending migrations
-pipenv run migrate
+python -c "from database.migrations import run_migrations; run_migrations()"
 
 # Check migration status via health endpoint
 curl http://localhost:8000/health
@@ -320,7 +340,8 @@ config-service/
 ├── svc/                   # Backend API service
 │   ├── main.py            # Application entry point
 │   ├── docker-compose.yml # Docker configuration
-│   ├── Pipfile            # Python dependencies
+│   ├── requirements.txt   # Python dependencies
+│   ├── pyproject.toml     # Project configuration and scripts
 │   ├── config/            # Application configuration
 │   ├── database/          # Database connection and migrations
 │   ├── models/            # Pydantic data models
@@ -387,7 +408,7 @@ This ensures your data survives container restarts and updates.
 
 ## Contributing
 
-1. Ensure all tests pass: `pipenv run test`
+1. Ensure all tests pass: `pytest` or `uv run test`
 2. Follow the existing code style and patterns
 3. Add tests for new functionality
 4. Update documentation as needed

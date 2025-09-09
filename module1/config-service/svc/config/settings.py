@@ -1,5 +1,6 @@
 """Application settings and configuration management."""
 
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
@@ -23,11 +24,10 @@ class Settings(BaseSettings):
     db_min_connections: int = 1
     db_max_connections: int = 20
 
-    class Config:
-        """Pydantic configuration."""
-
-        env_file = ".env"
-        case_sensitive = False
+    model_config = ConfigDict(
+        env_file=".env",
+        case_sensitive=False,
+    )
 
 
 # Global settings instance

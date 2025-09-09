@@ -8,7 +8,7 @@
     ],
     "python.testing.cwd": "${workspaceFolder}",
     "python.testing.autoTestDiscoverOnSaveEnabled": true,
-    "python.defaultInterpreterPath": "./.venv/bin/python",
+    "python.defaultInterpreterPath": "./config-service/.venv/bin/python",
     "python.terminal.activateEnvironment": true,
     "python.envFile": "${workspaceFolder}/config-service/.env.test",
     "files.exclude": {
@@ -19,5 +19,5 @@
         "./config-service"
     ],
     "python.analysis.autoImportCompletions": true,
-    "python.testing.pytestPath": "./.venv/bin/pytest"
+    "python.testing.pytestPath": "./config-service/.venv/bin/pytest"
 }

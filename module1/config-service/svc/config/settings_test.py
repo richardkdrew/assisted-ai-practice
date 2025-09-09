@@ -12,21 +12,29 @@ class TestSettings:
 
     def test_settings_default_values(self):
         """Test Settings with default values."""
-        with patch.dict(
-            os.environ,
-            {
-                "DATABASE_URL": "postgresql://test:test@localhost/test",
-                "DATABASE_TEST_URL": "postgresql://test:test@localhost/test_db",
-            },
-        ):
-            settings = Settings()
+        # Clear environment and set only required fields to test true defaults
+        env_vars = {
+            "DATABASE_DB": "test_db",
+            "DATABASE_USER": "test_user",
+            "DATABASE_PASSWORD": "test_pass",
+            "DATABASE_URL": "postgresql://test:test@localhost/test",
+            "DATABASE_TEST_URL": "postgresql://test:test@localhost/test_db",
+        }
 
-            assert settings.log_level == "DEBUG"
-            assert settings.debug is True
-            assert settings.host == "0.0.0.0"
-            assert settings.port == 8000
-            assert settings.db_min_connections == 1
-            assert settings.db_max_connections == 5
+        with patch.dict(os.environ, env_vars, clear=True):
+            # Mock the env_file to prevent loading .env file
+            with patch(
+                "config.settings.Settings.model_config",
+                {"env_file": "nonexistent.env", "case_sensitive": False},
+            ):
+                settings = Settings()
+
+                assert settings.log_level == "INFO"  # Default from Settings class
+                assert settings.debug is False  # Default from Settings class
+                assert settings.host == "0.0.0.0"
+                assert settings.port == 8000  # Default from Settings class
+                assert settings.db_min_connections == 1
+                assert settings.db_max_connections == 20  # Default from Settings class
 
     def test_settings_from_environment(self):
         """Test Settings loaded from environment variables."""
