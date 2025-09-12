@@ -1,0 +1,23 @@
+{
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestArgs": [
+        "config-service",
+        "--no-cov",
+        "-v"
+    ],
+    "python.testing.cwd": "${workspaceFolder}",
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,
+    "python.defaultInterpreterPath": "./config-service/.venv/bin/python",
+    "python.terminal.activateEnvironment": true,
+    "python.envFile": "${workspaceFolder}/config-service/.env.test",
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true
+    },
+    "python.analysis.extraPaths": [
+        "./config-service"
+    ],
+    "python.analysis.autoImportCompletions": true,
+    "python.testing.pytestPath": "./config-service/.venv/bin/pytest"
+}

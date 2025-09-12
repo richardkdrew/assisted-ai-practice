@@ -1,0 +1,32 @@
+[project]
+name = "config-service"
+version = "1.0.0"
+description = "A complete application configuration management system with REST API service"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi==0.116.1",
+    "pydantic==2.11.7",
+    "pydantic-extra-types",
+    "pytest-asyncio",
+    "httpx==0.28.1",
+    "pytest-cov==6.2.1",
+    "psycopg2-binary==2.9.10",
+    "pydantic-settings<3.0.0,>=2.0.0",
+    "python-ulid<3.0.0,>=2.0.0",
+    "uvicorn",
+    "pytest==8.4.1",
+]
+
+[project.scripts]
+dev = "python main.py"
+start = "uvicorn main:app --host 0.0.0.0 --port 8000"
+test = "pytest"
+test-cov = "pytest --cov=. --cov-report=html --cov-report=term"
+lint = "python -m py_compile *.py"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = []
