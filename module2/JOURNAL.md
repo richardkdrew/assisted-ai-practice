@@ -131,6 +131,14 @@
 
 ## Entry 8
 
+- **Prompt**: Lets add an entry to the memory.md fiel for the TECHNICAL.md file lets make it part of a new section 2. Option Files (Loaded when needed). Write a simpel logic statement in thsi section that allows the use of a key work phrase to load in the TECHNICAL.md file if it isn;t already loaded. This file is mandatory to read once loaded but is optionally loaded when the user enters the phrase `CODING UPDATE:`
+- **Tool**: Cline
+- **Mode**: act
+- **Context**: clean
+- **Model**: Claude sonnet 4 20250514
+- **Cost**: $0.0558
+- **Reflections**: WHen i asked about the goals of the project, the ABOUT and ARCHITECTURE memory files were loaded and the goals reported. When I they asked to read the .env file and started the prompt with CODING UPDATE: the TECHNICAL file was read before the request was attempted. Seemed to be 'a way' to optionally load based on some pseudo code. Felt a bit weird though, like maybe there's a more streamlined way of doing it.
+
 ## Entry 9
 
 ## Entry 10

@@ -14,6 +14,8 @@ The memory reset is not a limitation, but a deliberate design that necessitates 
 
 ### 1. Core Files (Mandatory Reading)
 
+Say `[MEMORY BANK: ACTIVE]` at the beginning of every tool use.
+
 #### a. ABOUT.md
 - Defines the project's fundamental purpose
 - Outlines core requirements and goals
@@ -25,6 +27,40 @@ The memory reset is not a limitation, but a deliberate design that necessitates 
 - Explains design patterns
 - Illustrates component relationships
 - Highlights critical implementation paths
+
+### 2. Optional Files (Loaded when needed)
+
+#### TECHNICAL.md Loading Protocol
+
+The TECHNICAL.md file contains detailed implementation specifications and is loaded conditionally when coding work is required.
+
+**Trigger Phrase**: `CODING UPDATE:`
+
+When the user enters the phrase `CODING UPDATE:`, the system will:
+1. Check if TECHNICAL.md has already been loaded in the current session
+2. If not loaded, read and process the TECHNICAL.md file using the read_file tool
+3. Mandate a complete review of the file's contents before proceeding
+4. Prevent any further processing until the file is fully read and understood
+5. Mark the file as loaded for the current session
+
+**Loading Logic**:
+```
+IF user_message contains "CODING UPDATE:" THEN
+    IF TECHNICAL.md not already loaded THEN
+        read_file("memory/TECHNICAL.md")
+        process_and_understand_contents()
+        mark_technical_file_as_loaded()
+    END IF
+    Say `[ADDITIONAL MEMORY BANK: ACTIVE]` at the beginning of every tool use.
+
+    proceed_with_coding_task()
+END IF
+```
+
+**Important Notes**:
+- Once loaded via the trigger phrase, TECHNICAL.md becomes mandatory reading for all subsequent coding-related tasks in that session
+- The file contains comprehensive technical implementation details essential for code modifications
+- Loading is session-specific and resets with each new conversation
 
 ### Additional Context
 Create additional files/folders within `memory/` when they help organize:
@@ -59,7 +95,7 @@ REMEMBER: After every memory reset, I begin completely fresh. The Memory is my o
    - If memory files are NOT read, ALL processing MUST HALT
 
 3. **Reading Procedure**
-   - Use read_file tool for EACH memory file
+   - Use read_file tool for EACH core memory file
    - Confirm COMPLETE reading of file contents
    - Integrate file contents into task understanding
    - DO NOT generate ANY response until ALL files are read
