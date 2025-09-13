@@ -55,10 +55,79 @@
 - **Cost**: $0.22478
 - **Reflections**: Very similar context to the example file, my assistant seems to know teh concept fairly well ;)
 
-
 ## Entry 6
 
+- **Prompt**: Using the following files, create a context document covering the technical implementation/details for the solution. use only the file paths provided and whatever context you already have from memory. Produce a plan for a new context file @/memory/TECHNICAL.md be sure to cover bopth the back end, front end and database. 
+
+    Overview:
+
+    - config-service/README.md
+
+    Data Models:
+
+    - config-service/svc/models/application.py
+    - config-service/svc/models/configuration.py
+    - config-service/svc/models/base.py
+
+    Database:
+
+    - config-service/svc/database/connection.py
+    - config-service/svc/database/migrations.py
+    - config-service/svc/database/migrations/002_create_applications_table.sql
+    - config-service/svc/database/migrations/003_create_configurations_table.sql
+
+    Repositories:
+
+    - config-service/svc/repositories/application_repository.py
+    - config-service/svc/repositories/configuration_repository.py
+
+    Services:
+
+    - config-service/svc/services/application_service.py
+    - config-service/svc/services/configuration_service.py
+
+    API Layer:
+
+    - config-service/svc/api/v1/applications.py
+    - config-service/svc/api/v1/configurations.py
+
+    Configuration:
+
+    - config-service/svc/config/settings.py
+    - config-service/svc/.env
+
+    Frontend Services:
+
+    - config-service/ui/src/services/api-service.ts
+    - config-service/ui/src/services/application-service.ts
+
+    Frontend Models:
+
+    - config-service/ui/src/models/application.ts
+    - config-service/ui/src/models/configuration.ts
+
+    Build and Deployment:
+
+    - config-service/svc/pyproject.toml
+    - config-service/svc/docker-compose.yml
+    - config-service/ui/package.json
+    - config-service/ui/vite.config.ts
+- **Tool**: Cline
+- **Mode**: plan + act
+- **Context**: clean
+- **Model**: Claude sonnet 4 20250514
+- **Cost**: $0.2865
+- **Reflections**: Really interesting process, given only the files plus memory, my assistant seemd really eager to use other files it coudl see but was told not to leverage. Results were less than ideal... needed to prompt them to get extra stuff added. Got there in the end but it took more work. Assitant definitely felt more constrained.
+
 ## Entry 7
+
+- **Prompt**: Let's check what you have in memory.
+- **Tool**: Cline
+- **Mode**: plan
+- **Context**: clean
+- **Model**: Claude sonnet 4 20250514
+- **Cost**: $0.0738
+- **Reflections**: Memory Contents Summary provided reports that all 3 context files (ABOUT, ARCHITECTURE, TECHNICAL) are there. Response also had a pretty hefty overview of the context of the solution from several different viewpoints. Score!
 
 ## Entry 8
 
