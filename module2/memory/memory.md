@@ -12,17 +12,16 @@ The memory reset is not a limitation, but a deliberate design that necessitates 
 
 ## Memory File Structure
 
-### 1. Core Files (Always Loaded)
+### 1. Core Files (Mandatory Reading)
 
 Say `[MEMORY BANK: ACTIVE]` at the beginning of every tool use.
 
-#### ABOUT.md
+#### a. ABOUT.md
 - Defines the project's fundamental purpose
 - Outlines core requirements and goals
 - Serves as the source of truth for project scope
-- **MANDATORY**: Must be read for EVERY task without exception
 
-### 2. Context-Specific Files (Conditionally Loaded)
+### 2. Intelligent Loading Files (Context-Aware)
 
 #### ARCHITECTURE.md and TECHNICAL.md Loading Protocol
 
@@ -30,13 +29,10 @@ The ARCHITECTURE.md and TECHNICAL.md files contain detailed system architecture 
 
 **Intelligent Loading Logic**:
 
-The system analyzes the user's request using multiple indicators to determine if context-specific memory files should be loaded:
+The system analyzes the user's request using multiple indicators to determine if technical memory files should be loaded:
 
 1. **Semantic Analysis**: Detects technical change keywords
-   - Development Actions: `implement`, `create`, `modify`, `update`, `refactor`, `optimize`, `fix`, `debug`, `build`, `deploy`
-   - Technical Areas: `api`, `database`, `service`, `component`, `model`, `repository`, `endpoint`, `schema`
-   - Quality Attributes: `performance`, `architecture`, `migration`, `dependency`, `scaling`, `infrastructure`
-   - Testing & Validation: `test`, `validation`, `error handling`
+   - Keywords: `refactor`, `optimize`, `performance`, `architecture`, `migration`, `dependency`, `scaling`, `infrastructure`, `optimization`, `implement`, `build`, `create`, `modify`, `update`, `fix`, `debug`, `test`, `deploy`
 
 2. **File Path Pattern Matching**: Identifies technical file modifications
    - Backend patterns: `config-service/svc/(api|services|repositories|models)/`
@@ -44,25 +40,26 @@ The system analyzes the user's request using multiple indicators to determine if
    - Configuration files: `(pyproject\.toml|package\.json|docker-compose\.yml|vite\.config\.ts)`
    - Test directories: `config-service/.*/test/`
 
-3. **Complexity Assessment**: Evaluates technical significance
-   - System-wide scope: `entire system`, `multiple`, `across`, `all`, `comprehensive`
-   - Architectural depth: `refactor`, `redesign`, `restructure`, `migrate`, `scale`
-   - Integration complexity: `end-to-end`, `integration`, `workflow`, `pipeline`
+3. **Change Complexity Evaluation**: Assesses technical significance
+   - Multiple file modifications (>2 files)
+   - Core architectural layer changes
+   - Database schema modifications
+   - Build system changes
 
-**Loading Decision Process**:
+**Loading Decision Tree**:
 ```
 IF user_request contains technical_keywords THEN
-    load_context_specific_files()
+    load_technical_files()
 ELSE IF user_request mentions file_paths matching technical_patterns THEN
-    load_context_specific_files()
+    load_technical_files()
 ELSE IF user_request indicates complex_changes THEN
-    load_context_specific_files()
+    load_technical_files()
 ELSE
     proceed_with_core_files_only()
 END IF
 ```
 
-**Context-Specific File Loading Process**:
+**Technical File Loading Process**:
 1. Analyze user request for technical indicators
 2. If technical indicators detected:
    - Read `memory/ARCHITECTURE.md` using read_file tool
@@ -73,47 +70,17 @@ END IF
 4. Proceed with task execution
 
 **Session Management**:
-- Context-specific files are loaded once per session when triggered
+- Technical files are loaded once per session when triggered
 - Loading state persists throughout the conversation
 - Files are automatically re-evaluated for new conversations
 
-### Loading Decision Matrix
-
-| Request Type | Core Files | Context-Specific Files | Memory Bank Status |
-|--------------|------------|----------------------|-------------------|
-| Informational Query | ABOUT.md | None | [MEMORY BANK: ACTIVE] |
-| Technical Action | ABOUT.md | ARCHITECTURE.md + TECHNICAL.md | [ADDITIONAL MEMORY BANK: ACTIVE] |
-| File Modification | ABOUT.md | ARCHITECTURE.md + TECHNICAL.md | [ADDITIONAL MEMORY BANK: ACTIVE] |
-| Complex Change | ABOUT.md | ARCHITECTURE.md + TECHNICAL.md | [ADDITIONAL MEMORY BANK: ACTIVE] |
-| Memory Update | ABOUT.md | ARCHITECTURE.md + TECHNICAL.md | [ADDITIONAL MEMORY BANK: ACTIVE] |
-
-### Additional Context Files
+### Additional Context
 Create additional files/folders within `memory/` when they help organize:
 - Complex feature documentation
 - Integration specifications
 - API documentation
 - Testing strategies
 - Deployment procedures
-
-## Loading Examples
-
-### Example 1: Technical Request
-**User**: "Optimize the database connection pooling"
-- **Analysis**: Keywords `optimize`, `database` detected
-- **Action**: Load ABOUT.md + ARCHITECTURE.md + TECHNICAL.md
-- **Reason**: Performance optimization requires full technical context
-
-### Example 2: Informational Request
-**User**: "What is the purpose of this configuration service?"
-- **Analysis**: No technical keywords, informational context
-- **Action**: Load ABOUT.md only
-- **Reason**: Project explanation doesn't require technical implementation details
-
-### Example 3: File-Specific Request
-**User**: "Update the application_service.py file"
-- **Analysis**: File pattern `.py` detected, keyword `update`
-- **Action**: Load ABOUT.md + ARCHITECTURE.md + TECHNICAL.md
-- **Reason**: Code modifications require architectural understanding
 
 ## Updates to Memory
 
@@ -132,12 +99,12 @@ REMEMBER: After every memory reset, I begin completely fresh. The Memory is my o
 ### Initialization Requirements
 
 1. **Absolute Reading Mandate**
-   - EVERY task MUST begin by reading ABOUT.md (core file)
-   - Context-specific files loaded based on intelligent analysis
+   - EVERY task MUST begin by reading ABOUT.md
+   - Technical files loaded based on intelligent analysis
 
 2. **Validation Mechanism**
    - System MUST validate memory file reading before ANY response generation
-   - If required memory files are NOT read, ALL processing MUST HALT
+   - If core memory files are NOT read, ALL processing MUST HALT
 
 3. **Reading Procedure**
    - Use read_file tool for EACH required memory file
@@ -145,22 +112,41 @@ REMEMBER: After every memory reset, I begin completely fresh. The Memory is my o
    - Integrate file contents into task understanding
    - DO NOT generate ANY response until ALL required files are read
 
+## Intelligent Loading Examples
+
+### Example 1: Technical Request
+User: "Refactor the configuration service API to improve performance"
+- Triggers: `refactor`, `performance`, `API`
+- Action: Load ARCHITECTURE.md and TECHNICAL.md
+- Reason: Clear technical modification request
+
+### Example 2: File-Specific Request
+User: "Update the application_service.py file to handle errors better"
+- Triggers: File path `application_service.py`, `update`
+- Action: Load ARCHITECTURE.md and TECHNICAL.md
+- Reason: Specific technical file modification
+
+### Example 3: Non-Technical Request
+User: "Explain the purpose of this project"
+- Triggers: None detected
+- Action: Load only ABOUT.md
+- Reason: Informational request, no technical changes
+
+### Example 4: Complex Change Request
+User: "Add a new feature to manage user permissions across the entire system"
+- Triggers: `Add`, `feature`, multiple system components implied
+- Action: Load ARCHITECTURE.md and TECHNICAL.md
+- Reason: Complex architectural change affecting multiple layers
+
 ## Rationale for Intelligent Loading
 
 ### Why Context-Aware Loading?
 
-1. **Efficiency**: Only loads detailed technical context when actually needed
-2. **Relevance**: Matches memory loading to specific task requirements
-3. **Flexibility**: Adapts automatically to various request types
-4. **Performance**: Reduces unnecessary file reading for simple requests
+1. **Efficiency**: Only loads detailed technical context when needed
+2. **Relevance**: Matches memory loading to task requirements
+3. **Flexibility**: Adapts to different types of requests automatically
+4. **Performance**: Reduces unnecessary file reading for simple tasks
 5. **Accuracy**: Ensures technical context is available for technical tasks
-
-### Why Mandatory Core Files?
-
-1. **Persistent Context**: Ensures consistent understanding of project's core purpose
-2. **Comprehensive Foundation**: Provides essential project knowledge before any action
-3. **Reduced Errors**: Prevents actions that contradict fundamental project goals
-4. **Adaptability**: Enables quick recalibration after memory reset
 
 ## Guiding Principles
 
@@ -173,28 +159,17 @@ REMEMBER: After every memory reset, I begin completely fresh. The Memory is my o
 ## Enforcement Rules
 
 1. ABOUT.md reading is a HARD PREREQUISITE for any task
-2. Context-specific files loaded based on intelligent analysis
+2. Technical files loaded based on intelligent analysis
 3. No response can be generated without first reading required memory files
 4. Failure to read required memory files is a CRITICAL SYSTEM ERROR
 5. Requires IMMEDIATE correction by reading ALL required memory files
 
-## Monitoring and Improvement
-
-The system should track:
-- Loading decisions made and their accuracy
-- User satisfaction with loaded context
-- False positives/negatives in detection
-- Performance impact of loading strategies
-
-This data can be used to refine the detection algorithms and improve accuracy over time.
-
 ## Future Enhancements
 
-- Machine learning-based context analysis for improved accuracy
-- User preference learning for personalized loading patterns
-- Advanced semantic analysis for nuanced request understanding
+- Machine learning-based context analysis
+- User preference learning for loading patterns
+- Advanced semantic analysis for technical indicators
 - Integration with project change tracking systems
-- Automated context validation and consistency checks
 
 ### RATIONALE
-Memory files are the SOLE SOURCE OF TRUTH for project context after a system reset. The intelligent loading mechanism ensures that the appropriate level of technical context is available while maintaining efficiency and relevance to the specific task at hand. This approach balances comprehensive understanding with operational efficiency, providing a robust foundation for consistent, high-quality work across all sessions.
+Memory files are the SOLE SOURCE OF TRUTH for project context after a system reset. The intelligent loading mechanism ensures that the appropriate level of technical context is available while maintaining efficiency and relevance to the specific task at hand.

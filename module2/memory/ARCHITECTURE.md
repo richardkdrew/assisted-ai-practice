@@ -20,22 +20,96 @@ graph TD
 ```mermaid
 graph TD
     User[User/Administrator] -->|Interacts via Browser| AdminUI[Admin Web UI<br/>TypeScript/Vite]
-    AdminUI -->|API Calls HTTPS| ConfigAPI[Configuration Service API<br/>Python FastAPI]
+    AdminUI -->|Uses| ServiceClient[Service Client Library<br/>TypeScript SDK]
+    ServiceClient -->|API Calls HTTPS| ConfigAPI[Configuration Service API<br/>Python FastAPI]
     ConfigAPI -->|Database Operations| Database[(PostgreSQL Database<br/>Connection Pool)]
     
     subgraph "Configuration Service System"
         AdminUI
+        ServiceClient
         ConfigAPI
         Database
     end
     
-    ClientApps[Client Applications] -->|Retrieve Configurations<br/>REST API| ConfigAPI
+    ClientApps[Client Applications] -->|Uses| ServiceClient2[Service Client Library<br/>TypeScript SDK]
+    ServiceClient2 -->|Retrieve Configurations<br/>REST API| ConfigAPI
     
     ConfigAPI -->|Health Checks| HealthEndpoint[Health Check Endpoint]
     ConfigAPI -->|Logging| LogSystem[Logging System]
 ```
 
 ## Core Components
+
+### Level 2 Component Diagram
+
+```mermaid
+graph TD
+    subgraph "Admin UI (config-service/ui/)"
+        UIComponents[UI Components<br/>application-list.ts<br/>configuration-list.ts<br/>configuration-form.ts]
+        UIServices[UI Services<br/>application-service.ts<br/>configuration-service.ts]
+    end
+    
+    subgraph "Service Client Library (config-service/svc-client/)"
+        ClientServices[Client Services<br/>ApplicationsService<br/>ConfigurationsService]
+        ClientModels[Client Models<br/>Application<br/>Configuration<br/>Errors]
+        HTTPClient[HTTP Client<br/>http-client.ts]
+    end
+    
+    subgraph "Backend API (config-service/svc/)"
+        APIEndpoints[API Endpoints<br/>applications.py<br/>configurations.py]
+        BusinessServices[Business Services<br/>application_service.py<br/>configuration_service.py]
+        Repositories[Repositories<br/>application_repository.py<br/>configuration_repository.py]
+        DataModels[Data Models<br/>application.py<br/>configuration.py]
+    end
+    
+    subgraph "Database Layer"
+        Database[(PostgreSQL<br/>Applications Table<br/>Configurations Table<br/>Migrations Table)]
+    end
+    
+    UIComponents --> UIServices
+    UIServices --> ClientServices
+    ClientServices --> HTTPClient
+    HTTPClient --> APIEndpoints
+    APIEndpoints --> BusinessServices
+    BusinessServices --> Repositories
+    Repositories --> DataModels
+    DataModels --> Database
+```
+
+### Service Client Library (TypeScript SDK)
+**Location**: `config-service/svc-client/`
+
+The Service Client Library is a TypeScript SDK that provides a clean, type-safe interface for interacting with the Configuration Service API. It abstracts HTTP communication details and provides consistent error handling.
+
+#### Key Components:
+1. **Services** (`src/services/`)
+   - `ApplicationsService`: Application CRUD operations
+   - `ConfigurationsService`: Configuration management operations
+   - `BaseService`: Common HTTP client functionality
+
+2. **Models** (`src/models/`)
+   - Type-safe data models for API requests/responses
+   - `Application`: Application entity model
+   - `Configuration`: Configuration entity model
+   - `Errors`: Standardized error handling types
+
+3. **HTTP Client** (`src/utils/`)
+   - Centralized HTTP communication
+   - Request/response interceptors
+   - Error handling and retry logic
+   - Type-safe API calls
+
+4. **Integration Tests** (`tests/integration/`)
+   - End-to-end testing of client functionality
+   - API contract validation
+   - Error scenario testing
+
+#### Architecture Benefits:
+- **Type Safety**: Full TypeScript support with compile-time validation
+- **Consistency**: Standardized API interaction patterns
+- **Reusability**: Shared between Admin UI and external client applications
+- **Maintainability**: Centralized API logic reduces duplication
+- **Testing**: Comprehensive integration test coverage
 
 ### Backend Service (Python FastAPI)
 **Location**: `config-service/svc/`
@@ -72,6 +146,8 @@ graph TD
 ### Frontend Administration UI (TypeScript)
 **Location**: `config-service/ui/`
 
+The Admin UI now uses the Service Client Library for all API interactions, providing a clean separation between UI logic and API communication.
+
 #### Key Components:
 1. **Components** (`components/`)
    - Application management interfaces
@@ -79,13 +155,13 @@ graph TD
    - Responsive UI building blocks
 
 2. **Services** (`services/`)
-   - API interaction layer
-   - HTTP client management
-   - Error handling and retry logic
+   - UI-specific service layer that wraps the Service Client
+   - Data transformation for UI requirements
+   - Error handling and user feedback
 
 3. **Models** (`models/`)
-   - Frontend data models
-   - Type definitions for API responses
+   - UI-specific data models
+   - View models for component state management
 
 ### Database Architecture (PostgreSQL)
 
@@ -150,7 +226,14 @@ graph TD
 - Schema-less approach for maximum flexibility
 - Application-scoped configuration isolation
 
-### 4. Security Considerations
+### 4. Service Client Architecture
+- **TypeScript SDK**: Provides type-safe API interactions
+- **Centralized HTTP Logic**: Single source of truth for API communication
+- **Error Standardization**: Consistent error handling across all clients
+- **Integration Testing**: Comprehensive test coverage for API contracts
+- **Reusability**: Shared between Admin UI and external applications
+
+### 5. Security Considerations
 - Input validation at API layer
 - CORS configuration for cross-origin requests
 - Comprehensive error handling without information leakage
@@ -220,14 +303,22 @@ graph TD
    - Database operations
    - API endpoint testing
 
+### Service Client Testing (TypeScript)
+1. **Integration Tests** (Vitest)
+   - API contract validation: `configurations-service.integration.test.ts`
+   - Service method testing with real API calls
+   - Error handling and edge case validation
+   - Configuration key counting functionality
+
 ### Frontend Testing (TypeScript)
 1. **Unit Tests** (Vitest)
    - Service layer testing: `application-service.test.ts`
    - Component logic validation
-   - API interaction testing
+   - Service client integration testing
 
 2. **End-to-End Tests** (Playwright)
-   - Complete user workflows: `application-crud.test.ts`
+   - Complete user workflows: `application-crud.test.ts`, `configuration-crud.test.ts`
+   - Configuration key count functionality: Added specific tests for key counting
    - UI interaction validation
    - Cross-browser compatibility
 
@@ -341,6 +432,32 @@ graph TD
 - Integration with CI/CD pipelines
 - Configuration rollback capabilities
 
+## Recent Architectural Improvements
+
+### Service Client Library Implementation
+- **Added TypeScript SDK** (`config-service/svc-client/`): Provides type-safe, reusable API client
+- **Centralized HTTP Logic**: All API interactions now go through the service client
+- **Enhanced Type Safety**: Full TypeScript support with compile-time validation
+- **Improved Testing**: Comprehensive integration tests for API contracts
+
+### Configuration Key Count Fix
+- **Root Cause**: UI service was accessing wrong property (`config.config` vs `config.configuration`)
+- **Solution**: Updated `transformToListItem()` method to use correct property mapping
+- **Testing**: Added E2E tests specifically for configuration key counting functionality
+- **Validation**: Manual testing confirmed proper key count display and updates
+
+### Enhanced E2E Test Coverage
+- **Configuration Key Tests**: Added tests for key count display and updates
+- **Empty Configuration Handling**: Added tests for zero-key configurations
+- **Comprehensive Scenarios**: Tests cover creation, editing, and key count validation
+
+### Build System Improvements
+- **Vite Configuration**: Updated to allow service client library access
+- **TypeScript Compilation**: Proper build pipeline for service client library
+- **Development Workflow**: Improved development server configuration
+
 ## Conclusion
 
-The Configuration Service architecture provides a solid foundation for centralized configuration management with clear separation of concerns, comprehensive error handling, and robust testing strategies. The system is designed for scalability and maintainability while supporting diverse application types and deployment scenarios.
+The Configuration Service architecture now provides an even more robust foundation for centralized configuration management. The addition of the Service Client Library creates a clean abstraction layer that improves type safety, reduces code duplication, and provides better testing capabilities. The recent fixes to the configuration key counting functionality demonstrate the system's maintainability and the effectiveness of the layered architecture approach.
+
+The system continues to be designed for scalability and maintainability while supporting diverse application types and deployment scenarios, with enhanced developer experience through improved tooling and comprehensive test coverage.
