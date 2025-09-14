@@ -131,17 +131,33 @@
 
 ## Entry 8
 
-- **Prompt**: Lets add an entry to the memory.md fiel for the TECHNICAL.md file lets make it part of a new section 2. Option Files (Loaded when needed). Write a simpel logic statement in thsi section that allows the use of a key work phrase to load in the TECHNICAL.md file if it isn;t already loaded. This file is mandatory to read once loaded but is optionally loaded when the user enters the phrase `CODING UPDATE:`
+- **Prompt**: Lets add an entry to the memory.md file for the TECHNICAL.md file lets make it part of a new section 2. Option Files (Loaded when needed). Write a simpel logic statement in thsi section that allows the use of a key work phrase to load in the TECHNICAL.md file if it isn;t already loaded. This file is mandatory to read once loaded but is optionally loaded when the user enters the phrase `CODING UPDATE:`
 - **Tool**: Cline
 - **Mode**: act
 - **Context**: clean
 - **Model**: Claude sonnet 4 20250514
 - **Cost**: $0.0558
-- **Reflections**: WHen i asked about the goals of the project, the ABOUT and ARCHITECTURE memory files were loaded and the goals reported. When I they asked to read the .env file and started the prompt with CODING UPDATE: the TECHNICAL file was read before the request was attempted. Seemed to be 'a way' to optionally load based on some pseudo code. Felt a bit weird though, like maybe there's a more streamlined way of doing it.
+- **Reflections**: When i asked about the goals of the project, the ABOUT and ARCHITECTURE memory files were loaded and the goals reported. When I they asked to read the .env file and started the prompt with CODING UPDATE: the TECHNICAL file was read before the request was attempted. Seemed to be 'a way' to optionally load based on some pseudo code. Felt a bit weird though, like maybe there's a more streamlined way of doing it.
 
 ## Entry 9
 
+- **Prompt**: CODING UPDATE: Using only your memory, plan the introduction of a client library instead of consuming the API directly.
+- **Tool**: Cline
+- **Mode**: plan & act
+- **Context**: clean
+- **Model**: Claude sonnet 4 20250514
+- **Cost**: $1.2726
+- **Reflections**: More back and forth than i expected, the memory fiels got read and the client plan seemed to be produced base don that. Difficult to tell teh difference without trying without the memeory files as a comparisson.
+
 ## Entry 10
+
+- **Prompt**: CODING UPDATE: lets plan the refactor to make the the admin ui to use the new service client
+- **Tool**: Cline
+- **Mode**: plan & act
+- **Context**: clean
+- **Model**: Claude sonnet 4 20250514
+- **Cost**: $4.6421
+- **Reflections**: The useual large scale refactroing execise with lots of oevr confidence. SOme problems with builds once my assistant was sconvinced it was done. A couple of targeted chats helped resolve it. I actually spent an additional 1hr chatting back and forth to fix bugs and get a series of integration tests refreshed - my assistant seemd to need a whole bunch of detailed planning assistance to get this sorted. Very interetsing to see how soemtimes a simple requets is nowhere near enough to get the job done.
 
 ## Entry 11
 

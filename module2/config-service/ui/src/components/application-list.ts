@@ -28,12 +28,12 @@ export class ApplicationList extends HTMLElement {
 
     try {
       const offset = (this.currentPage - 1) * this.pageSize;
-      const response = await applicationService.getAll(this.pageSize, offset);
+      const response = await applicationService.getAllWithCounts(this.pageSize, offset);
       
       if (response.error) {
         this.error = response.error;
       } else if (response.data) {
-        this.applications = applicationService.transformToListItems(response.data);
+        this.applications = response.data;
       }
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to load applications';

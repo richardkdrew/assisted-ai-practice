@@ -55,7 +55,7 @@ export class ConfigurationList extends HTMLElement {
       if (response.error) {
         this.error = response.error;
       } else if (response.data) {
-        this.configurations = configurationService.transformToListItems(response.data);
+        this.configurations = response.data.map(config => configurationService.transformToListItem(config));
       }
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to load configurations';

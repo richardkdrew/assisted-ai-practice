@@ -11,17 +11,21 @@ export default defineConfig({
     port: 3001,
     proxy: {
       '/api': {
-        target: 'http://localhost:8001',
+        target: 'http://localhost:8000',
         changeOrigin: true,
       },
     },
+    fs: {
+      allow: [
+        // Allow serving files from the project root
+        resolve(__dirname, '..'),
+        // Allow serving files from the svc-client directory
+        resolve(__dirname, '../svc-client')
+      ]
+    }
   },
   build: {
     outDir: 'dist',
     sourcemap: true,
-  },
-  test: {
-    globals: true,
-    environment: 'jsdom',
   },
 })

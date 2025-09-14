@@ -163,10 +163,13 @@ async def update_configuration(
 @router.get(
     "/configurations",
     response_model=List[ConfigurationResponse],
-    summary="List all configurations",
-    description="Get a list of all configurations with optional pagination",
+    summary="List configurations",
+    description="Get a list of configurations with optional filtering and pagination",
 )
 async def list_configurations(
+    application_id: Optional[str] = Query(
+        None, description="Filter configurations by application ID (ULID format)"
+    ),
     limit: Optional[int] = Query(
         None, ge=1, le=1000, description="Maximum number of configurations to return"
     ),
@@ -174,9 +177,10 @@ async def list_configurations(
         None, ge=0, description="Number of configurations to skip"
     ),
 ) -> List[ConfigurationResponse]:
-    """List all configurations with optional pagination.
+    """List configurations with optional filtering and pagination.
 
     Args:
+        application_id: Optional application ID to filter configurations
         limit: Maximum number of configurations to return
         offset: Number of configurations to skip
 
@@ -184,12 +188,30 @@ async def list_configurations(
         List of configuration responses
 
     Raises:
+        HTTPException: 400 if application_id format is invalid
         HTTPException: 500 if retrieval fails
     """
     try:
-        return await configuration_service.get_all_configurations(
-            limit=limit, offset=offset
-        )
+        # If application_id is provided, filter by application
+        if application_id:
+            try:
+                ulid_app_id = ULID.from_str(application_id)
+                return await configuration_service.get_configurations_by_application_id(
+                    ulid_app_id, limit=limit, offset=offset
+                )
+            except ValueError:
+                logger.warning(f"Invalid ULID format for application_id: {application_id}")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid ULID format for application_id: {application_id}",
+                )
+        else:
+            # Return all configurations
+            return await configuration_service.get_all_configurations(
+                limit=limit, offset=offset
+            )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to list configurations: {e}")
         raise HTTPException(
