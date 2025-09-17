@@ -10,6 +10,8 @@ The context management system is built on a critical principle: maintaining pers
 
 The memory reset is not a limitation, but a deliberate design that necessitates a robust documentation strategy. To ensure continuity and effectiveness, the system mandates a strict memory file reading protocol before any task execution.
 
+YOU MUST SAY EITHER `[ADDITIONAL MEMORY BANK: ACTIVE]` OR `[MEMORY BANK: ACTIVE]` read and understand the rest of this file to determine which.
+
 ## Memory File Structure
 
 ### 1. Core Files (Always Loaded)
