@@ -31,7 +31,7 @@
 - **Model**: Claude sonnet 4 20250514
 - **Input**: @/memory/ABOUT.md
 - **Cost**: $0.1140
-- **Reflections**: Lots of questions from my assistant this time. Gave me the feeling that I was either too vague or that the stated role was craeting some demand for a more detailed understanding before creatign a plan. Plan looked solid enough, did have to prompt on a couple of things like data and/or storage strategy, actaul endpoint listing,e tc... taht were misse din the intial plan.
+- **Reflections**: Lots of questions from my assistant this time. Gave me the feeling that I was either too vague or that the stated role was craeting some demand for a more detailed understanding before creatign a plan. Plan looked solid enough, did have to prompt on a couple of things like data and/or storage strategy, actaul endpoint listing, etc... taht were missed in the initial plan.
 
 ## Entry 4
 
@@ -43,7 +43,7 @@
 - **Input**: @/memory/ABOUT.md
 - **Output**: @/memory/ARCHITECTURE.md
 - **Cost**: $0.2154
-- **Reflections**: Worked as requested... I did find myself thinking about iterating on the outptu for several items. Overall a good exercise, though I can see how a more detaield reqeust and proposed arch doc structure would have been beneficial from the get go.
+- **Reflections**: Worked as requested... I did find myself thinking about iterating on the output for several items. Overall a good exercise, though I can see how a more detaield reqeust and proposed arch doc structure would have been beneficial from the get go.
 
 ## Entry 5
 
@@ -53,11 +53,11 @@
 - **Context**: clean
 - **Model**: Claude sonnet 4 20250514
 - **Cost**: $0.22478
-- **Reflections**: Very similar context to the example file, my assistant seems to know teh concept fairly well ;)
+- **Reflections**: Very similar context to the example file, my assistant seems to know the concept fairly well ;)
 
 ## Entry 6
 
-- **Prompt**: Using the following files, create a context document covering the technical implementation/details for the solution. use only the file paths provided and whatever context you already have from memory. Produce a plan for a new context file @/memory/TECHNICAL.md be sure to cover bopth the back end, front end and database. 
+- **Prompt**: Using the following files, create a context document covering the technical implementation/details for the solution. use only the file paths provided and whatever context you already have from memory. Produce a plan for a new context file @/memory/TECHNICAL.md be sure to cover both the back end, front end and database. 
 
     Overview:
 
@@ -117,7 +117,7 @@
 - **Context**: clean
 - **Model**: Claude sonnet 4 20250514
 - **Cost**: $0.2865
-- **Reflections**: Really interesting process, given only the files plus memory, my assistant seemd really eager to use other files it coudl see but was told not to leverage. Results were less than ideal... needed to prompt them to get extra stuff added. Got there in the end but it took more work. Assitant definitely felt more constrained.
+- **Reflections**: Really interesting process, given only the files plus memory, my assistant seemd really eager to use other files it could see but was told not to leverage. Results were less than ideal... needed to prompt them to get extra stuff added. Got there in the end but it took more work. Assitant definitely seemed to feel more constrained.
 
 ## Entry 7
 
@@ -137,7 +137,7 @@
 - **Context**: clean
 - **Model**: Claude sonnet 4 20250514
 - **Cost**: $0.0558
-- **Reflections**: When i asked about the goals of the project, the ABOUT and ARCHITECTURE memory files were loaded and the goals reported. When I they asked to read the .env file and started the prompt with CODING UPDATE: the TECHNICAL file was read before the request was attempted. Seemed to be 'a way' to optionally load based on some pseudo code. Felt a bit weird though, like maybe there's a more streamlined way of doing it.
+- **Reflections**: When i asked about the goals of the project, the ABOUT and ARCHITECTURE memory files were loaded and the goals reported. When I asked to read the .env file and started the prompt with CODING UPDATE: the TECHNICAL file was read before the request was attempted. Seemed to be 'a way' to optionally load based on some pseudo code. Felt a bit weird though, like maybe there's a more streamlined way of doing it.
 
 ## Entry 9
 
@@ -147,7 +147,7 @@
 - **Context**: clean
 - **Model**: Claude sonnet 4 20250514
 - **Cost**: $1.2726
-- **Reflections**: More back and forth than i expected, the memory fiels got read and the client plan seemed to be produced base don that. Difficult to tell teh difference without trying without the memeory files as a comparisson.
+- **Reflections**: More back and forth than I expected, the memory fiels got read and the client plan seemed to be produced base don that. Difficult to tell teh difference without trying without the memeory files as a comparisson.
 
 ## Entry 10
 
@@ -157,7 +157,7 @@
 - **Context**: clean
 - **Model**: Claude sonnet 4 20250514
 - **Cost**: $4.6421
-- **Reflections**: The useual large scale refactroing execise with lots of oevr confidence. SOme problems with builds once my assistant was sconvinced it was done. A couple of targeted chats helped resolve it. I actually spent an additional 1hr chatting back and forth to fix bugs and get a series of integration tests refreshed - my assistant seemd to need a whole bunch of detailed planning assistance to get this sorted. Very interetsing to see how soemtimes a simple requets is nowhere near enough to get the job done.
+- **Reflections**: The useual large scale refactroing execise with lots of over confidence. Some problems with builds once my assistant was convcinced it was done. A couple of targeted chats helped resolve it. I actually spent an additional 1hr chatting back and forth to fix bugs and get a series of integration tests refreshed - my assistant seemd to need a whole bunch of detailed planning assistance to get this sorted. Very interetsing to see how sometimes a simple requet is nowhere near enough to get the job done.
 
 ## Entry 11
 
@@ -171,8 +171,7 @@
 
 ## Entry 12
 
-- **Prompt**: 
-Generate a prompt to describe adding observability to the backedn of the config-service by adding OpenTelemetry support write the result to @/prompts/6-open-telemetry-prompt.md
+- **Prompt**: Generate a prompt to describe adding observability to the backend of the config-service by adding OpenTelemetry support write the result to @/prompts/6-open-telemetry-prompt.md
 - **Tool**: Cline
 - **Mode**: act
 - **Context**: clean
