@@ -37,14 +37,14 @@ clean:  ## Clean temporary files
 	find svc -type f -name "*.pyc" -delete
 
 db-up:  ## Start PostgreSQL database with Docker Compose
-	docker-compose up -d postgres
+	cd svc && docker-compose up -d postgres
 
 db-down:  ## Stop PostgreSQL database
-	docker-compose down
+	cd svc && docker-compose down
 
 db-reset:  ## Reset database (stop, remove, start fresh)
-	docker-compose down -v
-	docker-compose up -d postgres
+	cd svc && docker-compose down -v
+	cd svc && docker-compose up -d postgres
 	@echo "Waiting for database to be ready..."
 	@sleep 10
 
@@ -52,4 +52,4 @@ migrate:  ## Run database migrations
 	cd svc && uv run python -m migrations
 
 db-shell:  ## Connect to database shell
-	docker-compose exec postgres psql -U user -d configservice
+	cd svc && docker-compose exec postgres psql -U user -d configservice

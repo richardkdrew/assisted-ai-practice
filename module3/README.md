@@ -200,12 +200,12 @@ Tests include:
 ## Project Structure
 
 ```
-├── docker-compose.yml   # Database services
 ├── Makefile            # Development commands
 ├── README.md           # Project documentation
 └── svc/                # Service code directory
-    ├── pyproject.toml  # Python project config
-    ├── .env.example    # Environment template
+    ├── docker-compose.yml # Database services
+    ├── pyproject.toml     # Python project config
+    ├── .env.example       # Environment template
     ├── __init__.py
     ├── main.py         # FastAPI application
     ├── config.py       # Settings management
