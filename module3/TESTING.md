@@ -36,20 +36,9 @@ curl -X POST http://localhost:8000/api/v1/applications/ \
 curl http://localhost:8000/api/v1/applications/
 ```
 
-### Option 2: Using Test Scripts (No Docker Required)
+### Option 2: Manual Testing with curl
 
-For environments without Docker, we've created test scripts that demonstrate the API functionality:
-
-```bash
-# Run the simple curl-based test
-cd svc && python test_simple.py
-
-# Or run the comprehensive test
-cd svc && python test_manual.py
-
-# Run the test server
-cd svc && python run_test_app.py
-```
+For environments without Docker, you can test the API manually using curl commands (examples below).
 
 ## API Testing Scenarios
 

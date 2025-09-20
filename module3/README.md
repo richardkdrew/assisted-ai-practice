@@ -220,9 +220,6 @@ Tests include:
     ├── migrations/
     │   └── 001_initial_schema.sql
     ├── test_integration.py     # API integration tests
-    ├── test_manual.py          # Manual API testing script
-    ├── test_simple.py          # Simple curl-based testing
-    ├── run_test_app.py         # Test server runner
     └── *_test.py              # Unit tests
 ```
 
