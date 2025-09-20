@@ -42,10 +42,13 @@ For environments without Docker, we've created test scripts that demonstrate the
 
 ```bash
 # Run the simple curl-based test
-python test_simple.py
+cd svc && python test_simple.py
 
 # Or run the comprehensive test
-python test_manual.py
+cd svc && python test_manual.py
+
+# Run the test server
+cd svc && python run_test_app.py
 ```
 
 ## API Testing Scenarios
