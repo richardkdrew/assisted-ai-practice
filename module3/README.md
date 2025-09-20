@@ -36,7 +36,7 @@ A centralized configuration management system that provides dynamic, flexible co
    ```bash
    git clone <repository-url>
    cd configuration-service
-   uv sync --dev
+   make install
    ```
 
 2. **Start PostgreSQL database**:
@@ -65,14 +65,18 @@ make install
 # Run tests with coverage
 make test
 
+# Run integration tests only
+make test-integration
+
 # Run the development server
 make run
 
 # Database management
-make db-up      # Start PostgreSQL with Docker
+make db-up      # Start PostgreSQL with Docker Compose
 make db-down    # Stop PostgreSQL
-make db-reset   # Reset database
+make db-reset   # Reset database with fresh data
 make migrate    # Run migrations
+make db-shell   # Connect to database shell
 
 # Code quality
 make format     # Format code
@@ -138,7 +142,7 @@ Once running, visit:
 
 ## Configuration
 
-Copy `.env.example` to `.env` and adjust settings:
+Copy `svc/.env.example` to `svc/.env` and adjust settings:
 
 ```bash
 # Database Configuration
@@ -173,6 +177,12 @@ Run the complete test suite:
 make test
 ```
 
+Run only integration tests:
+
+```bash
+make test-integration
+```
+
 Generate coverage report:
 
 ```bash
@@ -180,30 +190,37 @@ make coverage
 ```
 
 Tests include:
-- Unit tests for all modules (80%+ coverage)
-- Model validation tests
-- Migration system tests
-- API endpoint tests
-- Configuration validation tests
+- **Unit tests**: All modules with 80%+ coverage target
+- **Integration tests**: Complete API-to-database flow testing
+- **Model validation tests**: Pydantic model validation
+- **Migration system tests**: Database schema management
+- **API endpoint tests**: FastAPI route testing
+- **Configuration validation tests**: Settings and environment handling
 
 ## Project Structure
 
 ```
-svc/
-├── __init__.py
-├── main.py              # FastAPI application
-├── config.py            # Settings management
-├── database.py          # Connection pool
-├── migrations.py        # Migration runner
-├── models.py            # Pydantic models
-├── repository.py        # Data access layer
-├── routers/
-│   ├── __init__.py
-│   ├── applications.py  # Application endpoints
-│   └── configurations.py # Configuration endpoints
-├── migrations/
-│   └── 001_initial_schema.sql
-└── *_test.py           # Unit tests
+├── docker-compose.yml   # Database services
+├── Makefile            # Development commands
+├── README.md           # Project documentation
+└── svc/                # Service code directory
+    ├── pyproject.toml  # Python project config
+    ├── .env.example    # Environment template
+    ├── __init__.py
+    ├── main.py         # FastAPI application
+    ├── config.py       # Settings management
+    ├── database.py     # Connection pool
+    ├── migrations.py   # Migration runner
+    ├── models.py       # Pydantic models
+    ├── repository.py   # Data access layer
+    ├── routers/
+    │   ├── __init__.py
+    │   ├── applications.py     # Application endpoints
+    │   └── configurations.py  # Configuration endpoints
+    ├── migrations/
+    │   └── 001_initial_schema.sql
+    ├── test_integration.py     # API integration tests
+    └── *_test.py              # Unit tests
 ```
 
 ## License
