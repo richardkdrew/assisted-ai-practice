@@ -25,17 +25,17 @@ class ApplicationUpdate(ApplicationBase):
 
 class Application(ApplicationBase):
     """Complete application model with all fields."""
-    id: ULID = Field(..., description="Unique application identifier")
+    id: str = Field(..., description="Unique application identifier")
     created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: datetime = Field(..., description="Last update timestamp")
-    configuration_ids: List[ULID] = Field(default_factory=list, description="Related configuration IDs")
+    configuration_ids: List[str] = Field(default_factory=list, description="Related configuration IDs")
 
     model_config = {"from_attributes": True}
 
 
 class ConfigurationBase(BaseModel):
     """Base configuration model with common fields."""
-    application_id: ULID = Field(..., description="Associated application ID")
+    application_id: str = Field(..., description="Associated application ID")
     name: str = Field(..., max_length=256, description="Configuration name, unique per application")
     comments: Optional[str] = Field(None, max_length=1024, description="Optional comments")
     config: Dict[str, Any] = Field(..., description="Configuration data as key-value pairs")
@@ -53,7 +53,7 @@ class ConfigurationUpdate(ConfigurationBase):
 
 class Configuration(ConfigurationBase):
     """Complete configuration model with all fields."""
-    id: ULID = Field(..., description="Unique configuration identifier")
+    id: str = Field(..., description="Unique configuration identifier")
     created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: datetime = Field(..., description="Last update timestamp")
 

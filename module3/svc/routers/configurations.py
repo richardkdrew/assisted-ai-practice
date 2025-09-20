@@ -5,8 +5,12 @@ import logging
 from fastapi import APIRouter, HTTPException
 from pydantic_extra_types.ulid import ULID
 
-from ..models import Configuration, ConfigurationCreate, ConfigurationUpdate
-from ..repository import config_repository
+try:
+    from ..models import Configuration, ConfigurationCreate, ConfigurationUpdate
+    from ..repository import config_repository
+except ImportError:
+    from models import Configuration, ConfigurationCreate, ConfigurationUpdate
+    from repository import config_repository
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -26,7 +30,7 @@ async def create_configuration(config_data: ConfigurationCreate) -> Configuratio
 
 
 @router.get("/{config_id}", response_model=Configuration)
-async def get_configuration(config_id: ULID) -> Configuration:
+async def get_configuration(config_id: str) -> Configuration:
     """Get configuration by ID."""
     configuration = await config_repository.get_by_id(config_id)
     if not configuration:
@@ -35,7 +39,7 @@ async def get_configuration(config_id: ULID) -> Configuration:
 
 
 @router.put("/{config_id}", response_model=Configuration)
-async def update_configuration(config_id: ULID, config_data: ConfigurationUpdate) -> Configuration:
+async def update_configuration(config_id: str, config_data: ConfigurationUpdate) -> Configuration:
     """Update an existing configuration."""
     try:
         configuration = await config_repository.update(config_id, config_data)
@@ -51,8 +55,9 @@ async def update_configuration(config_id: ULID, config_data: ConfigurationUpdate
 
 
 @router.delete("/{config_id}", status_code=204)
-async def delete_configuration(config_id: ULID):
+async def delete_configuration(config_id: str):
     """Delete a configuration."""
-    success = await config_repository.delete(config_id)
+    ulid_id = validate_ulid(config_id)
+    success = await config_repository.delete(ulid_id)
     if not success:
         raise HTTPException(status_code=404, detail="Configuration not found")

@@ -8,7 +8,10 @@ from typing import List
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-from .config import settings
+try:
+    from .config import settings
+except ImportError:
+    from config import settings
 
 logger = logging.getLogger(__name__)
 

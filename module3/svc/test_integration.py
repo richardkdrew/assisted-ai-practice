@@ -5,6 +5,7 @@ They require a running PostgreSQL database configured per the test environment.
 """
 
 import pytest
+import pytest_asyncio
 import asyncio
 import json
 from datetime import datetime, UTC
@@ -24,7 +25,7 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest_asyncio.fixture(scope="session", autouse=True)
 async def setup_test_database():
     """Set up test database with migrations before running tests."""
     # Initialize database pool
@@ -40,7 +41,7 @@ async def setup_test_database():
     db_pool.close()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def clean_database():
     """Clean database before each test."""
     # Clear test data in reverse dependency order
@@ -49,7 +50,7 @@ async def clean_database():
     yield
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client():
     """Create async HTTP client for testing."""
     transport = ASGITransport(app=app)
@@ -60,6 +61,7 @@ async def client():
 class TestApplicationsIntegration:
     """Integration tests for applications endpoints."""
 
+    @pytest.mark.asyncio
     async def test_create_application_flow(self, client: AsyncClient, clean_database):
         """Test complete application creation flow."""
         app_data = {
@@ -87,6 +89,7 @@ class TestApplicationsIntegration:
         assert len(db_result) == 1
         assert db_result[0]["name"] == "test-application"
 
+    @pytest.mark.asyncio
     async def test_get_application_with_configurations(self, client: AsyncClient, clean_database):
         """Test getting application with its related configurations."""
         # Create application via API
@@ -123,6 +126,7 @@ class TestApplicationsIntegration:
         assert config1_id in app_data["configuration_ids"]
         assert config2_id in app_data["configuration_ids"]
 
+    @pytest.mark.asyncio
     async def test_list_applications_pagination(self, client: AsyncClient, clean_database):
         """Test application listing with pagination."""
         # Create multiple applications
@@ -150,6 +154,7 @@ class TestApplicationsIntegration:
         assert len(page_data["items"]) == 2
         assert page_data["has_more"] is True
 
+    @pytest.mark.asyncio
     async def test_update_application_flow(self, client: AsyncClient, clean_database):
         """Test application update flow."""
         # Create application
@@ -179,6 +184,7 @@ class TestApplicationsIntegration:
         )
         assert db_result[0]["name"] == "updated-name"
 
+    @pytest.mark.asyncio
     async def test_delete_application_cascade(self, client: AsyncClient, clean_database):
         """Test application deletion cascades to configurations."""
         # Create application and configuration
@@ -208,6 +214,7 @@ class TestApplicationsIntegration:
 class TestConfigurationsIntegration:
     """Integration tests for configurations endpoints."""
 
+    @pytest.mark.asyncio
     async def test_create_configuration_flow(self, client: AsyncClient, clean_database):
         """Test complete configuration creation flow."""
         # Create parent application
@@ -249,6 +256,7 @@ class TestConfigurationsIntegration:
         db_config = json.loads(db_result[0]["config"])
         assert db_config["database"]["port"] == 5432
 
+    @pytest.mark.asyncio
     async def test_configuration_name_uniqueness_per_application(self, client: AsyncClient, clean_database):
         """Test that configuration names must be unique per application."""
         # Create two applications
@@ -283,6 +291,7 @@ class TestConfigurationsIntegration:
         assert duplicate_response.status_code == 409
         assert "already exists" in duplicate_response.json()["detail"]
 
+    @pytest.mark.asyncio
     async def test_update_configuration_flow(self, client: AsyncClient, clean_database):
         """Test configuration update flow."""
         # Create application and configuration
@@ -325,6 +334,7 @@ class TestConfigurationsIntegration:
 class TestErrorHandlingIntegration:
     """Integration tests for error scenarios."""
 
+    @pytest.mark.asyncio
     async def test_create_configuration_with_invalid_application_id(self, client: AsyncClient, clean_database):
         """Test creating configuration with non-existent application ID."""
         fake_app_id = str(ULID())
@@ -338,6 +348,7 @@ class TestErrorHandlingIntegration:
         # Should fail due to foreign key constraint
         assert response.status_code == 400
 
+    @pytest.mark.asyncio
     async def test_get_nonexistent_resources(self, client: AsyncClient, clean_database):
         """Test getting non-existent applications and configurations."""
         fake_id = str(ULID())
@@ -350,6 +361,7 @@ class TestErrorHandlingIntegration:
         config_response = await client.get(f"/api/v1/configurations/{fake_id}")
         assert config_response.status_code == 404
 
+    @pytest.mark.asyncio
     async def test_invalid_ulid_format(self, client: AsyncClient, clean_database):
         """Test API response to invalid ULID formats."""
         invalid_id = "not-a-valid-ulid"
@@ -361,6 +373,7 @@ class TestErrorHandlingIntegration:
 class TestDatabaseConsistency:
     """Integration tests for database consistency and constraints."""
 
+    @pytest.mark.asyncio
     async def test_timestamp_handling(self, client: AsyncClient, clean_database):
         """Test that timestamps are properly handled."""
         before_create = datetime.now(UTC)
@@ -380,6 +393,7 @@ class TestDatabaseConsistency:
         assert before_create <= updated_at <= after_create
         assert created_at == updated_at  # Should be same on creation
 
+    @pytest.mark.asyncio
     async def test_json_config_storage(self, client: AsyncClient, clean_database):
         """Test that complex JSON configurations are stored and retrieved correctly."""
         app_response = await client.post("/api/v1/applications/", json={"name": "json-test"})

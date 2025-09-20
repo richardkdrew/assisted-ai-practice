@@ -36,15 +36,16 @@ class TestMigrationRunner:
         mock_cursor = Mock()
         mock_conn.cursor.return_value = mock_cursor
 
-        with patch.object(mock_cursor, '__enter__', return_value=mock_cursor), \
-             patch.object(mock_cursor, '__exit__', return_value=None):
-            self.runner.ensure_migrations_table(mock_conn)
+        mock_cursor.__enter__ = Mock(return_value=mock_cursor)
+        mock_cursor.__exit__ = Mock(return_value=None)
 
-            # Verify the SQL was executed
-            mock_cursor.execute.assert_called_once()
-            create_table_sql = mock_cursor.execute.call_args[0][0]
-            assert "CREATE TABLE IF NOT EXISTS migrations" in create_table_sql
-            mock_conn.commit.assert_called_once()
+        self.runner.ensure_migrations_table(mock_conn)
+
+        # Verify the SQL was executed
+        mock_cursor.execute.assert_called_once()
+        create_table_sql = mock_cursor.execute.call_args[0][0]
+        assert "CREATE TABLE IF NOT EXISTS migrations" in create_table_sql
+        mock_conn.commit.assert_called_once()
 
     def test_get_executed_migrations(self):
         """Test retrieval of executed migrations."""
@@ -58,14 +59,15 @@ class TestMigrationRunner:
             {'filename': '002_add_indexes.sql'}
         ]
 
-        with patch.object(mock_cursor, '__enter__', return_value=mock_cursor), \
-             patch.object(mock_cursor, '__exit__', return_value=None):
-            executed = self.runner.get_executed_migrations(mock_conn)
+        mock_cursor.__enter__ = Mock(return_value=mock_cursor)
+        mock_cursor.__exit__ = Mock(return_value=None)
 
-            assert executed == ['001_initial.sql', '002_add_indexes.sql']
-            mock_cursor.execute.assert_called_once_with(
-                "SELECT filename FROM migrations ORDER BY executed_at"
-            )
+        executed = self.runner.get_executed_migrations(mock_conn)
+
+        assert executed == ['001_initial.sql', '002_add_indexes.sql']
+        mock_cursor.execute.assert_called_once_with(
+            "SELECT filename FROM migrations ORDER BY executed_at"
+        )
 
     def test_get_pending_migrations_empty_dir(self):
         """Test getting pending migrations when migrations directory is empty."""
@@ -110,21 +112,22 @@ class TestMigrationRunner:
         mock_cursor = Mock()
         mock_conn.cursor.return_value = mock_cursor
 
-        with patch.object(mock_cursor, '__enter__', return_value=mock_cursor), \
-             patch.object(mock_cursor, '__exit__', return_value=None):
-            self.runner.execute_migration(mock_conn, migration_file)
+        mock_cursor.__enter__ = Mock(return_value=mock_cursor)
+        mock_cursor.__exit__ = Mock(return_value=None)
 
-            # Verify migration SQL was executed
-            assert mock_cursor.execute.call_count == 2
-            first_call = mock_cursor.execute.call_args_list[0][0][0]
-            assert migration_content in first_call
+        self.runner.execute_migration(mock_conn, migration_file)
 
-            # Verify migration was recorded
-            second_call = mock_cursor.execute.call_args_list[1]
-            assert "INSERT INTO migrations" in second_call[0][0]
-            assert second_call[0][1] == ('001_test.sql',)
+        # Verify migration SQL was executed
+        assert mock_cursor.execute.call_count == 2
+        first_call = mock_cursor.execute.call_args_list[0][0][0]
+        assert migration_content in first_call
 
-            mock_conn.commit.assert_called_once()
+        # Verify migration was recorded
+        second_call = mock_cursor.execute.call_args_list[1]
+        assert "INSERT INTO migrations" in second_call[0][0]
+        assert second_call[0][1] == ('001_test.sql',)
+
+        mock_conn.commit.assert_called_once()
 
     @patch('svc.migrations.MigrationRunner.get_connection')
     def test_run_migrations_no_pending(self, mock_get_conn):

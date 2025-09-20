@@ -8,8 +8,12 @@ from typing import List, Optional, Dict, Any
 from pydantic_extra_types.ulid import ULID
 from ulid import ULID as ULIDGenerator
 
-from .database import db_pool
-from .models import Application, Configuration, ApplicationCreate, ApplicationUpdate, ConfigurationCreate, ConfigurationUpdate
+try:
+    from .database import db_pool
+    from .models import Application, Configuration, ApplicationCreate, ApplicationUpdate, ConfigurationCreate, ConfigurationUpdate
+except ImportError:
+    from database import db_pool
+    from models import Application, Configuration, ApplicationCreate, ApplicationUpdate, ConfigurationCreate, ConfigurationUpdate
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +33,7 @@ class ApplicationRepository:
         """
         params = (app_id, application_data.name, application_data.comments, now, now)
 
-        result = await db_pool.execute_query(query, params)
+        result = await db_pool.execute_returning(query, params)
         if not result:
             raise RuntimeError("Failed to create application")
 
@@ -37,7 +41,7 @@ class ApplicationRepository:
         app_data['configuration_ids'] = []
         return Application(**app_data)
 
-    async def get_by_id(self, app_id: ULID) -> Optional[Application]:
+    async def get_by_id(self, app_id: str) -> Optional[Application]:
         """Get application by ID with related configuration IDs."""
         # Get application data
         app_query = """
@@ -45,7 +49,7 @@ class ApplicationRepository:
             FROM applications
             WHERE id = %s
         """
-        app_result = await db_pool.execute_query(app_query, (str(app_id),))
+        app_result = await db_pool.execute_query(app_query, (app_id,))
 
         if not app_result:
             return None
@@ -54,14 +58,14 @@ class ApplicationRepository:
         config_query = """
             SELECT id FROM configurations WHERE application_id = %s
         """
-        config_result = await db_pool.execute_query(config_query, (str(app_id),))
+        config_result = await db_pool.execute_query(config_query, (app_id,))
 
         app_data = dict(app_result[0])
-        app_data['configuration_ids'] = [ULID(row['id']) for row in config_result]
+        app_data['configuration_ids'] = [row['id'] for row in config_result]
 
         return Application(**app_data)
 
-    async def update(self, app_id: ULID, application_data: ApplicationUpdate) -> Optional[Application]:
+    async def update(self, app_id: str, application_data: ApplicationUpdate) -> Optional[Application]:
         """Update an existing application."""
         now = datetime.utcnow()
 
@@ -71,9 +75,9 @@ class ApplicationRepository:
             WHERE id = %s
             RETURNING id, name, comments, created_at, updated_at
         """
-        params = (application_data.name, application_data.comments, now, str(app_id))
+        params = (application_data.name, application_data.comments, now, app_id)
 
-        result = await db_pool.execute_query(query, params)
+        result = await db_pool.execute_returning(query, params)
         if not result:
             return None
 
@@ -83,8 +87,8 @@ class ApplicationRepository:
         config_query = """
             SELECT id FROM configurations WHERE application_id = %s
         """
-        config_result = await db_pool.execute_query(config_query, (str(app_id),))
-        app_data['configuration_ids'] = [ULID(row['id']) for row in config_result]
+        config_result = await db_pool.execute_query(config_query, (app_id,))
+        app_data['configuration_ids'] = [row['id'] for row in config_result]
 
         return Application(**app_data)
 
@@ -107,7 +111,7 @@ class ApplicationRepository:
                 SELECT id FROM configurations WHERE application_id = %s
             """
             config_result = await db_pool.execute_query(config_query, (app_data['id'],))
-            app_data['configuration_ids'] = [ULID(config_row['id']) for config_row in config_result]
+            app_data['configuration_ids'] = [config_row['id'] for config_row in config_result]
 
             applications.append(Application(**app_data))
 
@@ -119,10 +123,10 @@ class ApplicationRepository:
         result = await db_pool.execute_query(query)
         return result[0]['count'] if result else 0
 
-    async def delete(self, app_id: ULID) -> bool:
+    async def delete(self, app_id: str) -> bool:
         """Delete an application and its configurations."""
         query = "DELETE FROM applications WHERE id = %s"
-        affected_rows = await db_pool.execute_command(query, (str(app_id),))
+        affected_rows = await db_pool.execute_command(query, (app_id,))
         return affected_rows > 0
 
 
@@ -142,7 +146,7 @@ class ConfigurationRepository:
         """
         check_result = await db_pool.execute_query(
             check_query,
-            (str(config_data.application_id), config_data.name)
+            (config_data.application_id, config_data.name)
         )
 
         if check_result and check_result[0]['count'] > 0:
@@ -155,7 +159,7 @@ class ConfigurationRepository:
         """
         params = (
             config_id,
-            str(config_data.application_id),
+            config_data.application_id,
             config_data.name,
             config_data.comments,
             json.dumps(config_data.config),
@@ -163,31 +167,39 @@ class ConfigurationRepository:
             now
         )
 
-        result = await db_pool.execute_query(query, params)
+        result = await db_pool.execute_returning(query, params)
         if not result:
             raise RuntimeError("Failed to create configuration")
 
         config_dict = dict(result[0])
-        config_dict['config'] = json.loads(config_dict['config']) if config_dict['config'] else {}
+        # Handle config field - it might be a string (JSON) or already parsed dict
+        if isinstance(config_dict['config'], str):
+            config_dict['config'] = json.loads(config_dict['config']) if config_dict['config'] else {}
+        elif config_dict['config'] is None:
+            config_dict['config'] = {}
         return Configuration(**config_dict)
 
-    async def get_by_id(self, config_id: ULID) -> Optional[Configuration]:
+    async def get_by_id(self, config_id: str) -> Optional[Configuration]:
         """Get configuration by ID."""
         query = """
             SELECT id, application_id, name, comments, config, created_at, updated_at
             FROM configurations
             WHERE id = %s
         """
-        result = await db_pool.execute_query(query, (str(config_id),))
+        result = await db_pool.execute_query(query, (config_id,))
 
         if not result:
             return None
 
         config_dict = dict(result[0])
-        config_dict['config'] = json.loads(config_dict['config']) if config_dict['config'] else {}
+        # Handle config field - it might be a string (JSON) or already parsed dict
+        if isinstance(config_dict['config'], str):
+            config_dict['config'] = json.loads(config_dict['config']) if config_dict['config'] else {}
+        elif config_dict['config'] is None:
+            config_dict['config'] = {}
         return Configuration(**config_dict)
 
-    async def update(self, config_id: ULID, config_data: ConfigurationUpdate) -> Optional[Configuration]:
+    async def update(self, config_id: str, config_data: ConfigurationUpdate) -> Optional[Configuration]:
         """Update an existing configuration."""
         now = datetime.utcnow()
 
@@ -199,7 +211,7 @@ class ConfigurationRepository:
         """
         check_result = await db_pool.execute_query(
             check_query,
-            (str(config_data.application_id), config_data.name, str(config_id))
+            (config_data.application_id, config_data.name, config_id)
         )
 
         if check_result and check_result[0]['count'] > 0:
@@ -212,26 +224,30 @@ class ConfigurationRepository:
             RETURNING id, application_id, name, comments, config, created_at, updated_at
         """
         params = (
-            str(config_data.application_id),
+            config_data.application_id,
             config_data.name,
             config_data.comments,
             json.dumps(config_data.config),
             now,
-            str(config_id)
+            config_id
         )
 
-        result = await db_pool.execute_query(query, params)
+        result = await db_pool.execute_returning(query, params)
         if not result:
             return None
 
         config_dict = dict(result[0])
-        config_dict['config'] = json.loads(config_dict['config']) if config_dict['config'] else {}
+        # Handle config field - it might be a string (JSON) or already parsed dict
+        if isinstance(config_dict['config'], str):
+            config_dict['config'] = json.loads(config_dict['config']) if config_dict['config'] else {}
+        elif config_dict['config'] is None:
+            config_dict['config'] = {}
         return Configuration(**config_dict)
 
-    async def delete(self, config_id: ULID) -> bool:
+    async def delete(self, config_id: str) -> bool:
         """Delete a configuration."""
         query = "DELETE FROM configurations WHERE id = %s"
-        affected_rows = await db_pool.execute_command(query, (str(config_id),))
+        affected_rows = await db_pool.execute_command(query, (config_id,))
         return affected_rows > 0
 
 

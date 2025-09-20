@@ -12,7 +12,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./svc/migrations:/docker-entrypoint-initdb.d/migrations
+      
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U user -d configservice"]
       interval: 5s

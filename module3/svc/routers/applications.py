@@ -6,8 +6,12 @@ from typing import List
 from fastapi import APIRouter, HTTPException, Query
 from pydantic_extra_types.ulid import ULID
 
-from ..models import Application, ApplicationCreate, ApplicationUpdate, PaginationParams, PaginatedResponse
-from ..repository import app_repository
+try:
+    from ..models import Application, ApplicationCreate, ApplicationUpdate, PaginationParams, PaginatedResponse
+    from ..repository import app_repository
+except ImportError:
+    from models import Application, ApplicationCreate, ApplicationUpdate, PaginationParams, PaginatedResponse
+    from repository import app_repository
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -24,7 +28,7 @@ async def create_application(application_data: ApplicationCreate) -> Application
 
 
 @router.get("/{app_id}", response_model=Application)
-async def get_application(app_id: ULID) -> Application:
+async def get_application(app_id: str) -> Application:
     """Get application by ID, includes list of all related configuration IDs."""
     application = await app_repository.get_by_id(app_id)
     if not application:
@@ -33,7 +37,7 @@ async def get_application(app_id: ULID) -> Application:
 
 
 @router.put("/{app_id}", response_model=Application)
-async def update_application(app_id: ULID, application_data: ApplicationUpdate) -> Application:
+async def update_application(app_id: str, application_data: ApplicationUpdate) -> Application:
     """Update an existing application."""
     try:
         application = await app_repository.update(app_id, application_data)
@@ -68,8 +72,9 @@ async def list_applications(
 
 
 @router.delete("/{app_id}", status_code=204)
-async def delete_application(app_id: ULID):
+async def delete_application(app_id: str):
     """Delete an application and all its configurations."""
-    success = await app_repository.delete(app_id)
+    ulid_id = validate_ulid(app_id)
+    success = await app_repository.delete(ulid_id)
     if not success:
         raise HTTPException(status_code=404, detail="Application not found")

@@ -10,7 +10,10 @@ import psycopg2.extras
 import psycopg2.pool
 from psycopg2.extras import RealDictCursor
 
-from .config import settings
+try:
+    from .config import settings
+except ImportError:
+    from config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -103,6 +106,22 @@ class DatabasePool:
                 cursor.execute(command, params)
                 conn.commit()
                 return cursor.rowcount
+
+    async def execute_returning(self, command: str, params: tuple = None) -> list[Dict[str, Any]]:
+        """Execute an INSERT/UPDATE/DELETE command with RETURNING clause.
+
+        Args:
+            command: SQL command string with RETURNING clause
+            params: Command parameters tuple
+
+        Returns:
+            List of dictionaries representing returned results
+        """
+        async with self.get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(command, params)
+                conn.commit()
+                return cursor.fetchall()
 
 
 # Global database pool instance

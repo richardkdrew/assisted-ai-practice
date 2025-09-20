@@ -62,7 +62,7 @@ class TestApplicationModels:
         assert app.created_at == now
         assert app.updated_at == now
         assert len(app.configuration_ids) == 2
-        assert all(isinstance(cid, ULID) for cid in app.configuration_ids)
+        assert all(isinstance(cid, str) for cid in app.configuration_ids)
 
 
 class TestConfigurationModels:

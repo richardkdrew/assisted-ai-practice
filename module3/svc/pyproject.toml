@@ -17,6 +17,7 @@ dependencies = [
 dev = [
     "pytest==8.4.1",
     "pytest-cov==6.2.1",
+    "pytest-asyncio>=0.20.0",
     "httpx==0.28.1",
     "python-dotenv>=1.0.0",
 ]
@@ -37,5 +38,6 @@ addopts = "--cov=svc --cov-report=term-missing --cov-fail-under=80"
 dev = [
     "httpx==0.28.1",
     "pytest==8.4.1",
+    "pytest-asyncio>=1.2.0",
     "pytest-cov==6.2.1",
 ]
