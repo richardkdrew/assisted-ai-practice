@@ -7,8 +7,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-# Add svc to path
-sys.path.insert(0, str(Path(__file__).parent / "svc"))
+# Add current directory to path
+sys.path.insert(0, str(Path(__file__).parent))
 
 import httpx
 from ulid import ULID

@@ -9,7 +9,7 @@ from pathlib import Path
 
 def run_test_server():
     """Run the test server using the SQLite version."""
-    svc_dir = Path(__file__).parent / "svc"
+    svc_dir = Path(__file__).parent
 
     print("🚀 Starting Configuration Service (Test Mode)")
     print("=" * 50)
