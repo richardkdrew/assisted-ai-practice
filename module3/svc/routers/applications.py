@@ -9,19 +9,34 @@ from pydantic_extra_types.ulid import ULID
 try:
     from ..models import Application, ApplicationCreate, ApplicationUpdate, PaginationParams, PaginatedResponse
     from ..repository import app_repository
+    from ..observability import update_business_metrics
 except ImportError:
     from models import Application, ApplicationCreate, ApplicationUpdate, PaginationParams, PaginatedResponse
     from repository import app_repository
+    from observability import update_business_metrics
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+
+async def _update_metrics():
+    """Update business metrics with current counts."""
+    try:
+        app_count = await app_repository.count()
+        # For now, we'll set configs and db connections to 0
+        # These would need to be calculated from their respective repositories
+        update_business_metrics(app_count, 0, 0)
+    except Exception as e:
+        logger.warning(f"Failed to update business metrics: {e}")
 
 
 @router.post("/", response_model=Application, status_code=201)
 async def create_application(application_data: ApplicationCreate) -> Application:
     """Create a new application."""
     try:
-        return await app_repository.create(application_data)
+        application = await app_repository.create(application_data)
+        await _update_metrics()  # Update metrics after creating
+        return application
     except Exception as e:
         logger.error(f"Failed to create application: {e}")
         raise HTTPException(status_code=400, detail=str(e))
@@ -74,7 +89,7 @@ async def list_applications(
 @router.delete("/{app_id}", status_code=204)
 async def delete_application(app_id: str):
     """Delete an application and all its configurations."""
-    ulid_id = validate_ulid(app_id)
-    success = await app_repository.delete(ulid_id)
+    success = await app_repository.delete(app_id)
     if not success:
         raise HTTPException(status_code=404, detail="Application not found")
+    await _update_metrics()  # Update metrics after deletion

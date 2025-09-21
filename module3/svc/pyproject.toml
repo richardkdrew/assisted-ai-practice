@@ -19,7 +19,17 @@ dev = [
     "pytest-cov==6.2.1",
     "pytest-asyncio>=0.20.0",
     "httpx==0.28.1",
+    "aiohttp>=3.8.0",
     "python-dotenv>=1.0.0",
+]
+observability = [
+    "opentelemetry-api>=1.20.0",
+    "opentelemetry-sdk>=1.20.0",
+    "opentelemetry-instrumentation-fastapi>=0.41b0",
+    "opentelemetry-exporter-otlp>=1.20.0",
+    "opentelemetry-instrumentation-requests>=0.41b0",
+    "opentelemetry-instrumentation-psycopg2>=0.41b0",
+    "prometheus-client>=0.17.0",
 ]
 
 [build-system]

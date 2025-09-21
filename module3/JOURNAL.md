@@ -16,3 +16,15 @@
   adding anything though.
 - **Tool**: Claude Code
 - **Reflections**: Interestinmg desire to complete the phase :) in discussion thouhg, we got to  a good space with the addition of new memoery files
+
+## Entry 3
+
+- **Prompt**: great. based on the issues we've seen how 
+  might we create a spec file like 
+  1-web-api-spec.md but specfiically for 
+  observability (lets call it 
+  3-observabiloty-spec.md) that helps us 
+  avoid these when we do this type of work 
+  again.
+- **Tool**: Claude Code
+- **Reflections**: Very long session with some tendency towards wantign to move on before I was ready. Lots of collaborative imporvments and at one point, even a discussion aroudn integration testing and the realissairon that tey hadn't beeen run to test the new observability. Led to a requets to draft upa. a spec in detail and to update WORKFLOW_STATUS to avoid the omissions next time.

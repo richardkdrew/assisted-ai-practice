@@ -10,10 +10,12 @@ try:
     from .config import settings
     from .database import db_pool
     from .routers import applications, configurations
+    from .observability import setup_observability
 except ImportError:
     from config import settings
     from database import db_pool
     from routers import applications, configurations
+    from observability import setup_observability
 
 
 @asynccontextmanager
@@ -44,6 +46,9 @@ def create_app() -> FastAPI:
         lifespan=lifespan
     )
 
+    # Setup observability
+    setup_observability(app)
+
     # Add CORS middleware
     app.add_middleware(
         CORSMiddleware,
@@ -69,6 +74,7 @@ def create_app() -> FastAPI:
     async def health_check():
         """Health check endpoint."""
         return {"status": "healthy", "service": "configuration-service"}
+
 
     return app
 

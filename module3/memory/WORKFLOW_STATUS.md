@@ -13,6 +13,8 @@ This document establishes a rigorous four-stage development process that ensures
 **Activities**:
 - **Story Planning**: Define complete feature scope with business value statement
 - **Task Planning**: Break down into Given-When-Then acceptance criteria scenarios
+- **Failure Mode Planning**: Anticipate common failure modes and integration issues
+- **Validation Strategy**: Include end-to-end validation approach in initial plan
 - **Test Strategy**: Identify testing approach and coverage requirements
 - **File Change Identification**: Map which files will be modified or created
 - **Branch Creation**: Create feature branch following naming conventions
@@ -38,8 +40,10 @@ This document establishes a rigorous four-stage development process that ensures
 **Activities**:
 - **Implementation Loop**: Write code according to planned file changes
 - **Testing Loop**: Create and execute tests for each Given-When-Then scenario
+- **End-to-End Validation**: Test integration points and full system functionality
 - **Quality Validation**: Run complete quality suite after each significant change
 - **Assessment**: Validate implementation against acceptance criteria
+- **Cleanup**: Remove temporary/debug code before stage completion
 - **Iteration**: Refine implementation until all criteria are satisfied
 
 **Completion Criteria**:
@@ -62,6 +66,7 @@ This document establishes a rigorous four-stage development process that ensures
 
 **Activities**:
 - **Process Assessment**: Evaluate what worked well and what didn't
+- **Critical Gap Resolution**: Address any critical issues identified during implementation
 - **Improvement Identification**: Document specific process enhancements
 - **Future Task Review**: Assess remaining tasks for priority and approach
 - **Documentation Update**: Record lessons learned and best practices
@@ -84,6 +89,7 @@ This document establishes a rigorous four-stage development process that ensures
 **Purpose**: Finalize current work and transition smoothly to the next development cycle.
 
 **Activities**:
+- **Final Production Readiness Review**: Ensure all components are production-ready
 - **Commit Creation**: Create conventional commit with clear, descriptive message
 - **Branch Management**: Merge feature branch and clean up
 - **Next Task Selection**: Choose next task based on priority and dependencies
@@ -106,7 +112,7 @@ This document establishes a rigorous four-stage development process that ensures
 
 ### Non-Negotiable Protocols
 
-1. **User-Driven Progression**: Only the user can advance between stages. The assistant **cannot** move to the next stage without explicit user approval.
+1. **Explicit Stage Approval Required**: Only the user can advance between stages. The assistant **must** wait for explicit "approved to move to stage X" before proceeding. Never assume approval or move stages automatically.
 
 2. **Complete Stage Completion**: All completion criteria must be satisfied before stage transition. No partial completions allowed.
 
@@ -228,12 +234,12 @@ test(utils): add unit tests for validation helpers
 ## Current Status
 
 ### Active Work Status
-**Status**: 🟢 **ACTIVE** - Configuration Service Implementation
-**Active Work Item**: [`001-story-configuration-service-api.md`](changes/001-story-configuration-service-api.md)
-**Current Task**: Documentation updates and memory file maintenance following Stage 3 completion
-**Current Stage**: Stage 3: REFLECT & ADAPT - COMPLETED ✅ Ready for Stage 4: COMMIT & PICK NEXT
-**AI Context**: All implementation complete with 90.44% test coverage, comprehensive reflection done, future priorities updated (Observability #1, UI #2)
-**Last Updated**: 2025-09-20 16:15
+**Status**: 🟢 **ACTIVE** - Observability Implementation
+**Active Work Item**: [`002-story-observability-implementation.md`](changes/002-story-observability-implementation.md)
+**Current Task**: Comprehensive observability stack implementation with OpenTelemetry, Prometheus, Grafana, and cAdvisor
+**Current Stage**: Stage 1: PLAN - COMPLETED ✅ Ready for Stage 2: BUILD & ASSESS
+**AI Context**: Complete observability architecture planned, 8 Given-When-Then tasks defined, feature branch created, minimal impact on existing Configuration Service
+**Last Updated**: 2025-09-20 16:55
 
 ### Status Update Protocol
 
