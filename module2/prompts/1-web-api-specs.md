@@ -93,7 +93,7 @@ Use a `.env` file to store environment variables, such as the database configura
 
 ## Project Structure
 
-With exception to the README nd the .gitignore file, creaet all other files inside a top level svc folder of the config-service parent folder e.g. config-service/svc/
+With exception to the README nd the .gitignore file, creaet all other files inside a top level svc folder of the parent folder e.g. ./svc/
 
 # Database Environment
 
