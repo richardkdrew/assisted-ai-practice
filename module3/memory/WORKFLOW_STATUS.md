@@ -225,25 +225,95 @@ make quality                 # Run complete validation suite (backend + UI + E2E
 ```
 
 ### Branch and Commit Workflow
+
+#### **Story Setup**
 ```bash
-# Story setup
 git checkout main
 git pull origin main
 git checkout -b feature/story-name
 git push -u origin feature/story-name
+```
 
-# Task iteration
+#### **Development Commit Strategy (RECOMMENDED)**
+```bash
+# Stage 1: PLAN completion (MANDATORY)
 git add .
-git commit -m "feat: implement task description"
+git commit -m "feat: complete Stage 1 planning for [story-name]"
 git push
 
-# Story completion
+# During Stage 2: BUILD & ASSESS (frequent commits)
+git add .
+git commit -m "feat(component): implement [specific-functionality]"
+git push
+
+git add .
+git commit -m "test(e2e): add [specific-test-coverage]"
+git push
+
+git add .
+git commit -m "fix(ui): resolve [specific-issue]"
+git push
+
+# Stage 2: BUILD & ASSESS completion (MANDATORY)
+git add .
+git commit -m "feat: complete [story-name] implementation with [key-achievement]"
+git push
+
+# Stage 3: REFLECT & ADAPT completion (MANDATORY)
+git add .
+git commit -m "docs: update documentation and reflection for [story-name]"
+git push
+
+# Stage 4: COMMIT & PICK NEXT (if additional changes made)
+git add .
+git commit -m "docs: finalize [story-name] documentation and next task selection"
+git push
+```
+
+#### **Story Completion**
+```bash
 git checkout main
 git merge feature/story-name
 git push origin main
 git branch -d feature/story-name
 git push origin --delete feature/story-name
 ```
+
+### Commit Frequency Guidelines
+
+#### **MANDATORY Commit Points**
+1. **End of Stage 1**: Planning complete, all tasks defined
+2. **End of Stage 2**: Implementation complete, acceptance criteria met
+3. **End of Stage 3**: Reflection and adaptation documented
+4. **Stage 4**: Final documentation updates (if any additional changes)
+
+#### **RECOMMENDED Commit Points (Stage 2 Focus)**
+```bash
+# After each Given-When-Then task completion
+git commit -m "feat(applications): implement CRUD operations"
+git commit -m "feat(configurations): add form validation"
+git commit -m "test(e2e): achieve 80% test coverage milestone"
+
+# After resolving blocking issues
+git commit -m "fix(forms): resolve edit form data population"
+git commit -m "fix(tests): resolve E2E test failures"
+
+# After significant integration milestones
+git commit -m "feat(integration): connect UI to backend API"
+git commit -m "feat(observability): integrate monitoring dashboards"
+```
+
+#### **Commit Frequency Rules**
+- **Minimum**: At each stage boundary (MANDATORY)
+- **Optimal**: After each task or significant milestone
+- **Maximum**: Daily if work is in progress
+- **Never**: Broken code, failed tests, or debug artifacts
+
+#### **Quality Gates for Commits**
+- ✅ Code compiles and runs without errors
+- ✅ New tests pass (existing tests can be temporarily failing if documented)
+- ✅ No debug artifacts (console.log, temporary files)
+- ✅ Clear, descriptive commit message following conventional format
 
 ### Conventional Commit Format
 ```bash
@@ -252,7 +322,17 @@ feat(auth): add user authentication system
 fix(api): resolve null pointer in user service
 docs(readme): update installation instructions
 test(utils): add unit tests for validation helpers
+refactor(components): improve Web Component architecture
 ```
+
+#### **Commit Types for Our Workflow**
+- **feat**: New features or functionality
+- **fix**: Bug fixes and issue resolution
+- **test**: Adding or updating tests
+- **docs**: Documentation updates
+- **refactor**: Code restructuring without feature changes
+- **style**: Code formatting and style changes
+- **chore**: Build process, dependency updates
 
 ---
 

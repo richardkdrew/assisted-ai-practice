@@ -185,6 +185,74 @@ make test-integration
 make test-observability
 ```
 
+### 3. Development Workflow with Commits
+
+#### **Starting a New Story**
+```bash
+# 1. Create feature branch
+git checkout main && git pull origin main
+git checkout -b feature/story-name
+git push -u origin feature/story-name
+
+# 2. Complete Stage 1: PLAN
+# [Planning work happens here]
+git add .
+git commit -m "feat: complete Stage 1 planning for story-name"
+git push
+
+# 3. Start backend services
+make backend-up
+```
+
+#### **During Stage 2: BUILD & ASSESS (Frequent Commits)**
+```bash
+# After implementing each task
+make test  # Verify tests pass
+git add .
+git commit -m "feat(component): implement specific functionality"
+git push
+
+# After fixing issues
+make ui-test-e2e  # Run E2E tests
+git add .
+git commit -m "fix(e2e): resolve form validation issues"
+git push
+
+# After reaching milestones
+make quality  # Run complete validation
+git add .
+git commit -m "test(coverage): achieve 90% E2E test coverage"
+git push
+
+# Stage 2 completion
+git add .
+git commit -m "feat: complete story-name implementation with key-achievement"
+git push
+```
+
+#### **Stage 3 & 4 Completion**
+```bash
+# After reflection and documentation updates
+git add .
+git commit -m "docs: update documentation and reflection for story-name"
+git push
+
+# Final commit (if additional changes)
+git add .
+git commit -m "docs: finalize story-name documentation and next task selection"
+git push
+```
+
+#### **Story Completion**
+```bash
+# Merge to main and clean up
+git checkout main
+git merge feature/story-name
+git push origin main
+git branch -d feature/story-name
+git push origin --delete feature/story-name
+```
+
 ### 2. Code Quality Commands
 ```bash
 # Format code (if formatter available)
