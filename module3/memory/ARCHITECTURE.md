@@ -2,11 +2,11 @@
 
 ## Overview
 
-The Configuration Service is built using a modern Python web stack with FastAPI and PostgreSQL, following a Repository pattern architecture that prioritizes direct SQL operations over ORM abstractions for performance and control.
+The Configuration Service is a complete full-stack application with a modern Python backend, TypeScript Admin UI, and comprehensive observability stack. The architecture follows a Repository pattern for the backend and Native Web Components for the frontend, with comprehensive Docker-based observability integration.
 
 ## Technology Stack
 
-### Core Components
+### Backend Stack
 - **Web Framework**: FastAPI 0.116.1 (async/await support, automatic OpenAPI documentation)
 - **Database**: PostgreSQL 16 (JSONB support for flexible configuration storage)
 - **Database Adapter**: psycopg2-binary 2.9.10 (PostgreSQL connectivity with connection pooling)
@@ -14,10 +14,38 @@ The Configuration Service is built using a modern Python web stack with FastAPI 
 - **Testing**: pytest 8.4.1 with pytest-cov 6.2.1 and httpx 0.28.1
 - **Package Management**: uv (fast Python package management)
 
+### Frontend Stack
+- **Language**: TypeScript 5.0+ (strict type checking, zero external frameworks)
+- **Components**: Native Web Components with Shadow DOM encapsulation
+- **Build System**: Vite 5.0+ (fast development server and build tooling)
+- **Testing**: Vitest 1.0+ (unit tests) + Playwright 1.40+ (E2E tests)
+- **Styling**: CSS Custom Properties with responsive design patterns
+
+### Observability Stack
+- **Metrics Collection**: Prometheus (time-series metrics storage)
+- **Visualization**: Grafana (auto-loaded dashboards)
+- **Telemetry Pipeline**: OpenTelemetry Collector (traces, metrics, logs)
+- **Container Metrics**: cAdvisor (Docker container monitoring)
+- **Service Discovery**: Docker Compose networking
+
 ### Key Design Decisions
+
+#### Backend Architecture
 - **No ORM**: Direct SQL queries with Repository pattern for performance and SQL control
 - **ULID Primary Keys**: Universally Unique Lexicographically Sortable Identifiers for better performance than UUIDs
 - **Connection Pooling**: ThreadedConnectionPool for efficient database resource management
+
+#### Frontend Architecture
+- **Zero External Frameworks**: Native Web Components for framework independence and longevity
+- **Shadow DOM Encapsulation**: True CSS and JavaScript isolation between components
+- **SOLID Principles**: Single responsibility, dependency inversion, interface segregation
+- **TypeScript Only**: No JavaScript files, strict type checking throughout
+
+#### Full-Stack Integration
+- **Docker Compose**: Complete development environment with single command startup
+- **Auto-Loading Dashboards**: Grafana dashboards provision automatically on startup
+- **Service Discovery**: Container-to-container communication via Docker networking
+- **Environment Configuration**: Complete .env support for all services
 - **Async/Await**: Full async support throughout the application stack
 
 ## System Architecture

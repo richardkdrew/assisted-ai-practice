@@ -4,6 +4,23 @@
 
 This document provides comprehensive instructions for setting up the Configuration Service development environment, including all scripts, commands, and procedures needed to run, test, and deploy the service.
 
+### ⚡ Quick Start (Recommended Workflow)
+```bash
+# 1. Start complete backend stack (database + API + observability)
+make backend-up
+
+# 2. Open monitoring dashboards
+make grafana  # Auto-loaded dashboards at http://localhost:3001
+
+# 3. Run tests
+make test
+
+# 4. Stop when done
+make backend-down
+```
+
+**Default Backend Interface**: Use `make backend-up` and `make backend-down` as the primary way to interact with the backend stack. This provides a complete development environment with observability out of the box.
+
 ## Prerequisites
 
 ### System Requirements
@@ -71,19 +88,36 @@ DB_POOL_MIN_CONN=1
 DB_POOL_MAX_CONN=20
 ```
 
-## Database Setup
+## Backend Stack Management (Primary Interface)
 
-### 1. Start PostgreSQL Database
+### 1. Full Backend Stack (Database + API + Observability)
 ```bash
-# Start database with Docker Compose
-make db-up
+# Start complete backend stack (RECOMMENDED)
+make backend-up
 
-# Wait for database to be ready (usually 5-10 seconds)
-# You can check with:
-make db-status
+# Stop complete backend stack
+make backend-down
+
+# View all backend logs
+make backend-logs
 ```
 
-### 2. Run Database Migrations
+### 2. Database-Only Operations
+```bash
+# Start database only
+make db-up
+
+# Stop database
+make db-down
+
+# Reset database (clean slate)
+make db-reset
+
+# Connect to database shell
+make db-shell
+```
+
+### 3. Run Database Migrations
 ```bash
 # Apply database schema migrations
 make migrate
@@ -95,32 +129,50 @@ make migrate
 # INFO:__main__:All migrations executed successfully
 ```
 
-### 3. Database Management Commands
+## Observability & Monitoring
+
+### 1. Observability Stack Commands
 ```bash
-# Start database
-make db-up
+# Open Grafana dashboards (auto-loaded)
+make grafana  # Opens http://localhost:3001 (admin/admin)
 
-# Stop database
-make db-down
+# Open Prometheus metrics
+make prometheus  # Opens http://localhost:9090
 
-# Reset database (clean slate)
-make db-reset
+# View current service metrics
+make metrics
 
-# Connect to database shell
-make db-shell
-
-# Check database status
-make db-status
+# Check observability stack status
+docker ps  # View all running containers
 ```
+
+### 2. Available Monitoring Dashboards
+- **Configuration Service - Application Metrics**: Application-level metrics
+- **Configuration Service - Container Metrics**: Container and infrastructure metrics
+
+### 3. Observability Stack Components
+- **Grafana** (port 3001): Dashboards and visualization
+- **Prometheus** (port 9090): Metrics collection and storage
+- **OpenTelemetry Collector** (ports 4317/4318/8889): Telemetry pipeline
+- **cAdvisor** (port 8080): Container metrics
 
 ## Development Workflow
 
-### 1. Daily Development Commands
+### 1. Quick Start (Recommended)
 ```bash
-# Start the development server
-make run
+# Start complete backend stack
+make backend-up
 
-# In another terminal, run tests
+# Open Grafana to view metrics
+make grafana
+
+# Run development server locally (optional, for local development)
+make run  # Only needed if developing outside Docker
+```
+
+### 2. Daily Development Commands
+```bash
+# Run tests
 make test
 
 # Run tests with coverage
@@ -128,6 +180,9 @@ make coverage
 
 # Run integration tests only
 make test-integration
+
+# Run observability integration tests
+make test-observability
 ```
 
 ### 2. Code Quality Commands
@@ -144,31 +199,71 @@ make typecheck
 
 ## Makefile Commands Reference
 
-### Core Development Commands
+### Backend Stack Management (Primary Commands)
 ```bash
-# Installation and setup
-make install          # Install dependencies with uv
+# Full stack operations (RECOMMENDED)
+make backend-up      # Start complete backend stack (DB + API + Observability)
+make backend-down    # Stop complete backend stack
+make backend-logs    # View backend stack logs
 
-# Database management
-make db-up           # Start PostgreSQL with Docker Compose
+# Database operations
+make db-up           # Start PostgreSQL only
 make db-down         # Stop PostgreSQL
 make db-reset        # Reset database with fresh data
 make migrate         # Run database migrations
 make db-shell        # Connect to database shell
+```
 
-# Application lifecycle
-make run             # Start FastAPI development server
+### Development & Testing Commands
+```bash
+# Installation and setup
+make install         # Install dependencies with uv
+
+# Application development
+make run             # Start FastAPI development server (local)
 make test            # Run all tests with coverage
 make test-integration # Run integration tests only
+make test-observability # Run observability integration tests
 make coverage        # Generate coverage report
 
-# Code quality (if implemented)
-make format          # Format code
-make lint            # Run linting
-make typecheck       # Run type checking
+# Code quality
+make format          # Format code with black
+make lint            # Run linting with flake8
 
 # Cleanup
 make clean           # Remove temporary files and directories
+```
+
+### Observability Commands
+```bash
+# Monitoring access
+make grafana         # Open Grafana dashboards (admin/admin)
+make prometheus      # Open Prometheus metrics
+make metrics         # Show current service metrics
+
+# Load testing and observability validation
+make load-test       # Run load testing for observability validation
+```
+
+### UI Development Commands
+```bash
+# UI operations
+make ui-install      # Install UI dependencies
+make ui-dev          # Start UI development server
+make ui-build        # Build UI for production
+make ui-test         # Run UI unit tests
+make ui-test-e2e     # Run UI end-to-end tests
+make ui-lint         # Lint UI code
+make ui-format       # Format UI code
+make ui-clean        # Clean UI build artifacts
+```
+
+### Quality Validation (Stage 2 Requirements)
+```bash
+# Complete quality validation suite
+make quality         # Run complete quality validation (backend + UI)
+make quality-backend # Run backend quality validation only
+make quality-ui      # Run UI quality validation only
 ```
 
 ### Makefile Implementation
@@ -278,46 +373,67 @@ curl http://localhost:8000/openapi.json
 
 ## Docker Configuration
 
-### Docker Compose Setup
+### Complete Stack Architecture
 **File**: `svc/docker-compose.yml`
-```yaml
-version: '3.8'
 
-services:
-  postgres:
-    image: postgres:16
-    container_name: configservice-db
-    environment:
-      POSTGRES_DB: configservice
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d configservice"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+The docker-compose configuration includes:
 
-volumes:
-  postgres_data:
-```
+#### Core Services
+- **PostgreSQL 16**: Database with health checks
+- **Configuration Service**: FastAPI application (containerized)
+- **OpenTelemetry Collector**: Telemetry data pipeline
+
+#### Observability Stack
+- **Prometheus**: Metrics storage and querying
+- **Grafana**: Dashboard visualization (with auto-loaded dashboards)
+- **cAdvisor**: Container metrics collection
+
+#### Network & Volumes
+- **observability** network: Connects all services
+- **postgres_data**: Persistent database storage
+- **prometheus_data**: Metrics storage
+- **grafana_data**: Dashboard and config storage
+
+### Key Features
+- **Auto-loaded Dashboards**: Grafana automatically provisions monitoring dashboards
+- **Health Checks**: All services include proper health monitoring
+- **Service Discovery**: Services communicate by container name
+- **Persistent Storage**: Data survives container restarts
 
 ### Container Management
 ```bash
-# Start database container
-docker-compose -f svc/docker-compose.yml up -d
+# Start complete backend stack (RECOMMENDED)
+make backend-up
 
-# View container logs
-docker-compose -f svc/docker-compose.yml logs -f postgres
+# View all backend logs
+make backend-logs
 
-# Stop and remove containers
-docker-compose -f svc/docker-compose.yml down
+# Stop complete backend stack
+make backend-down
 
-# Stop and remove containers with volumes (complete reset)
-docker-compose -f svc/docker-compose.yml down -v
+# Alternative: Direct docker-compose commands (if needed)
+cd svc && docker-compose up -d      # Start all services
+cd svc && docker-compose down       # Stop all services
+cd svc && docker-compose down -v    # Stop and remove volumes (complete reset)
+
+# View individual service logs
+docker logs configservice-app       # Application logs
+docker logs configservice-db        # Database logs
+docker logs configservice-grafana   # Grafana logs
+docker logs configservice-prometheus # Prometheus logs
+```
+
+### Service Endpoints (All Auto-configured)
+```bash
+# Core services
+Configuration Service API: http://localhost:8000
+PostgreSQL Database:       localhost:5432
+
+# Observability stack
+Grafana Dashboards:       http://localhost:3001 (admin/admin)
+Prometheus Metrics:       http://localhost:9090
+cAdvisor Container Stats: http://localhost:8080
+OpenTelemetry Collector:  localhost:4317 (gRPC), localhost:4318 (HTTP)
 ```
 
 ## Migration Management

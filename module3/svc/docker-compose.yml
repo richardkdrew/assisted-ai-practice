@@ -1,39 +1,38 @@
-version: '3.8'
 
 services:
-  # Database service (existing)
+  # Database service
   postgres:
-    image: postgres:16
-    container_name: configservice-db
+    image: postgres:${POSTGRES_VERSION:-16}
+    container_name: ${POSTGRES_CONTAINER_NAME:-configservice-db}
     environment:
-      POSTGRES_DB: configservice
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${DATABASE_NAME:-configservice}
+      POSTGRES_USER: ${DATABASE_USER:-user}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-password}
     ports:
-      - "5432:5432"
+      - "${DATABASE_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d configservice"]
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-user} -d ${DATABASE_NAME:-configservice}"]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
       - observability
 
-  # Configuration Service (containerized)
+  # Configuration Service
   config-service:
     build: .
-    container_name: configservice-app
+    container_name: ${CONFIG_SERVICE_CONTAINER_NAME:-configservice-app}
     ports:
-      - "8000:8000"
+      - "${CONFIG_SERVICE_PORT:-8000}:8000"
     environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=configservice
-      - DB_USER=user
-      - DB_PASSWORD=password
-      - LOG_LEVEL=INFO
+      - DB_HOST=${DATABASE_HOST:-postgres}
+      - DB_PORT=${DATABASE_INTERNAL_PORT:-5432}
+      - DB_NAME=${DATABASE_NAME:-configservice}
+      - DB_USER=${DATABASE_USER:-user}
+      - DB_PASSWORD=${DATABASE_PASSWORD:-password}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
     depends_on:
       postgres:
         condition: service_healthy
@@ -47,15 +46,15 @@ services:
 
   # OpenTelemetry Collector
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:latest
-    container_name: configservice-otel-collector
+    image: otel/opentelemetry-collector-contrib:${OTEL_COLLECTOR_VERSION:-latest}
+    container_name: ${OTEL_COLLECTOR_CONTAINER_NAME:-configservice-otel-collector}
     command: ["--config=/etc/otel-collector-config.yml"]
     volumes:
       - ./observability/otel-collector.yml:/etc/otel-collector-config.yml
     ports:
-      - "4317:4317"   # OTLP gRPC receiver
-      - "4318:4318"   # OTLP HTTP receiver
-      - "8889:8889"   # Prometheus metrics endpoint
+      - "${OTEL_GRPC_PORT:-4317}:4317"   # OTLP gRPC receiver
+      - "${OTEL_HTTP_PORT:-4318}:4318"   # OTLP HTTP receiver
+      - "${OTEL_METRICS_PORT:-8889}:8889"   # Prometheus metrics endpoint
     depends_on:
       - config-service
     networks:
@@ -63,8 +62,8 @@ services:
 
   # Prometheus
   prometheus:
-    image: prom/prometheus:latest
-    container_name: configservice-prometheus
+    image: prom/prometheus:${PROMETHEUS_VERSION:-latest}
+    container_name: ${PROMETHEUS_CONTAINER_NAME:-configservice-prometheus}
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -73,7 +72,7 @@ services:
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
     ports:
-      - "9090:9090"
+      - "${PROMETHEUS_PORT:-9090}:9090"
     volumes:
       - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
@@ -84,17 +83,17 @@ services:
 
   # Grafana
   grafana:
-    image: grafana/grafana:latest
-    container_name: configservice-grafana
+    image: grafana/grafana:${GRAFANA_VERSION:-latest}
+    container_name: ${GRAFANA_CONTAINER_NAME:-configservice-grafana}
     ports:
-      - "3001:3000"
+      - "${GRAFANA_PORT:-3001}:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=${GRAFANA_ALLOW_SIGNUP:-false}
     volumes:
       - grafana_data:/var/lib/grafana
       - ./observability/grafana/provisioning:/etc/grafana/provisioning
-      - ./observability/grafana/provisioning/dashboards:/var/lib/grafana/dashboards
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards
     depends_on:
       - prometheus
     networks:
@@ -102,10 +101,10 @@ services:
 
   # cAdvisor for container metrics
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.52.0
-    container_name: configservice-cadvisor
+    image: gcr.io/cadvisor/cadvisor:${CADVISOR_VERSION:-v0.52.0}
+    container_name: ${CADVISOR_CONTAINER_NAME:-configservice-cadvisor}
     ports:
-      - "8080:8080"
+      - "${CADVISOR_PORT:-8080}:8080"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro

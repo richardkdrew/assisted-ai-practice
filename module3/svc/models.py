@@ -1,10 +1,11 @@
 """Pydantic models for Configuration Service."""
 
 from datetime import datetime
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Generic, TypeVar
 
 from pydantic import BaseModel, Field
-from pydantic_extra_types.ulid import ULID
+
+T = TypeVar('T')
 
 
 class ApplicationBase(BaseModel):
@@ -66,9 +67,9 @@ class PaginationParams(BaseModel):
     offset: int = Field(default=0, ge=0, description="Number of items to skip")
 
 
-class PaginatedResponse(BaseModel):
+class PaginatedResponse(BaseModel, Generic[T]):
     """Generic paginated response wrapper."""
-    items: List[Any] = Field(..., description="List of items")
+    items: List[T] = Field(..., description="List of items")
     total: int = Field(..., description="Total number of items")
     limit: int = Field(..., description="Items per page")
     offset: int = Field(..., description="Number of items skipped")

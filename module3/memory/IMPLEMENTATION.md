@@ -2,11 +2,11 @@
 
 ## Overview
 
-This document captures the specific implementation details, technical decisions, and lessons learned during the development of the Configuration Service. It serves as a reference for understanding the current implementation state and important technical considerations.
+This document captures the specific implementation details, technical decisions, and lessons learned during the development of the Configuration Service full-stack application. It serves as a reference for understanding the current implementation state, important technical considerations, and the complete architecture including backend API, frontend Admin UI, and observability stack.
 
 ## Exact Technology Stack Versions
 
-### Core Dependencies (pyproject.toml)
+### Backend Dependencies (pyproject.toml)
 ```toml
 [project]
 dependencies = [
@@ -27,10 +27,36 @@ dev = [
 ]
 ```
 
+### Frontend Dependencies (ui/package.json)
+```json
+{
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "eslint": "^8.0.0",
+    "playwright": "^1.40.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}
+```
+
+### Observability Stack Versions
+- **Prometheus**: latest (time-series metrics database)
+- **Grafana**: latest (visualization and dashboards)
+- **OpenTelemetry Collector**: latest (telemetry data pipeline)
+- **cAdvisor**: v0.52.0 (container resource monitoring)
+- **PostgreSQL**: 16 (database with JSONB support)
+
 ### System Requirements
 - **Python**: 3.13.5
-- **PostgreSQL**: 16
-- **Package Manager**: uv (fast Python package management)
+- **Node.js**: 18+ (for frontend build tools)
+- **Docker**: 20+ (for observability stack)
+- **TypeScript**: 5.0+ (strict mode)
+- **Package Managers**: uv (Python), npm (Node.js)
 
 ## Key Implementation Decisions
 

@@ -12,6 +12,7 @@ processors:
     send_batch_size: 1024
   memory_limiter:
     limit_mib: 512
+    check_interval: 1s
   resource:
     attributes:
       - key: service.name
@@ -22,15 +23,15 @@ processors:
         action: upsert
 
 exporters:
-  logging:
-    loglevel: debug
+  debug:
+    verbosity: detailed
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, resource, batch]
-      exporters: [logging]
+      exporters: [debug]
 
   extensions: []
 

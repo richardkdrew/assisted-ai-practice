@@ -6,14 +6,38 @@ from fastapi import APIRouter, HTTPException
 from pydantic_extra_types.ulid import ULID
 
 try:
-    from ..models import Configuration, ConfigurationCreate, ConfigurationUpdate
+    from ..models import Configuration, ConfigurationCreate, ConfigurationUpdate, PaginatedResponse
     from ..repository import config_repository
 except ImportError:
-    from models import Configuration, ConfigurationCreate, ConfigurationUpdate
+    from models import Configuration, ConfigurationCreate, ConfigurationUpdate, PaginatedResponse
     from repository import config_repository
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+
+@router.get("/", response_model=PaginatedResponse[Configuration])
+async def get_configurations(application_id: str = None, limit: int = 50, offset: int = 0) -> PaginatedResponse[Configuration]:
+    """Get all configurations with optional filtering by application."""
+    try:
+        # Get configurations from repository with pagination
+        configurations = await config_repository.list_all(
+            application_id=application_id,
+            limit=limit,
+            offset=offset
+        )
+        total = await config_repository.count(application_id=application_id)
+
+        return PaginatedResponse(
+            items=configurations,
+            total=total,
+            limit=limit,
+            offset=offset,
+            has_more=(offset + limit) < total
+        )
+    except Exception as e:
+        logger.error(f"Failed to get configurations: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/", response_model=Configuration, status_code=201)
@@ -57,7 +81,11 @@ async def update_configuration(config_id: str, config_data: ConfigurationUpdate)
 @router.delete("/{config_id}", status_code=204)
 async def delete_configuration(config_id: str):
     """Delete a configuration."""
-    ulid_id = validate_ulid(config_id)
+    try:
+        ulid_id = ULID.from_str(config_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid configuration ID format")
+
     success = await config_repository.delete(ulid_id)
     if not success:
         raise HTTPException(status_code=404, detail="Configuration not found")

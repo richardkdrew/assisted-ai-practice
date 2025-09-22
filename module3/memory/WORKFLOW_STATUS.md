@@ -49,14 +49,22 @@ This document establishes a rigorous four-stage development process that ensures
 **Completion Criteria**:
 - [ ] All planned file changes implemented
 - [ ] All Given-When-Then scenarios pass
+- [ ] **MANDATORY**: 100% E2E test pass rate for all frontend components
+- [ ] **MANDATORY**: Backend dependency services (API, database) must be available for E2E tests
+- [ ] **MANDATORY**: Full-stack integration testing with UI server + backend stack
 - [ ] Quality validation passes cleanly (no warnings)
 - [ ] Code coverage meets requirements
 - [ ] Implementation matches planned scope exactly
 - [ ] **USER APPROVAL REQUIRED** to advance to Stage 3
 
-**Quality Gate**: All tests pass, quality validation is clean, and acceptance criteria are fully satisfied.
+**Quality Gate**: All tests pass, quality validation is clean, acceptance criteria are fully satisfied, and **E2E tests achieve 100% pass rate**.
 
-**Critical Protocol**: Quality validation must pass **without warnings**. Any warnings must be resolved before stage completion.
+**Critical Protocol**:
+- Quality validation must pass **without warnings**
+- **E2E tests are MANDATORY and must achieve 100% pass rate**
+- Any E2E test failures must be resolved before stage completion
+- Backend services (API, database, observability) must be running and healthy for E2E test execution
+- UI server integration must be verified and working
 
 ---
 
@@ -187,16 +195,33 @@ changes/
 
 ### Quality Validation Suite
 ```bash
-# Complete quality validation (must pass cleanly)
-npm test                    # Run all tests
-npm run lint               # Code linting
-npm run format             # Code formatting
-npm run type-check         # TypeScript validation
-npm run coverage           # Coverage analysis
+# Backend validation
+make test                    # Run backend tests with coverage
+make lint                    # Backend code linting
+make format                  # Backend code formatting
 
-# Alternative for different project types
-pytest --cov=. --cov-report=term-missing  # Python projects
-cargo test && cargo clippy                 # Rust projects
+# Frontend validation
+make ui-test                 # Run UI unit tests
+make ui-lint                 # UI code linting
+make ui-format               # UI code formatting
+
+# MANDATORY E2E Testing (Stage 2 Requirement)
+make backend-up              # Start backend stack (API + DB + observability)
+make ui-dev                  # Start UI development server
+make ui-test-e2e             # Run E2E tests (MUST achieve 100% pass rate)
+
+# Complete quality validation
+make quality                 # Run complete validation suite (backend + UI + E2E)
+```
+
+### E2E Testing Requirements (MANDATORY for Stage 2)
+```bash
+# CRITICAL: E2E tests require full-stack environment
+1. Backend stack must be running: make backend-up
+2. UI server must be running: make ui-dev
+3. All services must be healthy before E2E execution
+4. 100% E2E test pass rate required for Stage 2 completion
+5. Any E2E failures block Stage 2 → Stage 3 advancement
 ```
 
 ### Branch and Commit Workflow
@@ -234,12 +259,12 @@ test(utils): add unit tests for validation helpers
 ## Current Status
 
 ### Active Work Status
-**Status**: 🟢 **ACTIVE** - Admin UI Implementation Planning
+**Status**: 🟢 **ACTIVE** - Admin UI Implementation Build & Assess
 **Active Work Item**: [`003-story-admin-ui-implementation.md`](changes/003-story-admin-ui-implementation.md)
-**Current Task**: Planning Web Components-based Admin UI for Configuration Service with comprehensive testing strategy
-**Current Stage**: Stage 1: PLAN - IN PROGRESS 🔄
-**AI Context**: Native Web Components, TypeScript only, no external frameworks, vitest + Playwright testing, SOLID principles
-**Last Updated**: 2025-09-21 [current timestamp]
+**Current Task**: Completing Stage 2 BUILD & ASSESS - fixing remaining 5 e2e test failures for clean quality validation
+**Current Stage**: Stage 2: BUILD & ASSESS - NEAR COMPLETION 🚀
+**AI Context**: 34/39 tests passing, core CRUD flows working, need to fix edit form population & delete confirmation flows
+**Last Updated**: 2025-09-22
 
 ### Status Update Protocol
 

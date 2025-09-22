@@ -244,6 +244,54 @@ class ConfigurationRepository:
             config_dict['config'] = {}
         return Configuration(**config_dict)
 
+    async def list_all(self, application_id: Optional[str] = None, limit: int = 50, offset: int = 0) -> List[Configuration]:
+        """List all configurations with optional application filtering and pagination."""
+        if application_id:
+            query = """
+                SELECT id, application_id, name, comments, config, created_at, updated_at
+                FROM configurations
+                WHERE application_id = %s
+                ORDER BY created_at DESC
+                LIMIT %s OFFSET %s
+            """
+            params = (application_id, limit, offset)
+        else:
+            query = """
+                SELECT id, application_id, name, comments, config, created_at, updated_at
+                FROM configurations
+                ORDER BY created_at DESC
+                LIMIT %s OFFSET %s
+            """
+            params = (limit, offset)
+
+        result = await db_pool.execute_query(query, params)
+        if not result:
+            return []
+
+        configurations = []
+        for row in result:
+            config_dict = dict(row)
+            # Handle config field - it might be a string (JSON) or already parsed dict
+            if isinstance(config_dict['config'], str):
+                config_dict['config'] = json.loads(config_dict['config']) if config_dict['config'] else {}
+            elif config_dict['config'] is None:
+                config_dict['config'] = {}
+            configurations.append(Configuration(**config_dict))
+
+        return configurations
+
+    async def count(self, application_id: Optional[str] = None) -> int:
+        """Count total number of configurations, optionally filtered by application."""
+        if application_id:
+            query = "SELECT COUNT(*) as count FROM configurations WHERE application_id = %s"
+            params = (application_id,)
+        else:
+            query = "SELECT COUNT(*) as count FROM configurations"
+            params = ()
+
+        result = await db_pool.execute_query(query, params)
+        return result[0]['count'] if result else 0
+
     async def delete(self, config_id: str) -> bool:
         """Delete a configuration."""
         query = "DELETE FROM configurations WHERE id = %s"

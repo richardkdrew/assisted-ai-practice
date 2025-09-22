@@ -182,7 +182,6 @@ Makefile                            # Updated: Observability commands alongside 
 **Implementation Strategy**:
 ```yaml
 # Enhanced svc/docker-compose.yml
-version: '3.8'
 
 services:
   # Existing PostgreSQL (keep as-is)

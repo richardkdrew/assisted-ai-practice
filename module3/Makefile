@@ -54,18 +54,19 @@ migrate:  ## Run database migrations
 db-shell:  ## Connect to database shell
 	cd svc && docker-compose exec postgres psql -U user -d configservice
 
+# Backend targets
+backend-up:  ## Start full backend stack
+	cd svc && docker-compose up -d
+
+backend-down:  ## Stop backend stack
+	cd svc && docker-compose down
+
+backend-logs:  ## Show backend stack logs
+	cd svc && docker-compose logs -f
+
 # Observability targets
 install-observability:  ## Install observability dependencies
 	cd svc && uv sync --extra observability
-
-observability-up:  ## Start full observability stack
-	cd svc && docker-compose up -d
-
-observability-down:  ## Stop observability stack
-	cd svc && docker-compose down
-
-observability-logs:  ## Show observability stack logs
-	cd svc && docker-compose logs -f
 
 test-observability:  ## Run observability integration tests
 	cd svc && uv run python -m pytest test_observability_integration.py -v
@@ -84,6 +85,12 @@ grafana:  ## Open Grafana in browser
 metrics:  ## Show current service metrics
 	@curl -s http://localhost:8000/metrics | head -20
 
+observability-up:  ## Start observability stack (Prometheus, Grafana, cAdvisor)
+	cd svc && docker-compose up -d otel-collector prometheus grafana cadvisor
+
+observability-down:  ## Stop observability stack
+	cd svc && docker-compose stop otel-collector prometheus grafana cadvisor
+
 observability-status:  ## Check status of observability stack
 	@echo "Checking observability stack status..."
 	@cd svc && docker-compose ps
@@ -93,3 +100,92 @@ observability-status:  ## Check status of observability stack
 	@echo "  Prometheus:           http://localhost:9090"
 	@echo "  Grafana:              http://localhost:3001"
 	@echo "  cAdvisor:             http://localhost:8080"
+
+# UI targets
+ui-install:  ## Install UI dependencies
+	cd ui && npm install
+
+ui-dev:  ## Start UI development server
+	cd ui && npm run dev
+
+ui-build:  ## Build UI for production
+	cd ui && npm run build
+
+ui-test:  ## Run UI unit tests
+	cd ui && npm run test
+
+ui-test-e2e:  ## Run UI end-to-end tests
+	cd ui && npm run test:e2e
+
+ui-clean:  ## Clean UI build artifacts
+	cd ui && rm -rf dist/ node_modules/.vite/
+
+ui-lint:  ## Lint UI code
+	cd ui && npm run lint
+
+ui-format:  ## Format UI code
+	cd ui && npm run format
+
+# Development workflow targets
+dev-full:  ## Start complete development stack
+	@echo "Starting PostgreSQL database..."
+	make db-up
+	@echo "Waiting for database..."
+	@sleep 5
+	@echo "Starting backend service..."
+	make run &
+	@sleep 3
+	@echo "Starting UI development server..."
+	make ui-dev
+
+dev-backend:  ## Start backend only (database + API)
+	make db-up
+	@sleep 5
+	make run
+
+dev-ui-only:  ## Start UI only (assumes backend running)
+	make ui-dev
+
+dev-stop:  ## Stop all development services
+	@echo "Stopping all services..."
+	@pkill -f "uvicorn" || true
+	@pkill -f "vite" || true
+	make db-down
+
+# Quality validation targets
+quality:  ## Run complete quality validation (Stage 2 requirement)
+	@echo "=== Running Complete Quality Validation ==="
+	@echo "1. Backend linting..."
+	make lint
+	@echo "2. Backend formatting..."
+	make format
+	@echo "3. Backend tests..."
+	make test
+	@echo "4. UI linting..."
+	make ui-lint
+	@echo "5. UI formatting..."
+	make ui-format
+	@echo "6. UI unit tests..."
+	make ui-test
+	@echo "7. UI E2E tests (full stack)..."
+	make ui-test-e2e
+	@echo "=== Quality Validation Complete! ==="
+
+quality-backend:  ## Run backend quality validation only
+	@echo "Running backend quality checks..."
+	make lint
+	make format
+	make test
+
+quality-ui:  ## Run UI quality validation only
+	@echo "Running UI quality checks..."
+	make ui-lint
+	make ui-format
+	make ui-test
+
+# Stack management
+stack-up:  ## Start complete stack (database + backend + UI)
+	make dev-full
+
+stack-down:  ## Stop complete stack
+	make dev-stop
