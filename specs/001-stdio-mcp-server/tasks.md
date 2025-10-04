@@ -75,47 +75,47 @@ Note: Since this is a protocol implementation using the MCP SDK, we're creating 
 
 ## Phase 3.3: Core Implementation (ONLY after tests are failing)
 
-- [ ] **T010** Create ServerState and SessionState enums in module5/stdio-mcp-server/src/server.py based on data-model.md state machines
+- [x] **T010** Create ServerState and SessionState enums in module5/stdio-mcp-server/src/server.py based on data-model.md state machines
 
-- [ ] **T011** Implement logging configuration in module5/stdio-mcp-server/src/server.py - configure Python logging to stderr with structured format per research.md
+- [x] **T011** Implement logging configuration in module5/stdio-mcp-server/src/server.py - configure Python logging to stderr with structured format per research.md
 
-- [ ] **T012** Implement Server class initialization in module5/stdio-mcp-server/src/server.py - create MCP Server instance with name "stdio-mcp-server" and version "0.1.0"
+- [x] **T012** Implement Server class initialization in module5/stdio-mcp-server/src/server.py - create MCP Server instance with name "stdio-mcp-server" and version "0.1.0"
 
-- [ ] **T013** Implement initialize handler in module5/stdio-mcp-server/src/server.py - handle initialization request and return server capabilities (empty tools/resources/prompts for v1)
+- [x] **T013** Implement initialize handler in module5/stdio-mcp-server/src/server.py - handle initialization request and return server capabilities (empty tools/resources/prompts for v1)
 
-- [ ] **T014** Implement signal handlers in module5/stdio-mcp-server/src/server.py - register SIGINT and SIGTERM handlers for graceful shutdown per research.md
+- [x] **T014** Implement signal handlers in module5/stdio-mcp-server/src/server.py - register SIGINT and SIGTERM handlers for graceful shutdown per research.md
 
-- [ ] **T015** Implement main() async function in module5/stdio-mcp-server/src/server.py - set up stdio_server context manager and run server event loop
+- [x] **T015** Implement main() async function in module5/stdio-mcp-server/src/server.py - set up stdio_server context manager and run server event loop
 
-- [ ] **T016** Add __main__ entry point to module5/stdio-mcp-server/src/server.py - enable `python -m src.server` execution with asyncio.run(main())
+- [x] **T016** Add __main__ entry point to module5/stdio-mcp-server/src/server.py - enable `python -m src.server` execution with asyncio.run(main())
 
-- [ ] **T017** Implement error handling for JSON parse errors in module5/stdio-mcp-server/src/server.py - catch JSONDecodeError and return error response per contracts/error-response.json
+- [x] **T017** Implement error handling for JSON parse errors in module5/stdio-mcp-server/src/server.py - catch JSONDecodeError and return error response per contracts/error-response.json
 
-- [ ] **T018** Implement error handling for invalid method calls in module5/stdio-mcp-server/src/server.py - return "Method not found" error per JSON-RPC 2.0 spec
+- [x] **T018** Implement error handling for invalid method calls in module5/stdio-mcp-server/src/server.py - return "Method not found" error per JSON-RPC 2.0 spec
 
 ---
 
 ## Phase 3.4: Integration & Configuration
 
-- [ ] **T019** [P] Create module5/Makefile with targets: install, dev, run, lint, format, clean, help per plan.md Phase 4
+- [x] **T019** [P] Create module5/Makefile with targets: install, dev, run, lint, format, clean, help per plan.md Phase 4
 
-- [ ] **T020** [P] Update module5/.gitignore to exclude Python cache files (__pycache__, *.pyc), .venv/, build artifacts (dist/, *.egg-info)
+- [x] **T020** [P] Update module5/.gitignore to exclude Python cache files (__pycache__, *.pyc), .venv/, build artifacts (dist/, *.egg-info)
 
-- [ ] **T021** Update module5/.mcp.json to configure stdio-server with uv command and correct args for launching module5/stdio-mcp-server
+- [x] **T021** Update module5/.mcp.json to configure stdio-server with uv command and correct args for launching module5/stdio-mcp-server
 
 ---
 
 ## Phase 3.5: Documentation & Polish
 
-- [ ] **T022** [P] Create module5/stdio-mcp-server/README.md with server description, requirements (Python 3.11+, UV), installation instructions, usage examples, and testing with MCP Inspector
+- [x] **T022** [P] Create module5/stdio-mcp-server/README.md with server description, requirements (Python 3.11+, UV), installation instructions, usage examples, and testing with MCP Inspector
 
-- [ ] **T023** [P] Add type hints to all functions in module5/stdio-mcp-server/src/server.py per Constitution Principle III
+- [x] **T023** [P] Add type hints to all functions in module5/stdio-mcp-server/src/server.py per Constitution Principle III
 
-- [ ] **T024** [P] Add docstrings to Server class and main functions in module5/stdio-mcp-server/src/server.py
+- [x] **T024** [P] Add docstrings to Server class and main functions in module5/stdio-mcp-server/src/server.py
 
-- [ ] **T025** Run manual testing procedure from specs/001-stdio-mcp-server/quickstart.md - verify all 7 test scenarios pass
+- [x] **T025** Run manual testing procedure from specs/001-stdio-mcp-server/quickstart.md - verify all 7 test scenarios pass
 
-- [ ] **T026** Verify MCP Inspector integration with `make dev` - confirm successful connection, handshake, and capabilities display
+- [x] **T026** Verify MCP Inspector integration with `make dev` - confirm successful connection, handshake, and capabilities display
 
 ---
 

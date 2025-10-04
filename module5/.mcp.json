@@ -1,4 +1,15 @@
 {
-    "mcpServers":{   
+    "mcpServers": {
+        "stdio-server": {
+            "command": "uv",
+            "args": [
+                "--directory",
+                "stdio-mcp-server",
+                "run",
+                "python",
+                "-m",
+                "src.server"
+            ]
+        }
     }
 }

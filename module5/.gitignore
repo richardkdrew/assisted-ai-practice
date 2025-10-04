@@ -67,8 +67,9 @@ venv.bak/
 ehthumbs.db
 Thumbs.db
 
-# uv
+# UV package manager
 .uv/
+uv.lock
 
 # Logs
 *.log
