@@ -171,7 +171,17 @@ All dependencies already installed:
   - **Pattern**: Same as Features 002 and 003 entries
   - **Result**: ✅ CLAUDE.md updated
 
-- [ ] **T013** Commit implementation with conventional commit message
+- [x] **T014** [P] Write integration tests using FastMCP Client in-memory transport
+  - **File**: `stdio-mcp-server/tests/test_integration_devops_tools.py`
+  - **Pattern**: `async with Client(mcp) as client:`
+  - **Tests**: 12 integration tests covering:
+    - list_releases: success, with limit, missing app, invalid limit, CLI failure
+    - check_health: single env, case-insensitive, all envs, invalid env, CLI timeout
+    - Tool discovery validation
+    - Concurrent tool execution
+  - **Result**: ✅ All 12 integration tests passing (57 total project tests, 1 skipped)
+
+- [x] **T013** Commit implementation with conventional commit message
   - **Command**: `git add stdio-mcp-server/src/server.py stdio-mcp-server/tests/test_*.py CLAUDE.md`
   - **Message**:
     ```
