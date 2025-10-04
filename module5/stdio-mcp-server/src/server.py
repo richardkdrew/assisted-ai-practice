@@ -12,11 +12,12 @@ import asyncio
 import json
 import logging
 import sys
+from datetime import datetime, timezone
 from typing import Any
 from typing import NamedTuple
 
 from fastmcp import FastMCP
-from .validation import validate_environment
+from .validation import validate_environment, validate_non_empty, validate_promotion_path
 
 
 # ============================================================================
@@ -481,6 +482,133 @@ async def check_health(
     except FileNotFoundError:
         logger.error("CLI tool not found")
         raise RuntimeError("DevOps CLI tool not found at ../acme-devops-cli/devops-cli")
+
+
+@mcp.tool()
+async def promote_release(
+    app: str,
+    version: str,
+    from_env: str,
+    to_env: str,
+) -> dict[str, Any]:
+    """
+    Promote application release between environments.
+
+    Executes the devops-cli promote command with comprehensive validation
+    and production deployment safeguards. Follows strict forward promotion
+    flow: dev→staging→uat→prod (no skipping, no backward promotion).
+
+    Args:
+        app: Application name (required, non-empty)
+        version: Version identifier (required, non-empty)
+        from_env: Source environment (required: dev|staging|uat|prod)
+        to_env: Target environment (required: dev|staging|uat|prod)
+
+    Returns:
+        Dictionary containing:
+        - status: "success" or "error"
+        - promotion: Details (app, version, envs, CLI output, execution time)
+        - production_deployment: Boolean (True if to_env is "prod")
+        - timestamp: ISO 8601 timestamp
+
+    Raises:
+        ValueError: If validation fails (empty params, invalid envs, invalid path)
+        RuntimeError: If CLI execution fails or times out
+
+    Examples:
+        >>> # Promote from dev to staging
+        >>> result = await promote_release(
+        ...     app="web-api",
+        ...     version="1.2.3",
+        ...     from_env="dev",
+        ...     to_env="staging"
+        ... )
+        >>> print(result["status"])
+        "success"
+
+        >>> # Production deployment (uat → prod)
+        >>> result = await promote_release(
+        ...     app="mobile-app",
+        ...     version="2.0.1",
+        ...     from_env="uat",
+        ...     to_env="prod"
+        ... )
+        >>> print(result["production_deployment"])
+        True
+    """
+    start_time = asyncio.get_event_loop().time()
+
+    # Step 1: Validate and trim all parameters
+    app = validate_non_empty("app", app)
+    version = validate_non_empty("version", version)
+    from_env = validate_non_empty("from_env", from_env)
+    to_env = validate_non_empty("to_env", to_env)
+
+    # Step 2: Validate environments and normalize to lowercase
+    from_env_lower = validate_environment(from_env)
+    to_env_lower = validate_environment(to_env)
+
+    # validate_environment returns None for None input, but our params are required
+    assert from_env_lower is not None
+    assert to_env_lower is not None
+
+    # Step 3: Validate promotion path
+    validate_promotion_path(from_env_lower, to_env_lower)
+
+    # Step 4: Check for production deployment and log audit trail
+    is_production = to_env_lower == "prod"
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    if is_production:
+        logger.warning(
+            f"PRODUCTION DEPLOYMENT: Promoting {app} v{version} "
+            f"from {from_env_lower} to PRODUCTION"
+        )
+        logger.info(
+            f"Production promotion audit trail: app={app}, version={version}, "
+            f"from={from_env_lower}, timestamp={timestamp}, caller=MCP"
+        )
+
+    # Step 5: Execute CLI command with 300s timeout
+    try:
+        result = await execute_cli_command(
+            ["promote", app, version, from_env_lower, to_env_lower],
+            timeout=300.0,
+        )
+
+        execution_time = asyncio.get_event_loop().time() - start_time
+
+        # Check CLI return code
+        if result.returncode != 0:
+            logger.error(f"Promotion failed: {result.stderr}")
+            raise RuntimeError(f"Promotion failed: {result.stderr}")
+
+        # Step 6: Build success response
+        return {
+            "status": "success",
+            "promotion": {
+                "app": app,
+                "version": version,
+                "from_env": from_env_lower,
+                "to_env": to_env_lower,
+                "cli_output": result.stdout,
+                "cli_stderr": result.stderr,
+                "execution_time_seconds": execution_time,
+            },
+            "production_deployment": is_production,
+            "timestamp": timestamp,
+        }
+
+    except asyncio.TimeoutError:
+        logger.error(
+            f"Promotion timed out after 300s: {app} v{version} "
+            f"{from_env_lower}→{to_env_lower}"
+        )
+        raise RuntimeError(
+            f"Promotion operation timed out after 300 seconds. "
+            f"The deployment may still be in progress. "
+            f"Check deployment status manually."
+        )
 
 
 # Future features can be added using decorators:
