@@ -251,7 +251,7 @@ print("Message")  # ❌ Goes to stdout
 
 ## Recent Changes
 
-1. **Feature 001-env-validation-i implemented** (2025-10-05): Environment validation layer - centralized validation for environment names (dev, staging, uat, prod) with defense-in-depth security, <10ms validation overhead, 9 unit tests added
+1. **Feature 005-env-validation-i implemented** (2025-10-05): Environment validation layer - centralized validation for environment names (dev, staging, uat, prod) with defense-in-depth security, <10ms validation overhead, 9 unit tests added
 2. **Integration tests added** (2025-10-05): Added 12 integration tests for list-releases and check-health tools using FastMCP Client with in-memory transport pattern - provides fast, reliable end-to-end testing without external processes
 3. **Feature 004-now-that-i implemented** (2025-10-04): Two additional DevOps CLI tools (list-releases & check-health) - extends existing CLI wrapper with release history queries and environment health checks, 13 contract tests + 12 integration tests = 25 tests total
 4. **Feature 003-cli-wrapper implemented** (2025-10-04): DevOps CLI wrapper with get_deployment_status tool - subprocess execution module and MCP tools for wrapping external CLI

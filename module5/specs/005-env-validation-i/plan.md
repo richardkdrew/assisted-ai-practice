@@ -1,7 +1,7 @@
 # Implementation Plan: Environment Validation Layer for MCP Server
 
-**Branch**: `001-env-validation-i` | **Date**: 2025-10-05 | **Status**: ✅ IMPLEMENTED (commit a4e3a6f) | **Spec**: [spec.md](spec.md)
-**Input**: Feature specification from `/Users/richarddrew/working/assitant-to-agentic/practice-files/assisted-ai-practice/specs/001-env-validation-i/spec.md`
+**Branch**: `005-env-validation-i` | **Date**: 2025-10-05 | **Status**: ✅ IMPLEMENTED (commit a4e3a6f) | **Spec**: [spec.md](spec.md)
+**Input**: Feature specification from `/Users/richarddrew/working/assitant-to-agentic/practice-files/assisted-ai-practice/specs/005-env-validation-i/spec.md`
 
 ## Execution Flow (/plan command scope)
 ```
@@ -105,7 +105,7 @@ Add a centralized validation layer for environment name parameters in the MCP se
 
 ### Documentation (this feature)
 ```
-specs/001-env-validation-i/
+specs/005-env-validation-i/
    spec.md              # Feature specification (complete, clarified)
    plan.md              # This file (/plan command output)
    research.md          # Phase 0 output (/plan command)
@@ -151,7 +151,7 @@ module5/stdio-mcp-server/
 - How can we convert ValueError to MCP error responses? (Research FastMCP error handling)
 - What's the performance of current inline validation? (Benchmark to ensure <1ms addition)
 
-**Output Location**: `/Users/richarddrew/working/assitant-to-agentic/practice-files/assisted-ai-practice/specs/001-env-validation-i/research.md`
+**Output Location**: `/Users/richarddrew/working/assitant-to-agentic/practice-files/assisted-ai-practice/specs/005-env-validation-i/research.md`
 
 **Success Criteria**:
 - [x] Documented current validation locations
@@ -196,9 +196,9 @@ Defines validation function contract:
 6. Empty string "" � MCP error response after trimming
 
 **Output Locations**:
-- `/Users/richarddrew/working/assitant-to-agentic/practice-files/assisted-ai-practice/specs/001-env-validation-i/data-model.md`
-- `/Users/richarddrew/working/assitant-to-agentic/practice-files/assisted-ai-practice/specs/001-env-validation-i/contracts/validation.schema.json`
-- `/Users/richarddrew/working/assitant-to-agentic/practice-files/assisted-ai-practice/specs/001-env-validation-i/quickstart.md`
+- `/Users/richarddrew/working/assitant-to-agentic/practice-files/assisted-ai-practice/specs/005-env-validation-i/data-model.md`
+- `/Users/richarddrew/working/assitant-to-agentic/practice-files/assisted-ai-practice/specs/005-env-validation-i/contracts/validation.schema.json`
+- `/Users/richarddrew/working/assitant-to-agentic/practice-files/assisted-ai-practice/specs/005-env-validation-i/quickstart.md`
 
 **Success Criteria**:
 - [ ] VALID_ENVIRONMENTS constant defined
@@ -227,7 +227,7 @@ Defines validation function contract:
 - T014: Update CLAUDE.md
 - T015: Commit with conventional format
 
-**Output Location**: `/Users/richarddrew/working/assitant-to-agentic/practice-files/assisted-ai-practice/specs/001-env-validation-i/tasks.md`
+**Output Location**: `/Users/richarddrew/working/assitant-to-agentic/practice-files/assisted-ai-practice/specs/005-env-validation-i/tasks.md`
 
 **Success Criteria**:
 - [ ] Tasks follow TDD approach (tests before implementation)

@@ -1,6 +1,6 @@
 # Feature Specification: Environment Validation Layer for MCP Server
 
-**Feature Branch**: `001-env-validation-i`
+**Feature Branch**: `005-env-validation-i`
 **Created**: 2025-10-05
 **Status**: ✅ IMPLEMENTED - Feature complete, all tests passing (commit a4e3a6f)
 **Input**: User description: "I want to add some input validation to my MCP server for better user experience and defense-in-depth security. Let's focus on environment name validation as a key pattern: 1. Validate environment names against known environments (dev, staging, prod, etc.) before calling the CLI 2. Provide immediate feedback without subprocess overhead 3. Show how MCP validation differs from CLI validation. This demonstrates validation at the MCP layer while the CLI handles comprehensive business logic validation."

@@ -1,7 +1,7 @@
 # Tasks: Environment Validation Layer for MCP Server
 
 **Status**: ✅ COMPLETE - All 14 tasks executed successfully (commit a4e3a6f)
-**Input**: Design documents from `/Users/richarddrew/working/assitant-to-agentic/practice-files/assisted-ai-practice/specs/001-env-validation-i/`
+**Input**: Design documents from `/Users/richarddrew/working/assitant-to-agentic/practice-files/assisted-ai-practice/specs/005-env-validation-i/`
 **Prerequisites**: plan.md, research.md, data-model.md, contracts/, quickstart.md
 
 ## Execution Flow (main)
@@ -203,7 +203,7 @@ Single project structure (extending existing MCP server):
   - **Location**: "Recent Changes" section (top of file, before Feature 004)
   - **Add Entry**:
     ```markdown
-    1. **Feature 001-env-validation-i implemented** (2025-10-05): Environment validation layer - centralized validation for environment names (dev, staging, uat, prod) with defense-in-depth security, <10ms validation overhead, 7 unit tests added
+    1. **Feature 005-env-validation-i implemented** (2025-10-05): Environment validation layer - centralized validation for environment names (dev, staging, uat, prod) with defense-in-depth security, <10ms validation overhead, 7 unit tests added
     ```
   - **Pattern**: Follow existing feature entries format
   - **Result**: CLAUDE.md updated with Feature 001
