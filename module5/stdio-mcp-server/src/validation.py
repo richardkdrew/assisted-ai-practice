@@ -62,3 +62,88 @@ def validate_environment(env: str | None) -> str | None:
         )
 
     return env_lower
+
+
+def validate_non_empty(param_name: str, value: str) -> str:
+    """
+    Validate that a parameter is non-empty after trimming whitespace.
+
+    Args:
+        param_name: Name of parameter (for error messages)
+        value: Value to validate
+
+    Returns:
+        Trimmed value if non-empty
+
+    Raises:
+        ValueError: If value is empty after trimming
+    """
+    value_trimmed = value.strip()
+    if not value_trimmed:
+        logger.warning(f"Validation failed: {param_name} cannot be empty")
+        raise ValueError(f"{param_name} cannot be empty")
+    return value_trimmed
+
+
+# Valid promotion paths (strict forward flow only)
+VALID_PROMOTION_PATHS = frozenset({
+    ("dev", "staging"),
+    ("staging", "uat"),
+    ("uat", "prod"),
+})
+
+
+def validate_promotion_path(from_env: str, to_env: str) -> None:
+    """
+    Validate promotion path follows strict forward flow rules.
+
+    Valid paths: dev→staging, staging→uat, uat→prod
+    No skipping environments, no backward promotion.
+
+    Args:
+        from_env: Source environment (must be normalized lowercase)
+        to_env: Target environment (must be normalized lowercase)
+
+    Raises:
+        ValueError: If promotion path is invalid
+    """
+    if from_env == to_env:
+        logger.warning(f"Validation failed: cannot promote to same environment ({from_env})")
+        raise ValueError("cannot promote to same environment")
+
+    if (from_env, to_env) not in VALID_PROMOTION_PATHS:
+        # Check if this is a backward promotion (to_env appears before from_env in the chain)
+        # Build reverse mapping to detect backward promotions
+        env_order = {"dev": 0, "staging": 1, "uat": 2, "prod": 3}
+
+        if to_env in env_order and from_env in env_order and env_order[to_env] < env_order[from_env]:
+            # Backward promotion detected
+            logger.warning(
+                f"Validation failed: backward or invalid promotion {from_env}→{to_env}"
+            )
+            raise ValueError(
+                f"invalid promotion path: {from_env}→{to_env} "
+                f"(backward or invalid promotion not allowed)"
+            )
+
+        # Not backward, so it's skipping environments
+        valid_next = [to for (frm, to) in VALID_PROMOTION_PATHS if frm == from_env]
+
+        if valid_next:
+            logger.warning(
+                f"Validation failed: invalid promotion path {from_env}→{to_env}, "
+                f"valid next: {valid_next}"
+            )
+            raise ValueError(
+                f"invalid promotion path: {from_env}→{to_env} "
+                f"(valid next environment from {from_env}: {', '.join(valid_next)})"
+            )
+        else:
+            # No valid next (e.g., promoting from prod)
+            logger.warning(
+                f"Validation failed: invalid promotion {from_env}→{to_env}"
+            )
+            raise ValueError(
+                f"invalid promotion path: {from_env}→{to_env} "
+                f"(no valid promotion from {from_env})"
+            )
