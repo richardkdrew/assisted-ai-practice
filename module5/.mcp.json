@@ -10,6 +10,17 @@
             ],
             "cwd": "/Users/richarddrew/working/assitant-to-agentic/practice-files/assisted-ai-practice/module5"
         },
+        "stdio-server-dockerOLD": {
+            "command": "docker",
+            "args": [
+                "exec",
+                "-i",
+                "stdio-mcp-server",
+                "python",
+                "-m",
+                "src.server"
+            ]
+        },
         "stdio-server-uv": {
             "command": "uv",
             "args": [
@@ -20,6 +31,14 @@
                 "-m",
                 "src.server"
             ]
+        },
+        "stdio-server-local": {
+            "command": "python",
+            "args": [
+                "-m",
+                "src.server"
+            ],
+            "cwd": "stdio-mcp-server"
         }
     }
 }
