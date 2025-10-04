@@ -1,0 +1,236 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Environment Validation Contract",
+  "description": "Contract for validate_environment() function - validates and normalizes environment names",
+  "type": "object",
+  "properties": {
+    "function": {
+      "type": "string",
+      "const": "validate_environment",
+      "description": "Function name"
+    },
+    "module": {
+      "type": "string",
+      "const": "validation",
+      "description": "Module location: src/validation.py"
+    },
+    "signature": {
+      "type": "object",
+      "properties": {
+        "input": {
+          "type": "object",
+          "properties": {
+            "env": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "description": "Environment name (case-insensitive, whitespace allowed)"
+                },
+                {
+                  "type": "null",
+                  "description": "None indicates 'all environments' (valid)"
+                }
+              ]
+            }
+          },
+          "required": ["env"]
+        },
+        "output": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^(dev|staging|uat|prod)$",
+              "description": "Normalized environment name (lowercase, trimmed)"
+            },
+            {
+              "type": "null",
+              "description": "None if input was None"
+            }
+          ]
+        },
+        "raises": {
+          "type": "object",
+          "properties": {
+            "ValueError": {
+              "type": "string",
+              "pattern": "^Invalid environment:.*Must be one of:.*$",
+              "description": "Raised when env is not in VALID_ENVIRONMENTS or is empty after trimming"
+            }
+          }
+        }
+      },
+      "required": ["input", "output", "raises"]
+    },
+    "constants": {
+      "type": "object",
+      "properties": {
+        "VALID_ENVIRONMENTS": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["dev", "staging", "uat", "prod"]
+          },
+          "uniqueItems": true,
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Set of valid environment names (source of truth)"
+        }
+      },
+      "required": ["VALID_ENVIRONMENTS"]
+    },
+    "behavior": {
+      "type": "object",
+      "properties": {
+        "normalization": {
+          "type": "object",
+          "properties": {
+            "trim": {
+              "type": "boolean",
+              "const": true,
+              "description": "Leading/trailing whitespace is removed via str.strip()"
+            },
+            "lowercase": {
+              "type": "boolean",
+              "const": true,
+              "description": "Environment name is converted to lowercase via str.lower()"
+            }
+          },
+          "required": ["trim", "lowercase"]
+        },
+        "none_handling": {
+          "type": "string",
+          "const": "pass_through",
+          "description": "None input passes validation and returns None (represents 'all environments')"
+        },
+        "empty_string": {
+          "type": "string",
+          "const": "error",
+          "description": "Empty string or whitespace-only string raises ValueError after trimming"
+        },
+        "performance": {
+          "type": "object",
+          "properties": {
+            "max_latency_ms": {
+              "type": "number",
+              "const": 0.01,
+              "description": "Maximum validation time (well under 10ms target)"
+            },
+            "complexity": {
+              "type": "string",
+              "const": "O(1)",
+              "description": "Set membership check is constant time"
+            }
+          },
+          "required": ["max_latency_ms", "complexity"]
+        }
+      },
+      "required": ["normalization", "none_handling", "empty_string", "performance"]
+    },
+    "test_cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "input": {
+            "oneOf": [
+              {"type": "string"},
+              {"type": "null"}
+            ]
+          },
+          "expected_output": {
+            "oneOf": [
+              {"type": "string"},
+              {"type": "null"}
+            ]
+          },
+          "expected_error": {
+            "oneOf": [
+              {"type": "string"},
+              {"type": "null"}
+            ]
+          }
+        },
+        "required": ["name", "input"]
+      },
+      "minItems": 7,
+      "description": "Minimum test cases covering all scenarios"
+    }
+  },
+  "required": ["function", "module", "signature", "constants", "behavior", "test_cases"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "function": "validate_environment",
+      "module": "validation",
+      "signature": {
+        "input": {
+          "env": "PROD"
+        },
+        "output": "prod",
+        "raises": {}
+      },
+      "constants": {
+        "VALID_ENVIRONMENTS": ["dev", "staging", "uat", "prod"]
+      },
+      "behavior": {
+        "normalization": {
+          "trim": true,
+          "lowercase": true
+        },
+        "none_handling": "pass_through",
+        "empty_string": "error",
+        "performance": {
+          "max_latency_ms": 0.01,
+          "complexity": "O(1)"
+        }
+      },
+      "test_cases": [
+        {
+          "name": "valid_prod_lowercase",
+          "input": "prod",
+          "expected_output": "prod",
+          "expected_error": null
+        },
+        {
+          "name": "valid_prod_uppercase",
+          "input": "PROD",
+          "expected_output": "prod",
+          "expected_error": null
+        },
+        {
+          "name": "valid_staging_with_whitespace",
+          "input": " staging ",
+          "expected_output": "staging",
+          "expected_error": null
+        },
+        {
+          "name": "invalid_production",
+          "input": "production",
+          "expected_output": null,
+          "expected_error": "Invalid environment: production. Must be one of: dev, prod, staging, uat"
+        },
+        {
+          "name": "invalid_test",
+          "input": "test",
+          "expected_output": null,
+          "expected_error": "Invalid environment: test. Must be one of: dev, prod, staging, uat"
+        },
+        {
+          "name": "none_input",
+          "input": null,
+          "expected_output": null,
+          "expected_error": null
+        },
+        {
+          "name": "empty_string",
+          "input": "",
+          "expected_output": null,
+          "expected_error": "Environment cannot be empty"
+        }
+      ]
+    }
+  ]
+}
