@@ -195,9 +195,9 @@ print("Message")  # ❌ Goes to stdout
 
 ## Recent Changes
 
-1. **Constitution v1.1.0** (2025-10-04): Added Commit Discipline principle
-2. **Constitution v1.0.0** (2025-10-04): Initial constitution created
-3. **CLAUDE.md created** (2025-10-04): Runtime development guidelines
+1. **Feature 001-stdio-mcp-server planned** (2025-10-04): Implementation plan created with research, data model, contracts, and quickstart
+2. **Constitution v1.1.0** (2025-10-04): Added Commit Discipline principle
+3. **Constitution v1.0.0** (2025-10-04): Initial constitution created
 
 ## Pre-Implementation Checklist
 
