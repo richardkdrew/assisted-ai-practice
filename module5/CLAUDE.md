@@ -251,11 +251,12 @@ print("Message")  # ❌ Goes to stdout
 
 ## Recent Changes
 
-1. **Integration tests added** (2025-10-05): Added 12 integration tests for list-releases and check-health tools using FastMCP Client with in-memory transport pattern - provides fast, reliable end-to-end testing without external processes
-2. **Feature 004-now-that-i implemented** (2025-10-04): Two additional DevOps CLI tools (list-releases & check-health) - extends existing CLI wrapper with release history queries and environment health checks, 13 contract tests + 12 integration tests = 25 tests total
-3. **Feature 003-cli-wrapper implemented** (2025-10-04): DevOps CLI wrapper with get_deployment_status tool - subprocess execution module and MCP tools for wrapping external CLI
-4. **FastMCP migration** (2025-10-04): Migrated from MCP SDK to FastMCP framework for simpler server implementation
-5. **Feature 002-add-a-simple implemented** (2025-10-04): Ping tool added with 7 passing tests
+1. **Feature 001-env-validation-i implemented** (2025-10-05): Environment validation layer - centralized validation for environment names (dev, staging, uat, prod) with defense-in-depth security, <10ms validation overhead, 9 unit tests added
+2. **Integration tests added** (2025-10-05): Added 12 integration tests for list-releases and check-health tools using FastMCP Client with in-memory transport pattern - provides fast, reliable end-to-end testing without external processes
+3. **Feature 004-now-that-i implemented** (2025-10-04): Two additional DevOps CLI tools (list-releases & check-health) - extends existing CLI wrapper with release history queries and environment health checks, 13 contract tests + 12 integration tests = 25 tests total
+4. **Feature 003-cli-wrapper implemented** (2025-10-04): DevOps CLI wrapper with get_deployment_status tool - subprocess execution module and MCP tools for wrapping external CLI
+5. **FastMCP migration** (2025-10-04): Migrated from MCP SDK to FastMCP framework for simpler server implementation
+6. **Feature 002-add-a-simple implemented** (2025-10-04): Ping tool added with 7 passing tests
 
 ## Pre-Implementation Checklist
 

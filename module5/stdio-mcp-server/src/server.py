@@ -16,6 +16,7 @@ from typing import Any
 from typing import NamedTuple
 
 from fastmcp import FastMCP
+from .validation import validate_environment
 
 
 # ============================================================================
@@ -244,6 +245,10 @@ async def get_deployment_status(
         >>> print(result["deployments"][0]["version"])
         "v2.1.3"
     """
+    # Validate environment parameter using centralized validation layer
+    if environment is not None:
+        environment = validate_environment(environment)
+
     # Build CLI arguments
     args = ["status", "--format", "json"]
 
@@ -436,15 +441,8 @@ async def check_health(
         >>> print(len(result["health_checks"]))
         4
     """
-    # Validate env parameter (optional, case-insensitive)
-    if env is not None:
-        env_lower = env.lower()
-        if env_lower not in ["prod", "staging", "uat", "dev"]:
-            raise ValueError(
-                f"Invalid environment: {env}. Must be one of: prod, staging, uat, dev"
-            )
-    else:
-        env_lower = None
+    # Validate env parameter using centralized validation layer
+    env_lower = validate_environment(env)
 
     # Build CLI arguments
     args = ["health", "--format", "json"]
