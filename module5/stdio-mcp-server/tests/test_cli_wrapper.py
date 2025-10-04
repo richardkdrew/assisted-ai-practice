@@ -19,7 +19,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.cli_wrapper import CLIExecutionResult, execute_cli_command
+from src.server import CLIExecutionResult, execute_cli_command
 
 pytestmark = pytest.mark.asyncio
 

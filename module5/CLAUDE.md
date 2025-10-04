@@ -251,11 +251,9 @@ print("Message")  # ❌ Goes to stdout
 
 ## Recent Changes
 
-1. **Docker support added** (2025-10-04): Multi-stage Dockerfile, docker-compose.yml, make commands for Docker workflows
-2. **Feature 001-stdio-mcp-server implemented** (2025-10-04): Complete MCP server with 12 passing tests
-3. **Feature 001-stdio-mcp-server planned** (2025-10-04): Implementation plan created with research, data model, contracts, and quickstart
-4. **Constitution v1.1.0** (2025-10-04): Added Commit Discipline principle
-5. **Constitution v1.0.0** (2025-10-04): Initial constitution created
+1. **Feature 003-cli-wrapper planned** (2025-10-04): DevOps CLI wrapper implementation plan - subprocess execution module and MCP tools for wrapping external CLI
+2. **Feature 002-add-a-simple implemented** (2025-10-04): Ping tool added with 7 passing tests
+3. **Docker support added** (2025-10-04): Multi-stage Dockerfile, docker-compose.yml, make commands for Docker workflows
 
 ## Pre-Implementation Checklist
 

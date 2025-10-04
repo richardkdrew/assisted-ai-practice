@@ -8,8 +8,12 @@ Per Constitution Principle I (Simplicity First): FastMCP eliminates
 boilerplate while maintaining full MCP protocol compliance.
 """
 
+import asyncio
+import json
 import logging
 import sys
+from typing import Any
+from typing import NamedTuple
 
 from fastmcp import FastMCP
 
@@ -80,17 +84,219 @@ async def ping(message: str) -> str:
     return f"Pong: {message}"
 
 
-# T029: Import DevOps CLI wrapper tools
-# This import registers MCP tools via @mcp.tool() decorator
-# Tools registered: get_deployment_status
-try:
-    from .tools import devops  # noqa: F401
-except ImportError:
-    # Support both package import and direct execution for mcp dev
-    import sys
-    from pathlib import Path
-    sys.path.insert(0, str(Path(__file__).parent))
-    from tools import devops  # noqa: F401
+# ============================================================================
+# CLI Wrapper for DevOps CLI Tool
+# ============================================================================
+
+class CLIExecutionResult(NamedTuple):
+    """Result of executing a CLI command via subprocess.
+
+    Attributes:
+        stdout: Standard output from the CLI command (decoded as UTF-8).
+        stderr: Standard error output from the CLI command (decoded as UTF-8).
+        returncode: Process exit code (0 = success, non-zero = error).
+    """
+
+    stdout: str
+    stderr: str
+    returncode: int
+
+
+async def execute_cli_command(
+    args: list[str],
+    timeout: float = 30.0,
+    cwd: str | None = None,
+) -> CLIExecutionResult:
+    """Execute DevOps CLI command asynchronously with timeout management.
+
+    Args:
+        args: CLI command arguments (e.g., ["status", "--format", "json"]).
+              The CLI tool path (./acme-devops-cli/devops-cli) is prepended automatically.
+        timeout: Maximum execution time in seconds (default: 30.0).
+        cwd: Working directory for command execution (default: current directory).
+
+    Returns:
+        CLIExecutionResult containing stdout, stderr, and return code.
+
+    Raises:
+        asyncio.TimeoutError: If command execution exceeds timeout.
+        FileNotFoundError: If CLI tool is not found at expected path.
+        OSError: If subprocess creation fails for other reasons.
+
+    Example:
+        >>> result = await execute_cli_command(["status", "--format", "json"])
+        >>> print(result.stdout)  # JSON output from CLI
+    """
+    cli_path = "../acme-devops-cli/devops-cli"
+    full_args = [cli_path] + args
+
+    logger.info(f"Executing DevOps CLI: {' '.join(args)}")
+    start_time = asyncio.get_event_loop().time()
+
+    try:
+        # Create subprocess with explicit args (no shell injection risk)
+        process = await asyncio.create_subprocess_exec(
+            *full_args,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            cwd=cwd,
+        )
+
+        # Wait for process with timeout
+        stdout_bytes, stderr_bytes = await asyncio.wait_for(
+            process.communicate(), timeout=timeout
+        )
+
+        # Decode output
+        stdout = stdout_bytes.decode("utf-8")
+        stderr = stderr_bytes.decode("utf-8")
+        returncode = process.returncode
+
+        duration = asyncio.get_event_loop().time() - start_time
+        logger.debug(f"CLI command completed in {duration:.2f}s")
+
+        if stderr:
+            logger.warning(f"CLI stderr: {stderr}")
+
+        return CLIExecutionResult(
+            stdout=stdout, stderr=stderr, returncode=returncode
+        )
+
+    except asyncio.TimeoutError:
+        logger.error(f"CLI command timed out after {timeout}s")
+        raise
+
+    except FileNotFoundError as e:
+        logger.error(f"CLI tool not found at {cli_path}: {e}")
+        raise
+
+    except Exception as e:
+        logger.error(f"Unexpected error executing CLI: {e}")
+        raise
+
+
+# ============================================================================
+# DevOps CLI MCP Tools
+# ============================================================================
+
+@mcp.tool()
+async def get_deployment_status(
+    application: str | None = None,
+    environment: str | None = None,
+) -> dict[str, Any]:
+    """Get deployment status information from DevOps CLI.
+
+    Query deployment status for applications across environments with optional
+    filtering by application ID and/or environment name.
+
+    Args:
+        application: Optional application filter (e.g., "web-app", "api-service").
+                     If not provided, returns deployments for all applications.
+        environment: Optional environment filter (e.g., "prod", "staging", "uat").
+                     If not provided, returns deployments across all environments.
+
+    Returns:
+        Dictionary containing deployment information with structure:
+        {
+            "status": "success" | "error",
+            "deployments": [
+                {
+                    "id": str,
+                    "applicationId": str,
+                    "environment": str,
+                    "version": str,
+                    "status": str,
+                    "deployedAt": str (ISO 8601),
+                    "deployedBy": str (email),
+                    "commitHash": str
+                },
+                ...
+            ],
+            "total_count": int,
+            "filters_applied": {
+                "application": str | None,
+                "environment": str | None
+            },
+            "timestamp": str (ISO 8601)
+        }
+
+    Raises:
+        RuntimeError: If CLI execution times out or CLI tool is not found.
+        ValueError: If CLI returns invalid JSON or missing required fields.
+
+    Example:
+        >>> # Get all deployments
+        >>> result = await get_deployment_status()
+        >>> print(result["total_count"])
+        6
+
+        >>> # Filter by application
+        >>> result = await get_deployment_status(application="web-app")
+        >>> print([d["applicationId"] for d in result["deployments"]])
+        ["web-app", "web-app"]
+
+        >>> # Filter by both
+        >>> result = await get_deployment_status(
+        ...     application="web-app",
+        ...     environment="prod"
+        ... )
+        >>> print(result["deployments"][0]["version"])
+        "v2.1.3"
+    """
+    # Build CLI arguments
+    args = ["status", "--format", "json"]
+
+    if application:
+        args.extend(["--app", application])
+
+    if environment:
+        args.extend(["--env", environment])
+
+    try:
+        # Execute CLI command with timeout
+        result = await execute_cli_command(args, timeout=30.0)
+
+        # Check for CLI execution failure
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"DevOps CLI failed with exit code {result.returncode}: {result.stderr}"
+            )
+
+        # Parse JSON output
+        try:
+            data = json.loads(result.stdout)
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse CLI output as JSON: {e}")
+            logger.debug(f"Raw CLI output: {result.stdout}")
+            raise ValueError(f"CLI returned invalid JSON: {e}")
+
+        # Validate required fields
+        required_fields = [
+            "status",
+            "deployments",
+            "total_count",
+            "filters_applied",
+            "timestamp",
+        ]
+        for field in required_fields:
+            if field not in data:
+                raise ValueError(f"CLI output missing required field: {field}")
+
+        # Log CLI stderr if present (warnings, etc.)
+        if result.stderr:
+            logger.warning(f"CLI stderr: {result.stderr}")
+
+        return data
+
+    except asyncio.TimeoutError:
+        logger.error("CLI execution timed out")
+        raise RuntimeError("DevOps CLI timed out after 30 seconds")
+
+    except FileNotFoundError:
+        logger.error("CLI tool not found")
+        raise RuntimeError(
+            "DevOps CLI tool not found at ../acme-devops-cli/devops-cli"
+        )
 
 
 # Future features can be added using decorators:

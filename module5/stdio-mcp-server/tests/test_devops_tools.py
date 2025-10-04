@@ -17,8 +17,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.cli_wrapper import CLIExecutionResult
-import src.tools.devops as devops_module
+from src.server import CLIExecutionResult
+import src.server as server_module
 
 pytestmark = pytest.mark.asyncio
 
@@ -34,7 +34,7 @@ def get_tool_function(tool_obj):
 
 
 # Get the actual callable function
-get_deployment_status = get_tool_function(devops_module.get_deployment_status)
+get_deployment_status = get_tool_function(server_module.get_deployment_status)
 
 
 # T012: Test tool registration (will be skipped for now - requires server setup)
@@ -74,7 +74,7 @@ async def test_get_status_no_filters():
         returncode=0
     )
 
-    with patch('src.tools.devops.execute_cli_command', return_value=mock_result):
+    with patch('src.server.execute_cli_command', return_value=mock_result):
         result = await get_deployment_status()
 
         assert result["status"] == "success"
@@ -112,7 +112,7 @@ async def test_get_status_filter_by_app():
         returncode=0
     )
 
-    with patch('src.tools.devops.execute_cli_command', return_value=mock_result) as mock_exec:
+    with patch('src.server.execute_cli_command', return_value=mock_result) as mock_exec:
         result = await get_deployment_status(application="web-app")
 
         # Verify CLI was called with correct arguments
@@ -153,7 +153,7 @@ async def test_get_status_filter_by_env():
         returncode=0
     )
 
-    with patch('src.tools.devops.execute_cli_command', return_value=mock_result) as mock_exec:
+    with patch('src.server.execute_cli_command', return_value=mock_result) as mock_exec:
         result = await get_deployment_status(environment="prod")
 
         # Verify CLI was called with correct arguments
@@ -193,7 +193,7 @@ async def test_get_status_filter_both():
         returncode=0
     )
 
-    with patch('src.tools.devops.execute_cli_command', return_value=mock_result) as mock_exec:
+    with patch('src.server.execute_cli_command', return_value=mock_result) as mock_exec:
         result = await get_deployment_status(application="web-app", environment="prod")
 
         # Verify CLI was called with both filters
@@ -224,7 +224,7 @@ async def test_get_status_no_results():
         returncode=0
     )
 
-    with patch('src.tools.devops.execute_cli_command', return_value=mock_result):
+    with patch('src.server.execute_cli_command', return_value=mock_result):
         result = await get_deployment_status(application="nonexistent-app")
 
         # Verify no error is raised
@@ -236,7 +236,7 @@ async def test_get_status_no_results():
 # T018: Test timeout error
 async def test_get_status_timeout_error():
     """Test handling of CLI execution timeout."""
-    with patch('src.tools.devops.execute_cli_command', side_effect=asyncio.TimeoutError()):
+    with patch('src.server.execute_cli_command', side_effect=asyncio.TimeoutError()):
         with pytest.raises(RuntimeError, match="DevOps CLI timed out after 30 seconds"):
             await get_deployment_status()
 
@@ -244,7 +244,7 @@ async def test_get_status_timeout_error():
 # T019: Test CLI not found error
 async def test_get_status_cli_not_found():
     """Test handling of missing CLI tool."""
-    with patch('src.tools.devops.execute_cli_command', side_effect=FileNotFoundError("CLI not found")):
+    with patch('src.server.execute_cli_command', side_effect=FileNotFoundError("CLI not found")):
         with pytest.raises(RuntimeError, match="DevOps CLI tool not found"):
             await get_deployment_status()
 
@@ -258,7 +258,7 @@ async def test_get_status_invalid_json():
         returncode=0
     )
 
-    with patch('src.tools.devops.execute_cli_command', return_value=mock_result):
+    with patch('src.server.execute_cli_command', return_value=mock_result):
         with pytest.raises(ValueError, match="CLI returned invalid JSON"):
             await get_deployment_status()
 
@@ -272,7 +272,7 @@ async def test_get_status_cli_failure():
         returncode=1
     )
 
-    with patch('src.tools.devops.execute_cli_command', return_value=mock_result):
+    with patch('src.server.execute_cli_command', return_value=mock_result):
         with pytest.raises(RuntimeError, match="DevOps CLI failed with exit code 1"):
             await get_deployment_status()
 
@@ -291,6 +291,6 @@ async def test_get_status_missing_fields():
         returncode=0
     )
 
-    with patch('src.tools.devops.execute_cli_command', return_value=mock_result):
+    with patch('src.server.execute_cli_command', return_value=mock_result):
         with pytest.raises(ValueError, match="CLI output missing required field"):
             await get_deployment_status()
