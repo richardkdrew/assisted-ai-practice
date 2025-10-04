@@ -1,0 +1,49 @@
+{
+  "tool": "check-health",
+  "description": "Check environment health status via DevOps CLI",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "env": {
+        "type": "string",
+        "description": "Environment to check: prod, staging, uat, dev (optional, case-insensitive). Omit to check all environments.",
+        "enum": ["prod", "staging", "uat", "dev", "PROD", "STAGING", "UAT", "DEV", "Prod", "Staging", "Uat", "Dev"]
+      }
+    },
+    "required": []
+  },
+  "returns": {
+    "type": "object",
+    "description": "Health check data from CLI (structure determined by devops-cli tool)",
+    "properties": {
+      "status": {
+        "type": "string",
+        "enum": ["success", "error"]
+      },
+      "health_checks": {
+        "type": "array",
+        "description": "Array of health check objects (one per environment)"
+      },
+      "timestamp": {
+        "type": "string",
+        "format": "date-time",
+        "description": "ISO 8601 timestamp"
+      }
+    }
+  },
+  "errors": {
+    "ValueError": [
+      "Invalid environment: {env}. Must be one of: prod, staging, uat, dev"
+    ],
+    "RuntimeError": [
+      "DevOps CLI failed with exit code {code}: {stderr}",
+      "DevOps CLI tool not found at ../acme-devops-cli/devops-cli"
+    ],
+    "TimeoutError": [
+      "DevOps CLI timed out after 30 seconds"
+    ],
+    "JSONDecodeError": [
+      "CLI returned invalid JSON: {error}"
+    ]
+  }
+}

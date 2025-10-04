@@ -22,6 +22,7 @@ from fastmcp import FastMCP
 # Logging Configuration
 # ============================================================================
 
+
 def configure_logging() -> logging.Logger:
     """
     Configure structured logging to stderr.
@@ -36,8 +37,8 @@ def configure_logging() -> logging.Logger:
     """
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        stream=sys.stderr  # CRITICAL: Must be stderr, not stdout
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        stream=sys.stderr,  # CRITICAL: Must be stderr, not stdout
     )
     return logging.getLogger("stdio-mcp-server")
 
@@ -87,6 +88,7 @@ async def ping(message: str) -> str:
 # ============================================================================
 # CLI Wrapper for DevOps CLI Tool
 # ============================================================================
+
 
 class CLIExecutionResult(NamedTuple):
     """Result of executing a CLI command via subprocess.
@@ -158,9 +160,7 @@ async def execute_cli_command(
         if stderr:
             logger.warning(f"CLI stderr: {stderr}")
 
-        return CLIExecutionResult(
-            stdout=stdout, stderr=stderr, returncode=returncode
-        )
+        return CLIExecutionResult(stdout=stdout, stderr=stderr, returncode=returncode)
 
     except asyncio.TimeoutError:
         logger.error(f"CLI command timed out after {timeout}s")
@@ -178,6 +178,7 @@ async def execute_cli_command(
 # ============================================================================
 # DevOps CLI MCP Tools
 # ============================================================================
+
 
 @mcp.tool()
 async def get_deployment_status(
@@ -294,9 +295,194 @@ async def get_deployment_status(
 
     except FileNotFoundError:
         logger.error("CLI tool not found")
-        raise RuntimeError(
-            "DevOps CLI tool not found at ../acme-devops-cli/devops-cli"
-        )
+        raise RuntimeError("DevOps CLI tool not found at ../acme-devops-cli/devops-cli")
+
+
+@mcp.tool()
+async def list_releases(
+    app: str,
+    limit: int | None = None,
+) -> dict[str, Any]:
+    """List release history for an application via DevOps CLI.
+
+    Query release history with optional limit on number of results.
+    Useful for tracking deployments and release timeline.
+
+    Args:
+        app: Application name to query (required, non-empty).
+        limit: Maximum number of releases to return (optional, must be ≥1 if provided).
+
+    Returns:
+        Dictionary containing release information with structure:
+        {
+            "status": "success" | "error",
+            "releases": [
+                {
+                    "id": str,
+                    "applicationId": str,
+                    "version": str,
+                    "deployedAt": str (ISO 8601),
+                    "deployedBy": str (email),
+                    "commitHash": str
+                },
+                ...
+            ],
+            "total_count": int,
+            "filters_applied": {
+                "app": str,
+                "limit": int | None
+            }
+        }
+
+    Raises:
+        ValueError: If app is empty or limit is invalid.
+        RuntimeError: If CLI execution times out or CLI tool is not found.
+
+    Example:
+        >>> # Get last 5 releases for web-app
+        >>> result = await list_releases(app="web-app", limit=5)
+        >>> print(result["total_count"])
+        5
+    """
+    # Validate app parameter (required)
+    if not app:
+        raise ValueError("app parameter is required")
+
+    # Validate limit parameter (optional, must be positive)
+    if limit is not None and limit < 1:
+        raise ValueError("limit must be a positive integer")
+
+    # Build CLI arguments
+    args = ["releases", "--app", app, "--format", "json"]
+
+    if limit is not None:
+        args.extend(["--limit", str(limit)])
+
+    try:
+        # Execute CLI command with timeout
+        result = await execute_cli_command(args, timeout=30.0)
+
+        # Check for CLI execution failure
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"DevOps CLI failed with exit code {result.returncode}: {result.stderr}"
+            )
+
+        # Parse JSON output
+        try:
+            data = json.loads(result.stdout)
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse CLI output as JSON: {e}")
+            logger.debug(f"Raw CLI output: {result.stdout}")
+            raise ValueError(f"CLI returned invalid JSON: {e}")
+
+        # Log CLI stderr if present (warnings, etc.)
+        if result.stderr:
+            logger.warning(f"CLI stderr: {result.stderr}")
+
+        return data
+
+    except asyncio.TimeoutError:
+        logger.error("CLI execution timed out")
+        raise RuntimeError("DevOps CLI timed out after 30 seconds")
+
+    except FileNotFoundError:
+        logger.error("CLI tool not found")
+        raise RuntimeError("DevOps CLI tool not found at ../acme-devops-cli/devops-cli")
+
+
+@mcp.tool()
+async def check_health(
+    env: str | None = None,
+) -> dict[str, Any]:
+    """Check environment health status via DevOps CLI.
+
+    Query health status for specific environment or all environments.
+    Useful for monitoring system health and operational status.
+
+    Args:
+        env: Environment to check (optional, case-insensitive).
+             Valid values: "prod", "staging", "uat", "dev".
+             If not provided, checks ALL environments.
+
+    Returns:
+        Dictionary containing health check information with structure:
+        {
+            "status": "success" | "error",
+            "health_checks": [
+                {
+                    "environment": str,
+                    "status": str (healthy/degraded/unhealthy),
+                    "metrics": dict,
+                    "timestamp": str (ISO 8601)
+                },
+                ...
+            ],
+            "timestamp": str (ISO 8601)
+        }
+
+    Raises:
+        ValueError: If env is invalid (not in allowed list).
+        RuntimeError: If CLI execution times out or CLI tool is not found.
+
+    Example:
+        >>> # Check production environment
+        >>> result = await check_health(env="prod")
+        >>> print(result["health_checks"][0]["status"])
+        "healthy"
+
+        >>> # Check all environments
+        >>> result = await check_health()
+        >>> print(len(result["health_checks"]))
+        4
+    """
+    # Validate env parameter (optional, case-insensitive)
+    if env is not None:
+        env_lower = env.lower()
+        if env_lower not in ["prod", "staging", "uat", "dev"]:
+            raise ValueError(
+                f"Invalid environment: {env}. Must be one of: prod, staging, uat, dev"
+            )
+    else:
+        env_lower = None
+
+    # Build CLI arguments
+    args = ["health", "--format", "json"]
+
+    if env_lower is not None:
+        args.extend(["--env", env_lower])
+
+    try:
+        # Execute CLI command with timeout
+        result = await execute_cli_command(args, timeout=30.0)
+
+        # Check for CLI execution failure
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"DevOps CLI failed with exit code {result.returncode}: {result.stderr}"
+            )
+
+        # Parse JSON output
+        try:
+            data = json.loads(result.stdout)
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse CLI output as JSON: {e}")
+            logger.debug(f"Raw CLI output: {result.stdout}")
+            raise ValueError(f"CLI returned invalid JSON: {e}")
+
+        # Log CLI stderr if present (warnings, etc.)
+        if result.stderr:
+            logger.warning(f"CLI stderr: {result.stderr}")
+
+        return data
+
+    except asyncio.TimeoutError:
+        logger.error("CLI execution timed out")
+        raise RuntimeError("DevOps CLI timed out after 30 seconds")
+
+    except FileNotFoundError:
+        logger.error("CLI tool not found")
+        raise RuntimeError("DevOps CLI tool not found at ../acme-devops-cli/devops-cli")
 
 
 # Future features can be added using decorators:

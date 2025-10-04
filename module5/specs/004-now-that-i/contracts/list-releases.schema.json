@@ -1,0 +1,56 @@
+{
+  "tool": "list-releases",
+  "description": "Query release history for applications via DevOps CLI",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "app": {
+        "type": "string",
+        "description": "Application name to query (required)",
+        "minLength": 1
+      },
+      "limit": {
+        "type": "integer",
+        "description": "Maximum number of releases to return (optional)",
+        "minimum": 1
+      }
+    },
+    "required": ["app"]
+  },
+  "returns": {
+    "type": "object",
+    "description": "Release data from CLI (structure determined by devops-cli tool)",
+    "properties": {
+      "status": {
+        "type": "string",
+        "enum": ["success", "error"]
+      },
+      "releases": {
+        "type": "array",
+        "description": "Array of release objects"
+      },
+      "total_count": {
+        "type": "integer"
+      },
+      "filters_applied": {
+        "type": "object"
+      }
+    }
+  },
+  "errors": {
+    "ValueError": [
+      "app parameter is required",
+      "limit must be a positive integer"
+    ],
+    "RuntimeError": [
+      "DevOps CLI failed with exit code {code}: {stderr}",
+      "DevOps CLI tool not found at ../acme-devops-cli/devops-cli"
+    ],
+    "TimeoutError": [
+      "DevOps CLI timed out after 30 seconds"
+    ],
+    "JSONDecodeError": [
+      "CLI returned invalid JSON: {error}"
+    ]
+  }
+}
