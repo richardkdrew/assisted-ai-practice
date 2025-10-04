@@ -1,0 +1,382 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Promote Release Validation Test Contracts",
+  "description": "Test contracts for promote-release tool validation functions. Each test case defines expected behavior for unit tests.",
+  "version": "1.0.0",
+  "test_suites": {
+    "validate_non_empty": {
+      "description": "Tests for validate_non_empty(param_name: str, value: str) -> str",
+      "test_cases": [
+        {
+          "name": "valid_non_empty_string",
+          "input": {
+            "param_name": "app",
+            "value": "web-api"
+          },
+          "expected_output": "web-api",
+          "expected_exception": null,
+          "rationale": "Standard non-empty string should pass validation and return unchanged"
+        },
+        {
+          "name": "valid_with_leading_trailing_whitespace",
+          "input": {
+            "param_name": "version",
+            "value": "  1.2.3  "
+          },
+          "expected_output": "1.2.3",
+          "expected_exception": null,
+          "rationale": "Whitespace should be trimmed before returning value"
+        },
+        {
+          "name": "empty_string",
+          "input": {
+            "param_name": "app",
+            "value": ""
+          },
+          "expected_output": null,
+          "expected_exception": {
+            "type": "ValueError",
+            "message_contains": "app cannot be empty"
+          },
+          "rationale": "Empty string after trimming should raise ValueError with parameter name"
+        },
+        {
+          "name": "whitespace_only",
+          "input": {
+            "param_name": "version",
+            "value": "   "
+          },
+          "expected_output": null,
+          "expected_exception": {
+            "type": "ValueError",
+            "message_contains": "version cannot be empty"
+          },
+          "rationale": "Whitespace-only string should be treated as empty after trimming"
+        },
+        {
+          "name": "tab_and_newline_whitespace",
+          "input": {
+            "param_name": "app",
+            "value": "\t\n\r"
+          },
+          "expected_output": null,
+          "expected_exception": {
+            "type": "ValueError",
+            "message_contains": "app cannot be empty"
+          },
+          "rationale": "All types of whitespace should be stripped by str.strip()"
+        }
+      ]
+    },
+    "validate_promotion_path": {
+      "description": "Tests for validate_promotion_path(from_env: str, to_env: str) -> None",
+      "preconditions": "Assumes from_env and to_env are already validated and normalized via validate_environment()",
+      "test_cases": [
+        {
+          "name": "valid_dev_to_staging",
+          "input": {
+            "from_env": "dev",
+            "to_env": "staging"
+          },
+          "expected_output": null,
+          "expected_exception": null,
+          "rationale": "dev→staging is valid forward promotion path"
+        },
+        {
+          "name": "valid_staging_to_uat",
+          "input": {
+            "from_env": "staging",
+            "to_env": "uat"
+          },
+          "expected_output": null,
+          "expected_exception": null,
+          "rationale": "staging→uat is valid forward promotion path"
+        },
+        {
+          "name": "valid_uat_to_prod",
+          "input": {
+            "from_env": "uat",
+            "to_env": "prod"
+          },
+          "expected_output": null,
+          "expected_exception": null,
+          "rationale": "uat→prod is valid forward promotion path (production deployment)"
+        },
+        {
+          "name": "invalid_same_environment",
+          "input": {
+            "from_env": "dev",
+            "to_env": "dev"
+          },
+          "expected_output": null,
+          "expected_exception": {
+            "type": "ValueError",
+            "message_contains": "cannot promote to same environment"
+          },
+          "rationale": "Promoting to same environment should be rejected"
+        },
+        {
+          "name": "invalid_skipping_staging",
+          "input": {
+            "from_env": "dev",
+            "to_env": "uat"
+          },
+          "expected_output": null,
+          "expected_exception": {
+            "type": "ValueError",
+            "message_contains": ["invalid promotion path", "dev→uat", "staging"]
+          },
+          "rationale": "Cannot skip staging environment from dev; error should mention valid next env"
+        },
+        {
+          "name": "invalid_skipping_uat",
+          "input": {
+            "from_env": "staging",
+            "to_env": "prod"
+          },
+          "expected_output": null,
+          "expected_exception": {
+            "type": "ValueError",
+            "message_contains": ["invalid promotion path", "staging→prod", "uat"]
+          },
+          "rationale": "Cannot skip uat environment from staging; error should mention valid next env"
+        },
+        {
+          "name": "invalid_skipping_multiple",
+          "input": {
+            "from_env": "dev",
+            "to_env": "prod"
+          },
+          "expected_output": null,
+          "expected_exception": {
+            "type": "ValueError",
+            "message_contains": ["invalid promotion path", "dev→prod", "staging"]
+          },
+          "rationale": "Cannot skip multiple environments; error should suggest next valid env"
+        },
+        {
+          "name": "invalid_backward_prod_to_uat",
+          "input": {
+            "from_env": "prod",
+            "to_env": "uat"
+          },
+          "expected_output": null,
+          "expected_exception": {
+            "type": "ValueError",
+            "message_contains": ["invalid promotion path", "prod→uat", "backward"]
+          },
+          "rationale": "Backward promotion from prod should be rejected"
+        },
+        {
+          "name": "invalid_backward_staging_to_dev",
+          "input": {
+            "from_env": "staging",
+            "to_env": "dev"
+          },
+          "expected_output": null,
+          "expected_exception": {
+            "type": "ValueError",
+            "message_contains": ["invalid promotion path", "staging→dev", "backward"]
+          },
+          "rationale": "Backward promotion from staging should be rejected"
+        }
+      ]
+    },
+    "promote_release_integration": {
+      "description": "Integration tests for full promote_release() tool with all validation",
+      "test_cases": [
+        {
+          "name": "success_non_production",
+          "input": {
+            "app": "web-api",
+            "version": "1.2.3",
+            "from_env": "dev",
+            "to_env": "staging"
+          },
+          "mock_cli_response": {
+            "stdout": "Deployment successful: web-api v1.2.3 promoted to staging",
+            "stderr": "",
+            "returncode": 0,
+            "duration": 25.5
+          },
+          "expected_output": {
+            "status": "success",
+            "promotion": {
+              "app": "web-api",
+              "version": "1.2.3",
+              "from_env": "dev",
+              "to_env": "staging"
+            },
+            "production_deployment": false
+          },
+          "expected_logs": [
+            {"level": "INFO", "message_contains": "Executing DevOps CLI: promote web-api 1.2.3 dev staging"}
+          ],
+          "rationale": "Successful non-production promotion should return success response"
+        },
+        {
+          "name": "success_production_deployment",
+          "input": {
+            "app": "mobile-app",
+            "version": "2.0.1",
+            "from_env": "uat",
+            "to_env": "prod"
+          },
+          "mock_cli_response": {
+            "stdout": "Production deployment complete: mobile-app v2.0.1",
+            "stderr": "",
+            "returncode": 0,
+            "duration": 120.0
+          },
+          "expected_output": {
+            "status": "success",
+            "promotion": {
+              "app": "mobile-app",
+              "version": "2.0.1",
+              "from_env": "uat",
+              "to_env": "prod"
+            },
+            "production_deployment": true
+          },
+          "expected_logs": [
+            {"level": "WARNING", "message_contains": "PRODUCTION DEPLOYMENT"},
+            {"level": "INFO", "message_contains": "Production promotion audit trail"}
+          ],
+          "rationale": "Production deployment should log WARNING and set production_deployment flag"
+        },
+        {
+          "name": "validation_error_empty_app",
+          "input": {
+            "app": "  ",
+            "version": "1.0.0",
+            "from_env": "dev",
+            "to_env": "staging"
+          },
+          "expected_exception": {
+            "type": "ValueError",
+            "message_contains": "app cannot be empty"
+          },
+          "rationale": "Empty app parameter should fail validation before CLI execution"
+        },
+        {
+          "name": "validation_error_invalid_env",
+          "input": {
+            "app": "web-api",
+            "version": "1.0.0",
+            "from_env": "development",
+            "to_env": "staging"
+          },
+          "expected_exception": {
+            "type": "ValueError",
+            "message_contains": ["Invalid environment", "development", "dev, staging, uat, prod"]
+          },
+          "rationale": "Invalid environment name should fail validation with helpful error"
+        },
+        {
+          "name": "validation_error_invalid_path",
+          "input": {
+            "app": "web-api",
+            "version": "1.0.0",
+            "from_env": "dev",
+            "to_env": "prod"
+          },
+          "expected_exception": {
+            "type": "ValueError",
+            "message_contains": ["invalid promotion path", "dev→prod"]
+          },
+          "rationale": "Invalid promotion path should fail validation"
+        },
+        {
+          "name": "cli_execution_failure",
+          "input": {
+            "app": "web-api",
+            "version": "9.9.9",
+            "from_env": "dev",
+            "to_env": "staging"
+          },
+          "mock_cli_response": {
+            "stdout": "",
+            "stderr": "Error: Version 9.9.9 not found in dev environment",
+            "returncode": 1,
+            "duration": 2.0
+          },
+          "expected_exception": {
+            "type": "RuntimeError",
+            "message_contains": "Promotion failed"
+          },
+          "expected_logs": [
+            {"level": "ERROR", "message_contains": "Promotion failed"}
+          ],
+          "rationale": "CLI execution failure should raise RuntimeError with CLI error message"
+        },
+        {
+          "name": "cli_timeout",
+          "input": {
+            "app": "slow-app",
+            "version": "1.0.0",
+            "from_env": "dev",
+            "to_env": "staging"
+          },
+          "mock_cli_response": {
+            "timeout": true,
+            "duration": 300.0
+          },
+          "expected_exception": {
+            "type": "RuntimeError",
+            "message_contains": ["timed out", "300 seconds"]
+          },
+          "expected_logs": [
+            {"level": "ERROR", "message_contains": "Promotion timed out after 300s"}
+          ],
+          "rationale": "CLI timeout should raise RuntimeError with timeout details"
+        },
+        {
+          "name": "case_insensitive_environment_normalization",
+          "input": {
+            "app": "web-api",
+            "version": "1.0.0",
+            "from_env": "DEV",
+            "to_env": "STAGING"
+          },
+          "mock_cli_response": {
+            "stdout": "Success",
+            "stderr": "",
+            "returncode": 0,
+            "duration": 10.0
+          },
+          "expected_output": {
+            "promotion": {
+              "from_env": "dev",
+              "to_env": "staging"
+            }
+          },
+          "expected_cli_args": ["promote", "web-api", "1.0.0", "dev", "staging"],
+          "rationale": "Environment names should be normalized to lowercase before CLI execution"
+        }
+      ]
+    }
+  },
+  "validation_coverage_checklist": {
+    "required_parameters": true,
+    "empty_string_validation": true,
+    "whitespace_trimming": true,
+    "environment_validation": true,
+    "environment_normalization": true,
+    "same_environment_rejection": true,
+    "invalid_path_detection": true,
+    "forward_flow_enforcement": true,
+    "backward_promotion_prevention": true,
+    "production_deployment_flagging": true,
+    "cli_success_handling": true,
+    "cli_failure_handling": true,
+    "cli_timeout_handling": true,
+    "production_logging": true,
+    "error_message_clarity": true
+  },
+  "notes": {
+    "test_framework": "pytest with async support (pytest-asyncio)",
+    "mocking_strategy": "Mock execute_cli_command() to control CLI responses without actual subprocess execution",
+    "assertion_library": "Standard pytest assertions with parametrize for test case iteration",
+    "coverage_target": "≥95% code coverage for validation logic and promote_release function"
+  }
+}
