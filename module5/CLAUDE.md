@@ -251,9 +251,10 @@ print("Message")  # ❌ Goes to stdout
 
 ## Recent Changes
 
-1. **Feature 003-cli-wrapper planned** (2025-10-04): DevOps CLI wrapper implementation plan - subprocess execution module and MCP tools for wrapping external CLI
-2. **Feature 002-add-a-simple implemented** (2025-10-04): Ping tool added with 7 passing tests
-3. **Docker support added** (2025-10-04): Multi-stage Dockerfile, docker-compose.yml, make commands for Docker workflows
+1. **Feature 003-cli-wrapper implemented** (2025-10-04): DevOps CLI wrapper with get_deployment_status tool - subprocess execution module and MCP tools for wrapping external CLI
+2. **FastMCP migration** (2025-10-04): Migrated from MCP SDK to FastMCP framework for simpler server implementation
+3. **Feature 002-add-a-simple implemented** (2025-10-04): Ping tool added with 7 passing tests
+4. **Docker support added** (2025-10-04): Multi-stage Dockerfile, docker-compose.yml, make commands for Docker workflows
 
 ## Pre-Implementation Checklist
 

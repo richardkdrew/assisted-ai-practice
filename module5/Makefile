@@ -14,8 +14,8 @@ help: ## Display this help message
 install: ## Install dependencies via UV
 	cd $(STDIO_SERVER_DIR) && uv sync
 
-dev: ## Run MCP Inspector for interactive testing (alias for inspector)
-	cd $(STDIO_SERVER_DIR) && uv run mcp dev src/server.py
+dev: ## Run FastMCP Inspector for interactive testing
+	cd $(STDIO_SERVER_DIR) && uv run fastmcp dev src/server.py
 
 inspector: ## Run MCP Inspector with npx (works better than dev)
 	npx @modelcontextprotocol/inspector uv --directory $(STDIO_SERVER_DIR) run python -m src.server
