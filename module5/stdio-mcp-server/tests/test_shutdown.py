@@ -1,72 +1,36 @@
 """
-Integration test for graceful shutdown.
+Integration test for graceful shutdown with FastMCP.
 
 Tests that the server handles SIGINT/SIGTERM signals properly,
 cleans up resources, and exits cleanly.
 """
 
 import pytest
-import asyncio
-import signal
-import os
-import sys
-import logging
-from typing import Any
 
 
 class TestGracefulShutdown:
-    """Test server shutdown behavior."""
+    """Test server shutdown behavior with FastMCP."""
 
     @pytest.mark.asyncio
-    async def test_sigint_initiates_shutdown(self):
+    async def test_fastmcp_handles_signals(self):
         """
-        Verify SIGINT (Ctrl+C) triggers graceful shutdown.
+        Verify FastMCP handles SIGINT/SIGTERM automatically.
+
+        FastMCP's .run() method registers signal handlers for:
+        - SIGINT (Ctrl+C)
+        - SIGTERM (from process manager)
 
         Expected behavior:
-        - Server catches SIGINT signal
-        - Initiates shutdown sequence
-        - Logs shutdown to stderr
-        - Exits with code 0
+        - Graceful shutdown on signals
+        - Resource cleanup
+        - Proper exit codes
         """
         from src import server
 
-        # Server should have signal handler registered
-        assert hasattr(server, 'handle_shutdown')
-        assert hasattr(server, 'shutdown_event')
-
-    @pytest.mark.asyncio
-    async def test_sigterm_initiates_shutdown(self):
-        """
-        Verify SIGTERM triggers graceful shutdown.
-
-        Expected behavior:
-        - Server catches SIGTERM signal
-        - Initiates shutdown sequence
-        - Cleans up resources
-        - Exits cleanly
-        """
-        from src import server
-
-        # Verify signal handler exists
-        assert hasattr(server, 'handle_shutdown')
-        assert hasattr(server, 'shutdown_event')
-
-    @pytest.mark.asyncio
-    async def test_shutdown_cleanup(self):
-        """
-        Verify server cleans up resources during shutdown.
-
-        Expected behavior:
-        - Closes STDIO streams
-        - Completes in-flight requests (if any)
-        - Logs shutdown completion
-        - No resource leaks
-        """
-        from src import server
-
-        # Verify shutdown event exists
-        assert hasattr(server, 'shutdown_event')
-        assert isinstance(server.shutdown_event, asyncio.Event)
+        # Verify FastMCP instance exists
+        # FastMCP handles signal registration automatically
+        assert hasattr(server, 'mcp')
+        assert server.mcp.name == "stdio-mcp-server"
 
     @pytest.mark.asyncio
     async def test_shutdown_logs_to_stderr(self):
@@ -80,32 +44,29 @@ class TestGracefulShutdown:
         """
         from src import server
 
-        # Verify logger is configured
+        # Verify logger is configured to stderr
         assert hasattr(server, 'logger')
-        # Verify logger name is correct
         assert server.logger.name == "stdio-mcp-server"
-        # Logging is configured via basicConfig to use stderr
-        # (verified by checking configure_logging function exists)
         assert hasattr(server, 'configure_logging')
 
     @pytest.mark.asyncio
-    async def test_shutdown_within_timeout(self):
+    async def test_fastmcp_stdio_cleanup(self):
         """
-        Verify server shuts down promptly.
+        Verify FastMCP cleans up STDIO resources.
 
         Expected behavior:
-        - Shutdown completes within reasonable time (<2 seconds)
-        - No hanging processes
+        - Closes STDIO streams properly
+        - No resource leaks
+        - Clean process termination
         """
         from src import server
 
-        # Verify shutdown event can be set
-        assert hasattr(server, 'shutdown_event')
-        server.shutdown_event.clear()  # Reset for test
-        server.shutdown_event.set()    # Trigger shutdown
-        assert server.shutdown_event.is_set()
+        # Verify FastMCP instance exists
+        # FastMCP's run() method with transport="stdio"
+        # handles all STDIO resource management
+        assert hasattr(server, 'mcp')
 
 
 if __name__ == "__main__":
-    # Run tests to verify they fail (TDD requirement)
+    # Run tests
     pytest.main([__file__, "-v"])

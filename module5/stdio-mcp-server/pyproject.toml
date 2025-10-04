@@ -1,10 +1,10 @@
 [project]
 name = "stdio-mcp-server"
-version = "0.1.0"
-description = "Minimal MCP server using STDIO transport"
+version = "0.2.0"
+description = "Minimal MCP server using STDIO transport with FastMCP"
 requires-python = ">=3.11"
 dependencies = [
-    "mcp",
+    "fastmcp>=2.0.0",
 ]
 
 [build-system]

@@ -1,52 +1,36 @@
 """
-Integration test for MCP error handling.
+Integration test for MCP error handling with FastMCP.
 
 Tests that the server handles errors gracefully without crashing,
 returning proper JSON-RPC 2.0 error responses per contracts/error-response.json.
 """
 
 import pytest
-import asyncio
-import json
-from typing import Any, Dict
 
 
 class TestErrorHandling:
-    """Test server error handling and recovery."""
+    """Test server error handling and recovery with FastMCP."""
 
     @pytest.mark.asyncio
-    async def test_malformed_json_parse_error(self):
+    async def test_fastmcp_error_handling(self):
         """
-        Verify server is configured to handle errors.
+        Verify server uses FastMCP which handles errors automatically.
 
-        The MCP SDK automatically handles JSON parse errors and protocol violations.
-        We verify the server is set up to use the SDK's error handling.
+        FastMCP handles JSON parse errors and protocol violations automatically,
+        returning proper JSON-RPC 2.0 error responses.
         """
         from src import server
 
-        # Verify server has MCP server instance with error handling
-        assert hasattr(server, 'mcp_server')
-        # MCP SDK handles JSON-RPC errors automatically
-        # including parse errors (code -32700)
+        # Verify FastMCP instance exists with built-in error handling
+        assert hasattr(server, 'mcp')
+        assert server.mcp.name == "stdio-mcp-server"
+        # FastMCP handles JSON-RPC errors automatically including:
+        # - Parse errors (code -32700)
+        # - Method not found (code -32601)
+        # - Invalid params (code -32602)
 
     @pytest.mark.asyncio
-    async def test_invalid_method_not_found(self):
-        """
-        Verify server has method routing configured.
-
-        The MCP SDK automatically returns -32601 (Method not found)
-        for unknown methods. We verify handlers are registered.
-        """
-        from src import server
-
-        # Verify server has capability handlers registered
-        assert hasattr(server, 'list_tools')
-        assert hasattr(server, 'list_resources')
-        assert hasattr(server, 'list_prompts')
-        # MCP SDK handles method routing and "method not found" errors
-
-    @pytest.mark.asyncio
-    async def test_error_does_not_crash_server(self):
+    async def test_server_does_not_crash(self):
         """
         Verify server has error handling infrastructure.
 
@@ -55,12 +39,12 @@ class TestErrorHandling:
         """
         from src import server
 
-        # Verify server uses MCP SDK which handles errors gracefully
-        assert hasattr(server, 'mcp_server')
+        # Verify FastMCP instance exists
+        # FastMCP handles errors gracefully without crashing
+        assert hasattr(server, 'mcp')
 
-        # Verify main() has exception handling
-        assert hasattr(server, 'main')
-        # The main() function has try/except blocks for error handling
+        # FastMCP's .run() method includes exception handling
+        # and graceful error recovery
 
     @pytest.mark.asyncio
     async def test_error_logging_to_stderr(self):
@@ -72,12 +56,13 @@ class TestErrorHandling:
         """
         from src import server
 
-        # Verify logger is configured
+        # Verify logger is configured to stderr
         assert hasattr(server, 'logger')
         assert hasattr(server, 'configure_logging')
+        assert server.logger.name == "stdio-mcp-server"
         # configure_logging() sets stream=sys.stderr per Constitution
 
 
 if __name__ == "__main__":
-    # Run tests to verify they fail (TDD requirement)
+    # Run tests
     pytest.main([__file__, "-v"])

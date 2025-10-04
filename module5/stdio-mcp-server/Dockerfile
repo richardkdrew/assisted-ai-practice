@@ -13,6 +13,7 @@ WORKDIR /app
 # Copy project files
 COPY pyproject.toml .
 COPY .python-version .
+COPY uv.lock .
 COPY src/ src/
 
 # Install dependencies (creates .venv)
