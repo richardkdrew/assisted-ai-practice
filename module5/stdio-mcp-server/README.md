@@ -9,7 +9,9 @@ This server implements the MCP protocol for enabling AI assistants (like Claude 
 ### Available Tools
 
 - **ping**: Test connectivity and server responsiveness
-- **get_deployment_status**: Query deployment information from DevOps CLI (Phase 1)
+- **get_deployment_status**: Query deployment information from DevOps CLI
+- **check_health**: Check health status of deployed applications
+- **promote_release**: Promote application releases between environments
 
 #### Ping Tool
 
@@ -156,9 +158,165 @@ Query deployment status for applications across environments with optional filte
 - CLI execution failure: Returns error with exit code and stderr
 
 **Notes**:
-- This is Phase 1 of the DevOps CLI wrapper (get-status only)
-- Future phases will add: `list_releases`, `check_health`, `promote_release`
 - All CLI interactions use async subprocess execution with timeout management
+- Environment names are validated and normalized (case-insensitive)
+
+---
+
+#### check_health
+
+Check the health status of deployed applications across environments.
+
+**Purpose**: Monitor application health by executing health checks via the DevOps CLI.
+
+**Usage with MCP Inspector**:
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "check_health",
+    "arguments": {
+      "env": "prod"
+    }
+  }
+}
+```
+
+**Parameters**:
+- `env` (string, optional): Environment to check (dev, staging, uat, prod). If not provided, checks all environments.
+
+**Returns**:
+- JSON object with health check results:
+  - `status`: "success" or "error"
+  - `health_checks`: Array of health check objects
+  - `environment`: Environment checked (or "all")
+  - `timestamp`: ISO 8601 timestamp of check
+
+**Environment Validation**:
+- Valid environments: `dev`, `staging`, `uat`, `prod`
+- Case-insensitive (e.g., "PROD", "prod", "Prod" all accepted)
+- Whitespace is automatically trimmed
+- Invalid environments rejected immediately with clear error message
+
+**Error Handling**:
+- Timeout (>30s): Returns error with timeout message
+- CLI not found: Returns error indicating missing CLI tool
+- Invalid environment: Returns validation error before CLI execution
+- CLI execution failure: Returns error with exit code and stderr
+
+---
+
+#### promote_release
+
+Promote an application release from one environment to the next in the deployment pipeline.
+
+**Purpose**: Safely promote application versions through the deployment pipeline with comprehensive validation and production safeguards.
+
+**Deployment Pipeline**: dev → staging → uat → prod
+
+**Usage with MCP Inspector**:
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "promote_release",
+    "arguments": {
+      "app": "web-api",
+      "version": "1.2.3",
+      "from_env": "staging",
+      "to_env": "uat"
+    }
+  }
+}
+```
+
+**Parameters** (all required):
+- `app` (string): Application identifier (e.g., "web-api", "mobile-app")
+- `version` (string): Version to promote (e.g., "1.2.3", "v2.0.1")
+- `from_env` (string): Source environment (dev, staging, uat)
+- `to_env` (string): Target environment (staging, uat, prod)
+
+**Returns**:
+- JSON object with promotion results:
+  - `status`: "success" or error thrown
+  - `promotion`: Object with app, version, from_env, to_env, cli_output, execution_time
+  - `production_deployment`: Boolean flag (true if promoting to prod)
+  - `timestamp`: ISO 8601 timestamp
+
+**Validation Rules**:
+
+1. **Non-Empty Parameters**: All 4 parameters required and non-empty after trimming whitespace
+2. **Environment Names**: Must be one of: dev, staging, uat, prod (case-insensitive)
+3. **Promotion Path**: Must follow strict forward flow:
+   - ✅ Valid: dev→staging, staging→uat, uat→prod
+   - ❌ Invalid: Skipping environments (dev→uat, dev→prod, staging→prod)
+   - ❌ Invalid: Backward promotion (staging→dev, prod→uat, etc.)
+   - ❌ Invalid: Same environment (dev→dev)
+
+**Production Safeguards**:
+- Enhanced logging for all production promotions
+- Audit trail logged to stderr with timestamp and caller
+- Non-blocking (promotion proceeds after logging)
+- `production_deployment: true` flag in response
+
+**Timeout**: 300 seconds (5 minutes) for long-running deployments
+
+**Examples**:
+
+1. **Promote from dev to staging**:
+   ```json
+   {
+     "arguments": {
+       "app": "web-api",
+       "version": "1.2.3",
+       "from_env": "dev",
+       "to_env": "staging"
+     }
+   }
+   ```
+
+2. **Promote to production** (with safeguards):
+   ```json
+   {
+     "arguments": {
+       "app": "mobile-app",
+       "version": "2.0.1",
+       "from_env": "uat",
+       "to_env": "prod"
+     }
+   }
+   ```
+
+**Error Handling**:
+- Empty parameters: Validation error before CLI execution
+- Invalid environment: Validation error with list of valid options
+- Invalid promotion path: Validation error with valid next environment
+- Timeout (>300s): RuntimeError with helpful message about checking status manually
+- CLI execution failure: RuntimeError with CLI stderr output
+
+**Example Output**:
+```json
+{
+  "status": "success",
+  "promotion": {
+    "app": "web-api",
+    "version": "1.2.3",
+    "from_env": "staging",
+    "to_env": "uat",
+    "cli_output": "Deployment successful: web-api v1.2.3 promoted to uat",
+    "cli_stderr": "",
+    "execution_time_seconds": 45.2
+  },
+  "production_deployment": false,
+  "timestamp": "2025-10-05T14:30:00Z"
+}
+```
+
+**Notes**:
+- All environment names normalized to lowercase before CLI execution
+- Promotion paths enforced at MCP layer for immediate feedback
+- Production deployments logged with enhanced audit trail
+- CLI timeout set to 300s for long-running deployments
 
 ---
 
@@ -314,7 +472,9 @@ uv run pytest tests/ -v
 - Error handling (4 tests)
 - Graceful shutdown (5 tests)
 - Ping tool (7 tests)
-- **Total**: 19 tests, all passing ✓
+- Promotion validation (15 tests)
+- Promote release integration (8 tests)
+- **Total**: 42 tests, all passing ✓
 
 ## Architecture
 
@@ -364,12 +524,16 @@ NOT_STARTED → HANDSHAKE → ACTIVE → CLOSED
 stdio-mcp-server/
 ├── src/
 │   ├── __init__.py
-│   └── server.py          # Main server implementation
+│   ├── server.py          # Main server implementation
+│   └── validation.py      # Environment and parameter validation
 ├── tests/
 │   ├── __init__.py
 │   ├── test_initialize.py # Initialize handshake tests
 │   ├── test_error_handling.py # Error handling tests
-│   └── test_shutdown.py   # Graceful shutdown tests
+│   ├── test_shutdown.py   # Graceful shutdown tests
+│   ├── test_ping.py       # Ping tool tests
+│   ├── test_promotion_validation.py # Validation layer tests
+│   └── test_promote_release.py # Promote release integration tests
 ├── pyproject.toml         # UV project configuration
 ├── .python-version        # Python 3.11
 └── README.md              # This file
