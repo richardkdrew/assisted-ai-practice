@@ -3,19 +3,19 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 1.0.0 → 1.1.0
-Rationale: Added Principle VII (Commit Discipline) - expands governance with new mandatory practice
+Version Change: 1.1.0 → 1.2.0
+Rationale: Added Principle VIII (Automation via Make) - mandates use of make commands for all development tasks
 
 Modified Principles: None
-Added Sections: Principle VII - Commit Discipline
+Added Sections: Principle VIII - Automation via Make
 Removed Sections: None
 
 Templates Status:
 ✅ plan-template.md - reviewed, no conflicts
 ✅ spec-template.md - reviewed, no conflicts
-✅ tasks-template.md - reviewed, compatible (note on line 97: "Commit after each task" aligns with new principle)
+✅ tasks-template.md - reviewed, compatible
 
-Follow-up TODOs: None
+Previous Version: 1.0.0 → 1.1.0 (Added Principle VII - Commit Discipline)
 -->
 
 ## Core Principles
@@ -82,6 +82,21 @@ After each completed feature or logical unit of work:
 
 **Rationale**: Regular commits create checkpoints for rollback, make code review easier, and maintain clear project history. Each commit should represent a coherent, functional change.
 
+### VIII. Automation via Make
+All development tasks MUST be executed through make commands:
+- MUST use Makefile for all common operations (install, test, run, build, deploy)
+- MUST NOT run raw commands directly (uv, docker, pytest, etc.)
+- All make targets MUST be documented with inline comments
+- CI/CD pipelines MUST use make targets, not direct commands
+
+**Examples**:
+- ✅ `make install` (correct)
+- ❌ `cd stdio-mcp-server && uv sync` (wrong)
+- ✅ `make docker-up` (correct)
+- ❌ `docker-compose up -d` (wrong)
+
+**Rationale**: Centralized automation ensures consistency across environments, provides self-documenting workflows, and prevents command drift. Make targets abstract implementation details and enforce project standards.
+
 ## Anti-Patterns
 
 The following practices are PROHIBITED:
@@ -138,4 +153,4 @@ When communicating during development:
 Constitution changes MUST be committed with descriptive messages following the pattern:
 `docs: amend constitution to vX.Y.Z (brief description of changes)`
 
-**Version**: 1.1.0 | **Ratified**: 2025-10-04 | **Last Amended**: 2025-10-04
+**Version**: 1.2.0 | **Ratified**: 2025-10-04 | **Last Amended**: 2025-10-04

@@ -1,7 +1,7 @@
 # MCP STDIO Server - Claude Code Development Guidelines
 
 **Last Updated**: 2025-10-04
-**Constitution Version**: 1.1.0
+**Constitution Version**: 1.2.0
 
 ## ⚠️ MANDATORY: Read This First
 
@@ -88,7 +88,9 @@ When faced with a choice, prefer:
 **Framework**: MCP Python SDK (official)
 **Package Manager**: UV
 **Protocol**: MCP STDIO (JSON-RPC 2.0)
-**Testing**: MCP Inspector (manual), pytest (future)
+**Deployment**: Docker with docker-compose (recommended)
+**Testing**: MCP Inspector (manual), pytest
+**Automation**: Make (REQUIRED for all tasks)
 
 ## Project Structure
 
@@ -98,36 +100,90 @@ module5/
 │   ├── src/
 │   │   ├── __init__.py
 │   │   └── server.py          # Main server implementation
+│   ├── tests/
+│   │   ├── test_initialize.py # Initialize handshake tests
+│   │   ├── test_error_handling.py # Error handling tests
+│   │   └── test_shutdown.py   # Graceful shutdown tests
 │   ├── pyproject.toml         # UV project configuration
 │   ├── .python-version        # Python version (3.11+)
+│   ├── Dockerfile             # Multi-stage Docker build
+│   ├── .dockerignore          # Docker build exclusions
 │   └── README.md              # Server documentation
 ├── .specify/
 │   ├── memory/
 │   │   └── constitution.md    # Project constitution (source of truth)
 │   └── templates/             # Planning templates
-├── Makefile                   # Project automation
+├── Makefile                   # Project automation (REQUIRED)
+├── docker-compose.yml         # Docker orchestration
 ├── .mcp.json                  # MCP client configuration
 └── CLAUDE.md                  # This file
 ```
 
-## Common Commands
+## ⚠️ MANDATORY: Use Make Commands
+
+**CONSTITUTIONAL REQUIREMENT**: All development tasks MUST use make commands. Direct command execution bypasses project standards and automation.
+
+### Development Commands (UV-based)
 
 ```bash
 # Install dependencies
 make install
-# or: cd stdio-mcp-server && uv sync
 
 # Run with MCP Inspector (testing)
 make dev
-# or: cd stdio-mcp-server && uv run mcp dev src/server.py
 
-# Run server directly
+# Run server directly (production)
 make run
-# or: cd stdio-mcp-server && uv run python -m src.server
 
-# Code quality (future)
-make lint
-make format
+# Run tests
+make test
+
+# Clean build artifacts
+make clean
+
+# Show all available commands
+make help
+```
+
+### Docker Commands (Recommended for Production)
+
+```bash
+# Build Docker image
+make docker-build
+
+# Start server in background
+make docker-up
+
+# View server logs
+make docker-logs
+
+# Stop server
+make docker-down
+
+# Run server with MCP Inspector
+make docker-test
+
+# Run server in interactive mode (STDIO)
+make docker-interactive
+
+# Clean up Docker resources
+make docker-clean
+```
+
+### ❌ DO NOT Run Direct Commands
+
+```bash
+# WRONG: Direct UV commands
+uv sync                    # ❌ Use: make install
+uv run python -m src.server # ❌ Use: make run
+
+# WRONG: Direct Docker commands
+docker-compose up          # ❌ Use: make docker-up
+docker-compose build       # ❌ Use: make docker-build
+
+# CORRECT: Always use make
+make install               # ✅
+make docker-up             # ✅
 ```
 
 ## Code Style (Python)
@@ -195,9 +251,11 @@ print("Message")  # ❌ Goes to stdout
 
 ## Recent Changes
 
-1. **Feature 001-stdio-mcp-server planned** (2025-10-04): Implementation plan created with research, data model, contracts, and quickstart
-2. **Constitution v1.1.0** (2025-10-04): Added Commit Discipline principle
-3. **Constitution v1.0.0** (2025-10-04): Initial constitution created
+1. **Docker support added** (2025-10-04): Multi-stage Dockerfile, docker-compose.yml, make commands for Docker workflows
+2. **Feature 001-stdio-mcp-server implemented** (2025-10-04): Complete MCP server with 12 passing tests
+3. **Feature 001-stdio-mcp-server planned** (2025-10-04): Implementation plan created with research, data model, contracts, and quickstart
+4. **Constitution v1.1.0** (2025-10-04): Added Commit Discipline principle
+5. **Constitution v1.0.0** (2025-10-04): Initial constitution created
 
 ## Pre-Implementation Checklist
 

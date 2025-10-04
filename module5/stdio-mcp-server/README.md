@@ -32,6 +32,53 @@ This server implements the MCP protocol for enabling AI assistants (like Claude 
 
 ## Usage
 
+### Docker (Recommended for Production)
+
+**Prerequisites**: Docker and Docker Compose installed
+
+#### Quick Start with Docker Compose
+
+From the `module5` directory:
+
+```bash
+# Build and start the server
+docker-compose up -d mcp-server
+
+# View logs
+docker-compose logs -f mcp-server
+
+# Stop the server
+docker-compose down
+```
+
+#### With MCP Inspector (Testing)
+
+```bash
+# Start server and inspector
+docker-compose --profile inspector up -d
+
+# Inspector available at http://localhost:5173
+# Server logs: docker-compose logs -f mcp-server
+```
+
+#### Interactive Mode (STDIO)
+
+```bash
+# Run with interactive terminal
+docker-compose run --rm mcp-server
+
+# Send JSON-RPC messages via stdin, receive via stdout
+# Press Ctrl+D to exit
+```
+
+#### Build Docker Image Manually
+
+```bash
+cd stdio-mcp-server
+docker build -t stdio-mcp-server:latest .
+docker run -it stdio-mcp-server:latest
+```
+
 ### Development Mode (with MCP Inspector)
 
 The MCP Inspector provides an interactive web UI for testing the server:
@@ -122,6 +169,15 @@ uv run pytest tests/ -v
   - Signal handlers (SIGINT, SIGTERM)
   - MCP protocol handlers
   - Main event loop
+
+### Docker Architecture
+
+- **Multi-stage build**: Builder stage + minimal runtime stage
+- **Base image**: Python 3.11-slim (minimal footprint)
+- **Package manager**: UV (fast, reproducible)
+- **Image size**: ~150MB (optimized)
+- **Health checks**: Python import verification
+- **Resource limits**: Configurable via docker-compose.yml
 
 ### Protocol Compliance
 
@@ -232,6 +288,53 @@ uv run pytest tests/test_initialize.py -v
 
 # Run with debugging
 uv run pytest tests/ -vv --tb=long
+```
+
+### Docker Issues
+
+#### Build fails
+
+```bash
+# Check Docker is running
+docker --version
+docker-compose --version
+
+# Rebuild without cache
+cd module5
+docker-compose build --no-cache mcp-server
+
+# Check build logs
+docker-compose build mcp-server 2>&1 | tee build.log
+```
+
+#### Container won't start
+
+```bash
+# Check container logs
+docker-compose logs mcp-server
+
+# Check container status
+docker-compose ps
+
+# Verify health check
+docker inspect stdio-mcp-server | grep -A 10 Health
+```
+
+#### STDIO not working in container
+
+- Ensure `stdin_open: true` and `tty: true` in docker-compose.yml
+- Use `docker-compose run --rm mcp-server` for interactive mode
+- Check that protocol messages go to stdout and logs to stderr
+
+#### Resource limits too restrictive
+
+Edit docker-compose.yml to increase limits:
+```yaml
+deploy:
+  resources:
+    limits:
+      cpus: '1.0'      # Increase from 0.5
+      memory: 512M     # Increase from 256M
 ```
 
 ## References

@@ -1,6 +1,16 @@
 {
     "mcpServers": {
-        "stdio-server": {
+        "stdio-server-docker": {
+            "command": "docker",
+            "args": [
+                "compose",
+                "run",
+                "--rm",
+                "mcp-server"
+            ],
+            "cwd": "/Users/richarddrew/working/assitant-to-agentic/practice-files/assisted-ai-practice/module5"
+        },
+        "stdio-server-uv": {
             "command": "uv",
             "args": [
                 "--directory",

@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  mcp-server:
+    build:
+      context: ./stdio-mcp-server
+      dockerfile: Dockerfile
+    container_name: stdio-mcp-server
+
+    # STDIO mode: interactive terminal for stdin/stdout
+    stdin_open: true
+    tty: true
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Resource limits (optional, adjust as needed)
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+    # Environment variables
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import src.server; print('OK')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # Optional: MCP Inspector for testing (web UI)
+  mcp-inspector:
+    image: node:20-slim
+    container_name: mcp-inspector
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    ports:
+      - "5173:5173"
+    command: >
+      sh -c "
+      npm install -g @modelcontextprotocol/inspector &&
+      npx @modelcontextprotocol/inspector
+      "
+    profiles:
+      - inspector
+    # Only run when explicitly requested: docker-compose --profile inspector up
