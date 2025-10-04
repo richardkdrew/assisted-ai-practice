@@ -4,7 +4,43 @@ A minimal Model Context Protocol (MCP) server using STDIO transport, built with 
 
 ## Overview
 
-This server implements the MCP protocol for enabling AI assistants (like Claude Desktop) to access tools, resources, and prompts via standard input/output communication. Version 1.0 provides the core server infrastructure with empty capabilities - tools, resources, and prompts will be added in future versions.
+This server implements the MCP protocol for enabling AI assistants (like Claude Desktop) to access tools, resources, and prompts via standard input/output communication.
+
+### Available Tools
+
+#### Ping Tool
+
+Test connectivity by sending a message to the server and receiving an echoed response.
+
+**Purpose**: Verify that the MCP server is running and responsive.
+
+**Usage with MCP Inspector**:
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "ping",
+    "arguments": {
+      "message": "test"
+    }
+  }
+}
+```
+
+**Parameters**:
+- `message` (string, required): The message to echo back
+
+**Returns**:
+- String in format: `"Pong: {message}"`
+
+**Example**:
+- Input: `{"message": "Hello, MCP!"}`
+- Output: `"Pong: Hello, MCP!"`
+
+**Features**:
+- Preserves Unicode and special characters
+- Maintains exact whitespace
+- Validates parameter types (string required)
 
 ## Requirements
 
@@ -157,7 +193,8 @@ uv run pytest tests/ -v
 - Initialize handshake (3 tests)
 - Error handling (4 tests)
 - Graceful shutdown (5 tests)
-- **Total**: 12 tests, all passing ✓
+- Ping tool (7 tests)
+- **Total**: 19 tests, all passing ✓
 
 ## Architecture
 

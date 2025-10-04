@@ -61,14 +61,26 @@ mcp = FastMCP("stdio-mcp-server")
 # Server Capabilities (Tools, Resources, Prompts)
 # ============================================================================
 
-# Per plan.md: v1 has no tools, resources, or prompts implemented.
-# FastMCP will automatically return empty lists for these capabilities.
+
+@mcp.tool()
+async def ping(message: str) -> str:
+    """
+    Test connectivity by echoing back a message.
+
+    This tool accepts a message string and returns it prefixed with "Pong: ".
+    Useful for verifying that the MCP server is running and responsive.
+
+    Args:
+        message: The message to echo back
+
+    Returns:
+        A pong response with the echoed message in format "Pong: {message}"
+    """
+    logger.debug(f"Ping received: {message}")
+    return f"Pong: {message}"
+
+
 # Future features can be added using decorators:
-#
-# @mcp.tool()
-# def example_tool(arg: str) -> str:
-#     """Tool description"""
-#     return f"Result: {arg}"
 #
 # @mcp.resource("resource://example")
 # def example_resource() -> str:
