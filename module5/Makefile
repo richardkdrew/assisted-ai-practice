@@ -2,7 +2,7 @@
 # Provides convenient commands for common operations
 # Per Constitution: MUST use make commands for all development tasks
 
-.PHONY: install dev run lint format clean help test docker-build docker-up docker-down docker-logs docker-test docker-inspector docker-clean
+.PHONY: install dev run lint format clean help test inspector docker-build docker-up docker-down docker-logs docker-test docker-inspector docker-clean
 
 STDIO_SERVER_DIR = stdio-mcp-server
 
@@ -14,8 +14,11 @@ help: ## Display this help message
 install: ## Install dependencies via UV
 	cd $(STDIO_SERVER_DIR) && uv sync
 
-dev: ## Run MCP Inspector for interactive testing
+dev: ## Run MCP Inspector for interactive testing (alias for inspector)
 	cd $(STDIO_SERVER_DIR) && uv run mcp dev src/server.py
+
+inspector: ## Run MCP Inspector with npx (works better than dev)
+	npx @modelcontextprotocol/inspector uv --directory $(STDIO_SERVER_DIR) run python -m src.server
 
 run: ## Run the server directly (for production use)
 	cd $(STDIO_SERVER_DIR) && uv run python -m src.server
