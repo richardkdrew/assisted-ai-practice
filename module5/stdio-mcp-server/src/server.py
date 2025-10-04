@@ -83,7 +83,14 @@ async def ping(message: str) -> str:
 # T029: Import DevOps CLI wrapper tools
 # This import registers MCP tools via @mcp.tool() decorator
 # Tools registered: get_deployment_status
-from .tools import devops  # noqa: F401
+try:
+    from .tools import devops  # noqa: F401
+except ImportError:
+    # Support both package import and direct execution for mcp dev
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).parent))
+    from tools import devops  # noqa: F401
 
 
 # Future features can be added using decorators:
