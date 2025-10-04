@@ -80,6 +80,12 @@ async def ping(message: str) -> str:
     return f"Pong: {message}"
 
 
+# T029: Import DevOps CLI wrapper tools
+# This import registers MCP tools via @mcp.tool() decorator
+# Tools registered: get_deployment_status
+from .tools import devops  # noqa: F401
+
+
 # Future features can be added using decorators:
 #
 # @mcp.resource("resource://example")

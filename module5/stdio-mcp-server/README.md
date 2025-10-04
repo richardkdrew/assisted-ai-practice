@@ -8,6 +8,9 @@ This server implements the MCP protocol for enabling AI assistants (like Claude 
 
 ### Available Tools
 
+- **ping**: Test connectivity and server responsiveness
+- **get_deployment_status**: Query deployment information from DevOps CLI (Phase 1)
+
 #### Ping Tool
 
 Test connectivity by sending a message to the server and receiving an echoed response.
@@ -41,6 +44,123 @@ Test connectivity by sending a message to the server and receiving an echoed res
 - Preserves Unicode and special characters
 - Maintains exact whitespace
 - Validates parameter types (string required)
+
+---
+
+### DevOps CLI Wrapper Tools
+
+Tools for interacting with the DevOps CLI (`./acme-devops-cli/devops-cli`) to query deployment information, check health, and manage releases across environments.
+
+#### get_deployment_status
+
+Query deployment status for applications across environments with optional filtering.
+
+**Purpose**: Retrieve current deployment information including versions, deploy times, and status across all applications and environments.
+
+**Usage with MCP Inspector**:
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "get_deployment_status",
+    "arguments": {
+      "application": "web-app",
+      "environment": "prod"
+    }
+  }
+}
+```
+
+**Parameters**:
+- `application` (string, optional): Filter by application ID (e.g., "web-app", "api-service")
+- `environment` (string, optional): Filter by environment (e.g., "prod", "staging", "uat")
+
+**Returns**:
+- JSON object with deployment information:
+  - `status`: "success" or "error"
+  - `deployments`: Array of deployment objects
+  - `total_count`: Number of deployments returned
+  - `filters_applied`: Object showing which filters were used
+  - `timestamp`: ISO 8601 timestamp of query
+
+**Examples**:
+
+1. **Get all deployments** (no filters):
+   ```json
+   {
+     "arguments": {}
+   }
+   ```
+   Returns deployments across all applications and environments.
+
+2. **Filter by application**:
+   ```json
+   {
+     "arguments": {
+       "application": "web-app"
+     }
+   }
+   ```
+   Returns all deployments for "web-app" across all environments.
+
+3. **Filter by environment**:
+   ```json
+   {
+     "arguments": {
+       "environment": "prod"
+     }
+   }
+   ```
+   Returns all production deployments across all applications.
+
+4. **Filter by both**:
+   ```json
+   {
+     "arguments": {
+       "application": "web-app",
+       "environment": "prod"
+     }
+   }
+   ```
+   Returns only web-app production deployments.
+
+**Example Output**:
+```json
+{
+  "status": "success",
+  "deployments": [
+    {
+      "id": "deploy-001",
+      "applicationId": "web-app",
+      "environment": "prod",
+      "version": "v2.1.3",
+      "status": "deployed",
+      "deployedAt": "2024-01-15T10:30:00Z",
+      "deployedBy": "alice@company.com",
+      "commitHash": "abc123def456"
+    }
+  ],
+  "total_count": 1,
+  "filters_applied": {
+    "application": "web-app",
+    "environment": "prod"
+  },
+  "timestamp": "2025-10-04T17:00:00Z"
+}
+```
+
+**Error Handling**:
+- Timeout (>30s): Returns error with timeout message
+- CLI not found: Returns error indicating missing CLI tool
+- Invalid JSON: Returns error with parse details
+- CLI execution failure: Returns error with exit code and stderr
+
+**Notes**:
+- This is Phase 1 of the DevOps CLI wrapper (get-status only)
+- Future phases will add: `list_releases`, `check_health`, `promote_release`
+- All CLI interactions use async subprocess execution with timeout management
+
+---
 
 ## Requirements
 
