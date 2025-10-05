@@ -3,7 +3,7 @@
 # Per Constitution: MUST use make commands for all development tasks
 
 .PHONY: install dev run lint format clean help test inspector docker-build docker-up docker-down docker-logs docker-test docker-inspector docker-clean
-.PHONY: http-install http-run http-docker-build http-docker-up http-docker-down http-clean http-help api-up api-down
+.PHONY: http-install http-run http-docker-build http-docker-up http-docker-down http-clean http-help api-up api-down kill-ports
 
 STDIO_SERVER_DIR = stdio-mcp-server
 HTTP_SERVER_DIR = http-mcp-server
@@ -11,6 +11,39 @@ HTTP_SERVER_DIR = http-mcp-server
 help: ## Display this help message
 	@echo "Available targets:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
+
+kill-ports: ## Kill processes on common development ports (3001, 5173, 6274, 6277, 8000, 5000)
+	@echo "Killing processes on common development ports..."
+	@echo "Checking port 3001 (FastMCP Inspector)..."
+	@lsof -ti:3001 | xargs kill -9 2>/dev/null || echo "  No process on port 3001"
+	@echo "Checking port 5173 (MCP Inspector)..."
+	@lsof -ti:5173 | xargs kill -9 2>/dev/null || echo "  No process on port 5173"
+	@echo "Checking port 6274 (MCP Inspector UI)..."
+	@lsof -ti:6274 | xargs kill -9 2>/dev/null || echo "  No process on port 6274"
+	@echo "Checking port 6277 (MCP Proxy Server)..."
+	@lsof -ti:6277 | xargs kill -9 2>/dev/null || echo "  No process on port 6277"
+	@echo "Checking port 8000 (FastAPI/DevOps API)..."
+	@lsof -ti:8000 | xargs kill -9 2>/dev/null || echo "  No process on port 8000"
+	@echo "Checking port 5000 (Flask API)..."
+	@lsof -ti:5000 | xargs kill -9 2>/dev/null || echo "  No process on port 5000"
+	@echo "Port cleanup complete!"
+
+start-docker: ## Start Docker Desktop (macOS)
+	@echo "Starting Docker Desktop..."
+	@open -a Docker || echo "Docker Desktop not found. Please install Docker Desktop or start it manually."
+	@echo "Waiting for Docker to start..."
+	@sleep 10
+	@docker info >/dev/null 2>&1 && echo "Docker is running!" || echo "Docker may still be starting. Please wait and try again."
+
+http-dev-local: ## Run HTTP MCP server with local API (no Docker required)
+	@echo "Starting local acme-devops-api with uv..."
+	@cd acme-devops-api && uv run python app.py &
+	@echo "Waiting for local API to be ready..."
+	@sleep 3
+	@echo "Starting HTTP MCP server with FastMCP Inspector..."
+	@echo "FastMCP Inspector will be available at http://localhost:3001"
+	@echo "Local API available at http://localhost:8000"
+	cd $(HTTP_SERVER_DIR) && uv run fastmcp dev server.py
 
 # Development Commands (UV-based)
 install: ## Install dependencies via UV

@@ -14,4 +14,3 @@ Each tool should:
 - Pass query parameters correctly to the API
 
 Please create an implementation plan for these three additional tools. Purge all contents from the `IMPLEMENTATION-PLAN.md` file and reuse it for this new plan.
-

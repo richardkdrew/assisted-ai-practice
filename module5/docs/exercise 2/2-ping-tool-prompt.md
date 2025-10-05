@@ -9,7 +9,7 @@ The ping tool should:
 - Be properly registered with the MCP server
 - Include appropriate input schema validation
 
-Please create an implementation plan for adding this ping tool.
+Please create an implementation plan for adding this ping tool. Purge all contents from the `IMPLEMENTATION-PLAN.md` file and reuse it for this new plan.
 
 ## Expected Outcome
 
