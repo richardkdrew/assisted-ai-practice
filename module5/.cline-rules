@@ -1,0 +1,116 @@
+# Cline Architecture Rules Reference
+
+## ⚠️ MANDATORY: Read Constitutional Sources First
+
+**BEFORE ANY DEVELOPMENT**: Read these authoritative documents:
+1. **`.specify/memory/constitution.md`** - Constitutional requirements (v1.2.0)
+2. **`CLAUDE.md`** - Development guidelines (mandatory)
+3. **`ARCHITECTURE-RULES.md`** - Implementation patterns (this is just quick reference)
+
+## Constitutional Principles (v1.2.0)
+
+### I. Simplicity First
+Build minimal, functional solutions. No unnecessary complexity.
+
+### II. Explicit Over Implicit
+**MANDATORY**: Explicit error handling for ALL external interactions (File I/O, JSON, STDIO, network).
+
+### III. Type Safety & Documentation
+**REQUIRED**: Type hints on all functions, structured logging to stderr only.
+
+### IV. Human-in-the-Loop Development
+**STOP before implementing**: Explain → Discuss → Get approval → Then proceed.
+
+### V. Standard Libraries & Dependencies
+Python 3.11+, UV only, prefer standard libraries, justify external deps.
+
+### VI. MCP Protocol Compliance
+stdin/stdout only, JSON-RPC 2.0, NO prints/logs to stdout, diagnostics to stderr.
+
+### VII. Commit Discipline
+**MUST** commit after each feature, conventional format, working state only.
+
+### VIII. Automation via Make
+**MANDATORY**: All tasks through make commands. NO direct uv/docker/pytest.
+
+## Constitutional Violations (PROHIBITED)
+
+### NEVER Do
+- ❌ Log to stdout (breaks MCP protocol - Principle VI)
+- ❌ Skip error handling (violates Principle II)
+- ❌ Use direct commands instead of make (violates Principle VIII)
+- ❌ Commit broken code (violates Principle VII)
+- ❌ Skip human approval (violates Principle IV)
+- ❌ Add complexity without justification (violates Principle I)
+
+### ALWAYS Do
+- ✅ Explicit error handling for ALL external interactions
+- ✅ Type hints on ALL functions
+- ✅ Structured logging to stderr only
+- ✅ Use make commands for all tasks
+- ✅ Get human approval before implementing
+- ✅ Commit after each working feature
+
+## Quick Implementation Patterns
+
+### MCP Tool Structure
+```python
+@mcp.tool()
+async def tool_name(param: str) -> dict[str, Any]:
+    """REQUIRED: Docstring with Args/Returns/Raises"""
+    try:
+        # CONSTITUTIONAL: Explicit error handling
+        result = await execute_cli_command(args)
+        if result.returncode != 0:
+            raise RuntimeError(f"CLI failed: {result.stderr}")
+        return {"status": "success", "data": result.stdout}
+    except Exception as e:
+        logger.error(f"Error: {e}")
+        raise
+```
+
+### Logging Configuration
+```python
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    stream=sys.stderr  # CRITICAL: Must be stderr, not stdout
+)
+```
+
+## Constitutional Commands (MANDATORY)
+
+```bash
+# REQUIRED: Use make commands only
+make help            # Show all available commands
+make install         # Install dependencies  
+make run            # Run server
+make test           # Run tests
+make docker-up      # Start with Docker
+
+# PROHIBITED: Direct commands (Constitutional violation)
+# uv sync            # ❌ Use: make install
+# docker-compose up  # ❌ Use: make docker-up
+```
+
+## Environment Rules
+- **Valid**: dev, staging, uat, prod
+- **Promotion Flow**: dev → staging → uat → prod (forward only)
+- **No Skipping**: Must follow sequential promotion
+- **No Backward**: Cannot promote to earlier environment
+
+## Files to Reference
+- `.specify/memory/constitution.md` - **CONSTITUTIONAL REQUIREMENTS**
+- `CLAUDE.md` - **DEVELOPMENT GUIDELINES** 
+- `stdio-mcp-server/src/server.py` - Implementation patterns
+- `stdio-mcp-server/src/validation.py` - Validation patterns
+- `Makefile` - **REQUIRED** automation commands
+
+## Pre-Implementation Checklist
+- [ ] Read constitution and CLAUDE.md
+- [ ] Explain approach to human
+- [ ] Get explicit approval
+- [ ] Plan error handling for all external interactions
+- [ ] Ensure type hints on all functions
+- [ ] Plan to use make commands only
+- [ ] Plan conventional commit message

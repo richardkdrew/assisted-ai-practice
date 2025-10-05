@@ -6,20 +6,9 @@
                 "compose",
                 "run",
                 "--rm",
-                "mcp-server"
+                "stdio-mcp-server"
             ],
             "cwd": "/Users/richarddrew/working/assitant-to-agentic/practice-files/assisted-ai-practice/module5"
-        },
-        "stdio-server-dockerOLD": {
-            "command": "docker",
-            "args": [
-                "exec",
-                "-i",
-                "stdio-mcp-server",
-                "python",
-                "-m",
-                "src.server"
-            ]
         },
         "stdio-server-uv": {
             "command": "uv",
@@ -32,6 +21,16 @@
                 "src.server"
             ]
         },
+        "http-server-uv": {
+            "command": "uv",
+            "args": [
+                "--directory",
+                "http-mcp-server",
+                "run",
+                "python",
+                "server.py"
+            ]
+        },
         "stdio-server-local": {
             "command": "python",
             "args": [
@@ -39,6 +38,13 @@
                 "src.server"
             ],
             "cwd": "stdio-mcp-server"
+        },
+        "http-server-local": {
+            "command": "python",
+            "args": [
+                "server.py"
+            ],
+            "cwd": "http-mcp-server"
         }
     }
 }

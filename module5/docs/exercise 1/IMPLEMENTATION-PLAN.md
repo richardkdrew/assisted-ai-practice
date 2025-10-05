@@ -1,6 +1,7 @@
 # MCP STDIO Server Implementation Plan
 
 ## Overview
+
 This plan outlines the implementation of a minimal Python-based MCP (Model Context Protocol) server using STDIO communication. The server will use the official MCP Python SDK and be managed with UV for dependency management.
 
 ## Project Structure
@@ -22,9 +23,11 @@ module5/
 ## Implementation Phases
 
 ### Phase 1: Project Setup
+
 **Goal**: Initialize the Python project structure with UV
 
-**Tasks**:
+**Tasks**
+
 1. Create `stdio-mcp-server` directory
 2. Initialize UV project with `uv init`
 3. Set Python version to 3.11+ (recommended for MCP)
