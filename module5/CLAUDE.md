@@ -251,12 +251,13 @@ print("Message")  # ❌ Goes to stdout
 
 ## Recent Changes
 
-1. **Feature 006-add-promote-release implemented** (2025-10-05): Promote release tool with comprehensive validation - wraps `devops-cli promote` with strict promotion path validation (dev→staging→uat→prod), production safeguards with enhanced audit logging, 300s timeout for long-running deployments, 23 tests total (15 validation + 8 integration)
-2. **Feature 005-env-validation-i implemented** (2025-10-05): Environment validation layer - centralized validation for environment names (dev, staging, uat, prod) with defense-in-depth security, <10ms validation overhead, 9 unit tests added
-3. **Integration tests added** (2025-10-05): Added 12 integration tests for list-releases and check-health tools using FastMCP Client with in-memory transport pattern - provides fast, reliable end-to-end testing without external processes
-4. **Feature 004-now-that-i implemented** (2025-10-04): Two additional DevOps CLI tools (list-releases & check-health) - extends existing CLI wrapper with release history queries and environment health checks, 13 contract tests + 12 integration tests = 25 tests total
-5. **Feature 003-cli-wrapper implemented** (2025-10-04): DevOps CLI wrapper with get_deployment_status tool - subprocess execution module and MCP tools for wrapping external CLI
-6. **FastMCP migration** (2025-10-04): Migrated from MCP SDK to FastMCP framework for simpler server implementation
+1. **HTTP MCP Server Pagination Support implemented** (2025-10-05): Added comprehensive pagination support to `get_deployment_status` and `get_log_entries` tools - includes `limit` and `offset` parameters with sensible defaults (limit=50), parameter validation, consistent pagination metadata structure with human-readable feedback ("Showing 1-50 of 120 results"), and full backward compatibility
+2. **Feature 006-add-promote-release implemented** (2025-10-05): Promote release tool with comprehensive validation - wraps `devops-cli promote` with strict promotion path validation (dev→staging→uat→prod), production safeguards with enhanced audit logging, 300s timeout for long-running deployments, 23 tests total (15 validation + 8 integration)
+3. **Feature 005-env-validation-i implemented** (2025-10-05): Environment validation layer - centralized validation for environment names (dev, staging, uat, prod) with defense-in-depth security, <10ms validation overhead, 9 unit tests added
+4. **Integration tests added** (2025-10-05): Added 12 integration tests for list-releases and check-health tools using FastMCP Client with in-memory transport pattern - provides fast, reliable end-to-end testing without external processes
+5. **Feature 004-now-that-i implemented** (2025-10-04): Two additional DevOps CLI tools (list-releases & check-health) - extends existing CLI wrapper with release history queries and environment health checks, 13 contract tests + 12 integration tests = 25 tests total
+6. **Feature 003-cli-wrapper implemented** (2025-10-04): DevOps CLI wrapper with get_deployment_status tool - subprocess execution module and MCP tools for wrapping external CLI
+7. **FastMCP migration** (2025-10-04): Migrated from MCP SDK to FastMCP framework for simpler server implementation
 
 ## Pre-Implementation Checklist
 

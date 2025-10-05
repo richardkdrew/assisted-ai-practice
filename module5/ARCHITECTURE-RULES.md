@@ -146,6 +146,38 @@ return {
 }
 ```
 
+#### 5. Pagination Support (HTTP MCP Server)
+```python
+# REQUIRED: Pagination parameters with validation
+@mcp.tool()
+async def get_data(
+    limit: Optional[int] = None,
+    offset: Optional[int] = None
+) -> dict[str, Any]:
+    # Apply defaults and validate
+    effective_limit = 50 if limit is None else limit
+    effective_offset = 0 if offset is None else offset
+    
+    if effective_limit <= 0:
+        raise ValueError("Limit must be a positive integer")
+    if effective_offset < 0:
+        raise ValueError("Offset must be a non-negative integer")
+    
+    # Include pagination metadata in response
+    return {
+        "status": "success",
+        "data": [...],
+        "pagination": {
+            "total_count": total,
+            "returned_count": returned,
+            "limit": effective_limit,
+            "offset": effective_offset,
+            "has_more": has_more,
+            "page_info": f"Showing {start}-{end} of {total} results"
+        }
+    }
+```
+
 ---
 
 ## 🛡️ Validation Layer Architecture
