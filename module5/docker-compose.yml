@@ -1,0 +1,156 @@
+version: '3.8'
+
+services:
+  # STDIO MCP Server
+  stdio-mcp-server:
+    build:
+      context: ./stdio-mcp-server
+      dockerfile: Dockerfile
+    container_name: stdio-mcp-server
+
+    # STDIO mode: interactive terminal for stdin/stdout
+    stdin_open: true
+    tty: true
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Resource limits (optional, adjust as needed)
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+    # Environment variables
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import src.server; print('OK')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # HTTP MCP Server
+  http-mcp-server:
+    build:
+      context: ./http-mcp-server
+      dockerfile: Dockerfile
+    container_name: http-mcp-server
+    depends_on:
+      - acme-devops-api
+
+    # HTTP mode: expose port for HTTP transport
+    ports:
+      - "3000:3000"
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+    # Environment variables
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+      - API_BASE_URL=http://acme-devops-api:8000
+      - HTTP_TIMEOUT=30.0
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:3000/health', timeout=5.0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    networks:
+      - mcp-network
+
+  # acme-devops-api (for HTTP MCP server integration)
+  acme-devops-api:
+    build:
+      context: ./acme-devops-api
+      dockerfile: Dockerfile
+    container_name: acme-devops-api
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+    # Environment variables
+    environment:
+      - PYTHONUNBUFFERED=1
+      - HOST=0.0.0.0
+      - PORT=8000
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    networks:
+      - mcp-network
+
+  # Optional: MCP Inspector for testing (web UI)
+  mcp-inspector:
+    image: node:20-slim
+    container_name: mcp-inspector
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    ports:
+      - "5173:5173"
+    command: >
+      sh -c "
+      npm install -g @modelcontextprotocol/inspector &&
+      npx @modelcontextprotocol/inspector
+      "
+    profiles:
+      - inspector
+    # Only run when explicitly requested: docker-compose --profile inspector up
+
+networks:
+  mcp-network:
+    driver: bridge

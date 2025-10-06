@@ -1,0 +1,280 @@
+{
+  "toolName": "get_deployment_status",
+  "description": "Get deployment status information for applications across environments from the DevOps CLI tool",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "application": {
+        "type": "string",
+        "description": "Optional application filter (e.g., 'web-app', 'api-service'). If not provided, returns all applications."
+      },
+      "environment": {
+        "type": "string",
+        "description": "Optional environment filter (e.g., 'prod', 'staging', 'uat'). If not provided, returns all environments."
+      }
+    },
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "required": ["status", "deployments", "total_count", "filters_applied", "timestamp"],
+    "properties": {
+      "status": {
+        "type": "string",
+        "enum": ["success", "error"],
+        "description": "Overall request status"
+      },
+      "deployments": {
+        "type": "array",
+        "description": "Array of deployment objects matching the filters",
+        "items": {
+          "type": "object",
+          "required": ["id", "applicationId", "environment", "version", "status", "deployedAt", "deployedBy", "commitHash"],
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Unique deployment identifier"
+            },
+            "applicationId": {
+              "type": "string",
+              "description": "Application identifier"
+            },
+            "environment": {
+              "type": "string",
+              "description": "Deployment environment"
+            },
+            "version": {
+              "type": "string",
+              "description": "Deployed version (semantic versioning)"
+            },
+            "status": {
+              "type": "string",
+              "description": "Deployment status"
+            },
+            "deployedAt": {
+              "type": "string",
+              "description": "ISO 8601 timestamp of deployment"
+            },
+            "deployedBy": {
+              "type": "string",
+              "description": "Email of deployer"
+            },
+            "commitHash": {
+              "type": "string",
+              "description": "Git commit hash"
+            }
+          }
+        }
+      },
+      "total_count": {
+        "type": "integer",
+        "description": "Number of deployments returned"
+      },
+      "filters_applied": {
+        "type": "object",
+        "required": ["application", "environment"],
+        "properties": {
+          "application": {
+            "type": ["string", "null"],
+            "description": "Application filter that was applied"
+          },
+          "environment": {
+            "type": ["string", "null"],
+            "description": "Environment filter that was applied"
+          }
+        }
+      },
+      "timestamp": {
+        "type": "string",
+        "description": "ISO 8601 timestamp of response generation"
+      }
+    }
+  },
+  "examples": [
+    {
+      "name": "Get all deployments (no filters)",
+      "input": {},
+      "output": {
+        "status": "success",
+        "deployments": [
+          {
+            "id": "deploy-001",
+            "applicationId": "web-app",
+            "environment": "prod",
+            "version": "v2.1.3",
+            "status": "deployed",
+            "deployedAt": "2024-01-15T10:30:00Z",
+            "deployedBy": "alice@company.com",
+            "commitHash": "abc123def456"
+          },
+          {
+            "id": "deploy-002",
+            "applicationId": "api-service",
+            "environment": "staging",
+            "version": "v1.8.2",
+            "status": "deployed",
+            "deployedAt": "2024-01-16T14:20:00Z",
+            "deployedBy": "bob@company.com",
+            "commitHash": "def456ghi789"
+          }
+        ],
+        "total_count": 2,
+        "filters_applied": {
+          "application": null,
+          "environment": null
+        },
+        "timestamp": "2025-10-04T17:21:45.504760Z"
+      }
+    },
+    {
+      "name": "Filter by application only",
+      "input": {
+        "application": "web-app"
+      },
+      "output": {
+        "status": "success",
+        "deployments": [
+          {
+            "id": "deploy-001",
+            "applicationId": "web-app",
+            "environment": "prod",
+            "version": "v2.1.3",
+            "status": "deployed",
+            "deployedAt": "2024-01-15T10:30:00Z",
+            "deployedBy": "alice@company.com",
+            "commitHash": "abc123def456"
+          }
+        ],
+        "total_count": 1,
+        "filters_applied": {
+          "application": "web-app",
+          "environment": null
+        },
+        "timestamp": "2025-10-04T17:21:48.504760Z"
+      }
+    },
+    {
+      "name": "Filter by environment only",
+      "input": {
+        "environment": "prod"
+      },
+      "output": {
+        "status": "success",
+        "deployments": [
+          {
+            "id": "deploy-001",
+            "applicationId": "web-app",
+            "environment": "prod",
+            "version": "v2.1.3",
+            "status": "deployed",
+            "deployedAt": "2024-01-15T10:30:00Z",
+            "deployedBy": "alice@company.com",
+            "commitHash": "abc123def456"
+          },
+          {
+            "id": "deploy-003",
+            "applicationId": "api-service",
+            "environment": "prod",
+            "version": "v1.8.2",
+            "status": "deployed",
+            "deployedAt": "2024-01-16T11:00:00Z",
+            "deployedBy": "carol@company.com",
+            "commitHash": "ghi789jkl012"
+          }
+        ],
+        "total_count": 2,
+        "filters_applied": {
+          "application": null,
+          "environment": "prod"
+        },
+        "timestamp": "2025-10-04T17:21:51.504760Z"
+      }
+    },
+    {
+      "name": "Filter by both application and environment",
+      "input": {
+        "application": "web-app",
+        "environment": "prod"
+      },
+      "output": {
+        "status": "success",
+        "deployments": [
+          {
+            "id": "deploy-001",
+            "applicationId": "web-app",
+            "environment": "prod",
+            "version": "v2.1.3",
+            "status": "deployed",
+            "deployedAt": "2024-01-15T10:30:00Z",
+            "deployedBy": "alice@company.com",
+            "commitHash": "abc123def456"
+          }
+        ],
+        "total_count": 1,
+        "filters_applied": {
+          "application": "web-app",
+          "environment": "prod"
+        },
+        "timestamp": "2025-10-04T17:21:54.504760Z"
+      }
+    },
+    {
+      "name": "No results (non-existent application)",
+      "input": {
+        "application": "nonexistent-app"
+      },
+      "output": {
+        "status": "success",
+        "deployments": [],
+        "total_count": 0,
+        "filters_applied": {
+          "application": "nonexistent-app",
+          "environment": null
+        },
+        "timestamp": "2025-10-04T17:21:57.504760Z"
+      }
+    }
+  ],
+  "errorCases": [
+    {
+      "name": "CLI execution timeout",
+      "trigger": "CLI command takes longer than 30 seconds",
+      "expectedError": {
+        "code": -32603,
+        "message": "DevOps CLI timed out after 30 seconds"
+      }
+    },
+    {
+      "name": "CLI tool not found",
+      "trigger": "./acme-devops-cli/devops-cli file does not exist",
+      "expectedError": {
+        "code": -32603,
+        "message": "DevOps CLI tool not found at ./acme-devops-cli/devops-cli"
+      }
+    },
+    {
+      "name": "Invalid JSON output",
+      "trigger": "CLI returns malformed JSON",
+      "expectedError": {
+        "code": -32603,
+        "message": "CLI returned invalid JSON: <parse error details>"
+      }
+    },
+    {
+      "name": "CLI execution failure",
+      "trigger": "CLI returns non-zero exit code",
+      "expectedError": {
+        "code": -32603,
+        "message": "DevOps CLI failed with exit code <N>: <stderr output>"
+      }
+    },
+    {
+      "name": "Missing required fields in output",
+      "trigger": "CLI output missing 'status', 'deployments', etc.",
+      "expectedError": {
+        "code": -32603,
+        "message": "CLI output missing required field: <field_name>"
+      }
+    }
+  ]
+}

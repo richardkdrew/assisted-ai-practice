@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MCP Error Response Contract",
+  "description": "Standard error response for malformed messages or protocol violations",
+
+  "example_parse_error": {
+    "jsonrpc": "2.0",
+    "id": null,
+    "error": {
+      "code": -32700,
+      "message": "Parse error"
+    }
+  },
+
+  "example_invalid_request": {
+    "jsonrpc": "2.0",
+    "id": null,
+    "error": {
+      "code": -32600,
+      "message": "Invalid Request"
+    }
+  },
+
+  "example_method_not_found": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "error": {
+      "code": -32601,
+      "message": "Method not found"
+    }
+  },
+
+  "example_internal_error": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "error": {
+      "code": -32603,
+      "message": "Internal error",
+      "data": {
+        "details": "Additional error context"
+      }
+    }
+  },
+
+  "schema": {
+    "type": "object",
+    "required": ["jsonrpc", "id", "error"],
+    "properties": {
+      "jsonrpc": {
+        "type": "string",
+        "const": "2.0"
+      },
+      "id": {
+        "type": ["number", "string", "null"]
+      },
+      "error": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "Error code per JSON-RPC 2.0 spec"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Human-readable error message"
+          },
+          "data": {
+            "description": "Optional additional error data"
+          }
+        }
+      }
+    }
+  },
+
+  "error_codes": {
+    "-32700": "Parse error - Invalid JSON received",
+    "-32600": "Invalid Request - JSON-RPC structure invalid",
+    "-32601": "Method not found - Method doesn't exist",
+    "-32602": "Invalid params - Invalid method parameters",
+    "-32603": "Internal error - Server internal error",
+    "-32000 to -32099": "Reserved for MCP-specific errors"
+  }
+}

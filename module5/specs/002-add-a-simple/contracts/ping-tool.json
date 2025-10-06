@@ -1,0 +1,64 @@
+{
+  "tool": "ping",
+  "description": "Test connectivity by echoing back a message with 'Pong:' prefix",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "message": {
+        "type": "string",
+        "description": "The message to echo back"
+      }
+    },
+    "required": ["message"]
+  },
+  "examples": [
+    {
+      "description": "Simple test message",
+      "input": {
+        "message": "test"
+      },
+      "output": "Pong: test"
+    },
+    {
+      "description": "Empty message",
+      "input": {
+        "message": ""
+      },
+      "output": "Pong: "
+    },
+    {
+      "description": "Message with special characters and Unicode",
+      "input": {
+        "message": "Hello! @#$% 世界"
+      },
+      "output": "Pong: Hello! @#$% 世界"
+    },
+    {
+      "description": "Message with whitespace",
+      "input": {
+        "message": "  leading and trailing  "
+      },
+      "output": "Pong:   leading and trailing  "
+    }
+  ],
+  "errorCases": [
+    {
+      "description": "Missing message parameter",
+      "input": {},
+      "expectedError": {
+        "code": -32602,
+        "message": "Invalid params"
+      }
+    },
+    {
+      "description": "Invalid type (number instead of string)",
+      "input": {
+        "message": 123
+      },
+      "expectedError": {
+        "code": -32602,
+        "message": "Invalid params"
+      }
+    }
+  ]
+}
