@@ -1,0 +1,42 @@
+{
+  "menu": [
+    {
+      "label": "About Jaeger",
+      "items": [
+        {
+          "label": "Documentation",
+          "url": "https://www.jaegertracing.io/docs/latest"
+        }
+      ]
+    }
+  ],
+  "search": {
+    "maxLookback": {
+      "label": "2 Days",
+      "value": "2d"
+    },
+    "defaultService": "configuration-service"
+  },
+  "dependencies": {
+    "dagMaxNumServices": 200,
+    "menuEnabled": true
+  },
+  "tracking": {
+    "enabled": false
+  },
+  "linkPatterns": [
+    {
+      "type": "error",
+      "key": "error.type",
+      "url": "https://docs.example.com/errors/{value}",
+      "text": "Error Documentation: {value}"
+    },
+    {
+      "type": "trace",
+      "key": "request_id",
+      "url": "/search?service=configuration-service&tags=%7B%22request_id%22%3A%22{value}%22%7D",
+      "text": "Search for RequestID: {value}"
+    }
+  ],
+  "queryLimit": 50
+}

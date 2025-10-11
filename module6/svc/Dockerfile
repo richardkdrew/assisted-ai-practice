@@ -1,0 +1,29 @@
+# Configuration Service Container
+FROM ghcr.io/astral-sh/uv:python3.13-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy project files
+COPY pyproject.toml ./
+COPY *.py ./
+COPY routers/ ./routers/
+COPY migrations/ ./migrations/
+
+# Install only production and observability dependencies
+RUN uv sync --extra observability
+
+# Create non-root user
+RUN adduser -D -s /bin/sh app && \
+    chown -R app:app /app
+USER app
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/health')"
+
+# Start the application
+CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
