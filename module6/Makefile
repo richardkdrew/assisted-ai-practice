@@ -20,7 +20,7 @@ test-verbose:  ## Run tests with verbose output
 	cd svc && uv run python -m pytest -v
 
 test-integration:  ## Run integration tests only
-	cd svc && uv run python -m pytest test_integration.py -v
+	cd svc && uv run python -m pytest integration_test.py -v
 
 coverage:  ## Generate coverage report
 	cd svc && uv run python -m pytest --cov-report=html
@@ -73,7 +73,7 @@ install-observability:  ## Install observability dependencies
 	cd svc && uv sync --extra observability
 
 test-observability:  ## Run observability integration tests
-	cd svc && uv run python -m pytest test_observability_integration.py -v
+	cd svc && uv run python -m pytest observability/observability_integration_test.py -v
 
 load-test:  ## Run load testing for observability validation
 	cd svc && uv run python load_testing.py --report load_test_report.md

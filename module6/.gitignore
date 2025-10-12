@@ -84,3 +84,9 @@ node_modules/
 **/playwright-report/
 **/test-results/
 **/.playwright/
+
+# Trace data
+*.jsonl
+data/traces/
+svc/example_traces.jsonl
+svc/bin/trace-query
