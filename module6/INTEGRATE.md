@@ -11,13 +11,30 @@ My assistant seemed to really grasp the concept and went to work planning a true
 ## 3. What are some details we can capture to determine if a service/feature/investment is fulfilling its destiny? What are some questions we can ask ourselves (and assumptions we can discuss) during the initial planning phases about what success looks like? What do we need to capture to quantify it?
 
 May have misunderstood the question...
-**Key Questions we could use:**
+
+### Details we can capture
+
+- Usage Metrics
+- Performance Metrics
+- Business Impact Metrics
+- User Experience Metrics
+
+### Key Questions we could ask
 
 - What specific problem is this feature solving?
 - Which stakeholders are most affected by this problem?
 - How are users/systems currently working around this problem?
 - What quantitative improvements would make this investment worthwhile?
 - What timeframe is appropriate to measure success of the investment (immediate, short-term, long-term)?
+
+### What we need to capture
+
+We probably need some metrics around:
+
+- Error recovery success rates
+- Reduction in manual interventions (linked to improvments in auto-recovery)
+- System uptime improvements
+- General usage patterns
 
 ## 4. From the following list, which would have the biggest impact from agentic automation in your org? (no need to over-share, the benefit is in the reflection, don't rush it)
 
@@ -27,4 +44,4 @@ Given the volume of trace information collected just by enabling middleware and 
 
 ---
 
-Before the next time we meet, please post a link to your repo and your reflections to Discord.
+**Before the next time we meet, please post a link to your repo and your reflections to Discord.**
