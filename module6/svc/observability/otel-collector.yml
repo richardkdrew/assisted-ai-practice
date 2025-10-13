@@ -1,0 +1,53 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+  memory_limiter:
+    limit_mib: 512
+    check_interval: 1s
+  resource:
+    attributes:
+      - key: service.name
+        value: "configuration-service"
+        action: upsert
+      - key: service.version
+        value: "1.0.0"
+        action: upsert
+
+exporters:
+  debug:
+    verbosity: detailed
+  # Use OTLP exporter to send traces to Jaeger
+  otlp:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+  # Add Prometheus exporter for metrics
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [debug, otlp]
+    # Add metrics pipeline
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [debug, prometheus]
+
+  extensions: []
+
+  telemetry:
+    logs:
+      level: "debug"
