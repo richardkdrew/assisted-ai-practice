@@ -1,11 +1,11 @@
 """Core agent logic for managing conversations."""
 
-from context.manager import ContextManager
-from models.config import Config
-from models.message import Conversation
-from observability.tracer import get_tracer, get_trace_id
-from persistence.store import ConversationStore
-from providers.base import BaseProvider
+from detective_agent.context.manager import ContextManager
+from detective_agent.models.config import Config
+from detective_agent.models.message import Conversation
+from detective_agent.observability.tracer import get_tracer, get_trace_id
+from detective_agent.persistence.store import ConversationStore
+from detective_agent.providers.base import BaseProvider
 
 
 class Agent:

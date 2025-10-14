@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from models.message import Conversation, Message
+from detective_agent.models.message import Conversation, Message
 
 
 def test_message_creation():

@@ -2,7 +2,7 @@
 
 from unittest.mock import Mock, patch
 
-from providers.anthropic import AnthropicProvider
+from detective_agent.providers.anthropic import AnthropicProvider
 
 
 def test_anthropic_provider_init():
@@ -11,7 +11,7 @@ def test_anthropic_provider_init():
     assert provider.model == "claude-3-5-sonnet-20241022"
 
 
-@patch("providers.anthropic.Anthropic")
+@patch("detective_agent.providers.anthropic.Anthropic")
 def test_anthropic_provider_send_message(mock_anthropic):
     """Test sending a message through Anthropic provider."""
     mock_client = Mock()
@@ -30,7 +30,7 @@ def test_anthropic_provider_send_message(mock_anthropic):
     )
 
 
-@patch("providers.anthropic.Anthropic")
+@patch("detective_agent.providers.anthropic.Anthropic")
 def test_anthropic_provider_handles_multiple_messages(mock_anthropic):
     """Test provider handles conversation with multiple messages."""
     mock_client = Mock()

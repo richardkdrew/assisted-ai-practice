@@ -4,8 +4,8 @@ import time
 
 from anthropic import Anthropic
 
-from observability.tracer import get_tracer
-from providers.base import BaseProvider
+from detective_agent.observability.tracer import get_tracer
+from detective_agent.providers.base import BaseProvider
 
 
 class AnthropicProvider(BaseProvider):

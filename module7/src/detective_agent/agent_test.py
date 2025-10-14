@@ -4,10 +4,10 @@ from unittest.mock import Mock
 
 import pytest
 
-from agent import Agent
-from models.config import Config
-from models.message import Conversation
-from persistence.store import ConversationStore
+from detective_agent.agent import Agent
+from detective_agent.models.config import Config
+from detective_agent.models.message import Conversation
+from detective_agent.persistence.store import ConversationStore
 
 
 @pytest.fixture

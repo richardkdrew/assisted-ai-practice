@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from models.config import Config
+from detective_agent.models.config import Config
 
 
 def test_config_from_env_with_api_key(monkeypatch):

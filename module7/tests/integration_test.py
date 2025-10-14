@@ -4,10 +4,10 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from agent import Agent
-from models.config import Config
-from persistence.store import ConversationStore
-from providers.anthropic import AnthropicProvider
+from detective_agent.agent import Agent
+from detective_agent.models.config import Config
+from detective_agent.persistence.store import ConversationStore
+from detective_agent.providers.anthropic import AnthropicProvider
 
 
 @pytest.fixture
@@ -20,7 +20,7 @@ def integration_setup(tmp_path, monkeypatch):
     return config, store
 
 
-@patch("providers.anthropic.Anthropic")
+@patch("detective_agent.providers.anthropic.Anthropic")
 def test_full_conversation_flow(mock_anthropic, integration_setup):
     """Test a complete conversation flow from start to finish."""
     config, store = integration_setup
@@ -55,7 +55,7 @@ def test_full_conversation_flow(mock_anthropic, integration_setup):
     assert loaded_conversation.messages[3].content == "Python is a programming language."
 
 
-@patch("providers.anthropic.Anthropic")
+@patch("detective_agent.providers.anthropic.Anthropic")
 def test_multiple_conversations(mock_anthropic, integration_setup):
     """Test managing multiple conversations."""
     config, store = integration_setup

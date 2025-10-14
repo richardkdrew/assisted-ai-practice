@@ -5,8 +5,8 @@ from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
-from models.message import Conversation, Message
-from observability.tracer import flush_traces
+from detective_agent.models.message import Conversation, Message
+from detective_agent.observability.tracer import flush_traces
 
 
 class ConversationStore:

@@ -1,4 +1,4 @@
-"""Shared test fixtures and configuration."""
+"""Shared test fixtures and configuration for all tests."""
 
 import pytest
 

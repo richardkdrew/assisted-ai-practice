@@ -2,8 +2,8 @@
 
 import pytest
 
-from models.message import Conversation
-from persistence.store import ConversationStore
+from detective_agent.models.message import Conversation
+from detective_agent.persistence.store import ConversationStore
 
 
 @pytest.fixture

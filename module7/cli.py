@@ -2,11 +2,11 @@
 
 import sys
 
-from agent import Agent
-from models.config import Config
-from observability.tracer import setup_tracer
-from persistence.store import ConversationStore
-from providers.anthropic import AnthropicProvider
+from detective_agent.agent import Agent
+from detective_agent.models.config import Config
+from detective_agent.observability.tracer import setup_tracer
+from detective_agent.persistence.store import ConversationStore
+from detective_agent.providers.anthropic import AnthropicProvider
 
 
 def print_conversations(agent: Agent) -> None:

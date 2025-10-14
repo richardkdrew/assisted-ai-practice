@@ -2,8 +2,8 @@
 
 import pytest
 
-from models.message import Conversation
-from observability.tracer import get_trace_id, get_tracer
+from detective_agent.models.message import Conversation
+from detective_agent.observability.tracer import get_trace_id, get_tracer
 
 
 def test_get_trace_id_returns_current_trace():

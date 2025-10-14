@@ -2,8 +2,8 @@
 
 import pytest
 
-from context.manager import ContextManager
-from models.message import Message
+from detective_agent.context.manager import ContextManager
+from detective_agent.models.message import Message
 
 
 @pytest.fixture

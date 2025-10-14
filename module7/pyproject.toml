@@ -49,7 +49,7 @@ packages = ["src/detective_agent"]
 [tool.pytest.ini_options]
 minversion = "8.0"
 asyncio_mode = "auto"
-testpaths = ["tests"]
+testpaths = ["src", "tests"]
 python_files = ["*_test.py", "test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
@@ -57,13 +57,13 @@ addopts = [
     "-v",
     "--strict-markers",
     "--strict-config",
-    "--cov=.",
+    "--cov=src/detective_agent",
     "--cov-report=term-missing",
     "--cov-report=html",
 ]
 
 [tool.coverage.run]
-source = ["."]
+source = ["src/detective_agent"]
 omit = [
     "*/tests/*",
     "*_test.py",
