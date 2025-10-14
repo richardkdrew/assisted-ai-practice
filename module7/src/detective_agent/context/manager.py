@@ -1,6 +1,6 @@
 """Context window management for conversations."""
 
-from detective_agent.message import Message
+from detective_agent.models import Message
 
 
 class ContextManager:

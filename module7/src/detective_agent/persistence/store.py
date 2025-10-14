@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
-from detective_agent.message import Conversation, Message
+from detective_agent.models import Conversation, Message
 from detective_agent.observability.tracer import flush_traces
 
 
