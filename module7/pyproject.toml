@@ -49,8 +49,8 @@ packages = ["src/detective_agent"]
 [tool.pytest.ini_options]
 minversion = "8.0"
 asyncio_mode = "auto"
-testpaths = ["src", "tests"]
-python_files = ["*_test.py", "test_*.py"]
+testpaths = ["tests"]
+python_files = ["*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [

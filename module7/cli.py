@@ -1,5 +1,6 @@
 """Command-line interface for the AI agent."""
 
+import asyncio
 import sys
 
 from detective_agent.agent import Agent
@@ -22,7 +23,7 @@ def print_conversations(agent: Agent) -> None:
     print()
 
 
-def run_conversation(agent: Agent, conversation_id: str | None = None) -> None:
+async def run_conversation(agent: Agent, conversation_id: str | None = None) -> None:
     """Run an interactive conversation."""
     if conversation_id:
         try:
@@ -50,7 +51,7 @@ def run_conversation(agent: Agent, conversation_id: str | None = None) -> None:
                 print("Goodbye!")
                 break
 
-            response = agent.send_message(conversation, user_input)
+            response = await agent.send_message(conversation, user_input)
             print(f"\nAssistant: {response}\n")
 
         except KeyboardInterrupt:
@@ -80,7 +81,7 @@ def main() -> None:
         if command == "list":
             print_conversations(agent)
         elif command == "continue" and len(sys.argv) > 2:
-            run_conversation(agent, sys.argv[2])
+            asyncio.run(run_conversation(agent, sys.argv[2]))
         else:
             print("Usage:")
             print("  python cli.py              - Start a new conversation")
@@ -88,7 +89,7 @@ def main() -> None:
             print("  python cli.py continue ID  - Continue a conversation")
             sys.exit(1)
     else:
-        run_conversation(agent)
+        asyncio.run(run_conversation(agent))
 
 
 if __name__ == "__main__":

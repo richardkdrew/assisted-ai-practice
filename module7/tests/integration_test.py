@@ -1,6 +1,6 @@
 """Integration test for end-to-end conversation flow."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -20,17 +20,24 @@ def integration_setup(tmp_path, monkeypatch):
     return config, store
 
 
-@patch("detective_agent.providers.anthropic.Anthropic")
-def test_full_conversation_flow(mock_anthropic, integration_setup):
+@pytest.mark.asyncio
+@patch("detective_agent.providers.anthropic.AsyncAnthropic")
+async def test_full_conversation_flow(mock_anthropic, integration_setup):
     """Test a complete conversation flow from start to finish."""
     config, store = integration_setup
 
     mock_client = Mock()
     mock_responses = [
-        Mock(content=[Mock(text="Hello! How can I help you?")]),
-        Mock(content=[Mock(text="Python is a programming language.")]),
+        Mock(
+            content=[Mock(text="Hello! How can I help you?")],
+            usage=Mock(input_tokens=10, output_tokens=20),
+        ),
+        Mock(
+            content=[Mock(text="Python is a programming language.")],
+            usage=Mock(input_tokens=15, output_tokens=25),
+        ),
     ]
-    mock_client.messages.create.side_effect = mock_responses
+    mock_client.messages.create = AsyncMock(side_effect=mock_responses)
     mock_anthropic.return_value = mock_client
 
     provider = AnthropicProvider(config.api_key, config.model)
@@ -39,11 +46,11 @@ def test_full_conversation_flow(mock_anthropic, integration_setup):
     conversation = agent.new_conversation()
     assert conversation.id is not None
 
-    response1 = agent.send_message(conversation, "Hello")
+    response1 = await agent.send_message(conversation, "Hello")
     assert response1 == "Hello! How can I help you?"
     assert len(conversation.messages) == 2
 
-    response2 = agent.send_message(conversation, "What is Python?")
+    response2 = await agent.send_message(conversation, "What is Python?")
     assert response2 == "Python is a programming language."
     assert len(conversation.messages) == 4
 
@@ -55,23 +62,27 @@ def test_full_conversation_flow(mock_anthropic, integration_setup):
     assert loaded_conversation.messages[3].content == "Python is a programming language."
 
 
-@patch("detective_agent.providers.anthropic.Anthropic")
-def test_multiple_conversations(mock_anthropic, integration_setup):
+@pytest.mark.asyncio
+@patch("detective_agent.providers.anthropic.AsyncAnthropic")
+async def test_multiple_conversations(mock_anthropic, integration_setup):
     """Test managing multiple conversations."""
     config, store = integration_setup
 
     mock_client = Mock()
-    mock_client.messages.create.return_value = Mock(content=[Mock(text="Response")])
+    mock_response = Mock(
+        content=[Mock(text="Response")], usage=Mock(input_tokens=10, output_tokens=20)
+    )
+    mock_client.messages.create = AsyncMock(return_value=mock_response)
     mock_anthropic.return_value = mock_client
 
     provider = AnthropicProvider(config.api_key, config.model)
     agent = Agent(provider, store, config)
 
     conv1 = agent.new_conversation()
-    agent.send_message(conv1, "Message 1")
+    await agent.send_message(conv1, "Message 1")
 
     conv2 = agent.new_conversation()
-    agent.send_message(conv2, "Message 2")
+    await agent.send_message(conv2, "Message 2")
 
     conversations = agent.list_conversations()
     assert len(conversations) == 2

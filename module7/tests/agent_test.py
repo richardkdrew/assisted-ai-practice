@@ -1,6 +1,6 @@
 """Tests for agent core logic."""
 
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -14,7 +14,7 @@ from detective_agent.persistence.store import ConversationStore
 def mock_provider():
     """Create a mock provider."""
     provider = Mock()
-    provider.send_message.return_value = "Mock response"
+    provider.send_message = AsyncMock(return_value="Mock response")
     return provider
 
 
@@ -43,10 +43,11 @@ def test_new_conversation(agent):
     assert len(conv.messages) == 0
 
 
-def test_send_message(agent, mock_provider):
+@pytest.mark.asyncio
+async def test_send_message(agent, mock_provider):
     """Test sending a message through the agent."""
     conv = agent.new_conversation()
-    response = agent.send_message(conv, "Hello")
+    response = await agent.send_message(conv, "Hello")
 
     assert response == "Mock response"
     assert len(conv.messages) == 2
@@ -56,10 +57,11 @@ def test_send_message(agent, mock_provider):
     assert conv.messages[1].content == "Mock response"
 
 
-def test_send_message_saves_conversation(agent, store):
+@pytest.mark.asyncio
+async def test_send_message_saves_conversation(agent, store):
     """Test that sending a message saves the conversation."""
     conv = agent.new_conversation()
-    agent.send_message(conv, "Test message")
+    await agent.send_message(conv, "Test message")
 
     loaded = store.load(conv.id)
     assert len(loaded.messages) == 2

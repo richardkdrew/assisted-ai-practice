@@ -19,7 +19,7 @@ class Agent:
         self.tracer = get_tracer()
         self.context_manager = ContextManager(max_messages=config.max_messages)
 
-    def send_message(self, conversation: Conversation, user_message: str) -> str:
+    async def send_message(self, conversation: Conversation, user_message: str) -> str:
         """
         Send a user message and get an assistant response.
 
@@ -56,7 +56,7 @@ class Agent:
 
             # Convert truncated messages to API format
             messages = [msg.to_dict() for msg in truncated_messages]
-            response = self.provider.send_message(messages, self.config.max_tokens)
+            response = await self.provider.send_message(messages, self.config.max_tokens)
             conversation.add_message("assistant", response)
 
             span.set_attribute("response_length", len(response))
