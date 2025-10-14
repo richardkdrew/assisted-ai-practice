@@ -7,13 +7,16 @@ class BaseProvider(ABC):
     """Abstract base class for AI providers."""
 
     @abstractmethod
-    async def send_message(self, messages: list[dict], max_tokens: int) -> str:
+    async def send_message(
+        self, messages: list[dict], max_tokens: int, system: str | None = None
+    ) -> str:
         """
         Send messages to the AI provider and get a response.
 
         Args:
             messages: List of message dicts with 'role' and 'content'
             max_tokens: Maximum tokens for the response
+            system: Optional system prompt to guide the model's behavior
 
         Returns:
             The assistant's response content

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from detective_agent.models.config import Config
+from detective_agent.models.config import DEFAULT_SYSTEM_PROMPT, Config
 
 
 def test_config_from_env_with_api_key(monkeypatch):
@@ -35,3 +35,28 @@ def test_config_custom_values(monkeypatch):
     assert config.model == "claude-3-opus-20240229"
     assert config.max_tokens == 8192
     assert config.conversations_dir == Path("/tmp/convos")
+
+
+def test_config_default_system_prompt():
+    """Test that config uses default system prompt."""
+    config = Config(api_key="test-key")
+    assert config.system_prompt == DEFAULT_SYSTEM_PROMPT
+    assert "Detective Agent" in config.system_prompt
+    assert "Release Confidence System" in config.system_prompt
+
+
+def test_config_custom_system_prompt():
+    """Test config with custom system prompt."""
+    custom_prompt = "You are a helpful assistant."
+    config = Config(api_key="test-key", system_prompt=custom_prompt)
+    assert config.system_prompt == custom_prompt
+
+
+def test_config_system_prompt_from_env(monkeypatch):
+    """Test loading system prompt from environment variable."""
+    custom_prompt = "Custom system prompt from env."
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    monkeypatch.setenv("SYSTEM_PROMPT", custom_prompt)
+
+    config = Config.from_env()
+    assert config.system_prompt == custom_prompt

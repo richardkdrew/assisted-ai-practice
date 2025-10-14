@@ -19,19 +19,30 @@ class AnthropicProvider(BaseProvider):
         self.tracer = get_tracer()
         self.retry_config = retry_config or RetryConfig()
 
-    async def send_message(self, messages: list[dict], max_tokens: int) -> str:
+    async def send_message(
+        self, messages: list[dict], max_tokens: int, system: str | None = None
+    ) -> str:
         """Send messages to Claude and get a response with retry logic."""
         with self.tracer.start_as_current_span("anthropic_api_call") as span:
             span.set_attribute("model", self.model)
             span.set_attribute("max_tokens", max_tokens)
             span.set_attribute("message_count", len(messages))
+            span.set_attribute("has_system_prompt", system is not None)
 
             async def _make_api_call():
                 """Inner function to make the API call."""
                 start_time = time.time()
-                response = await self.client.messages.create(
-                    model=self.model, max_tokens=max_tokens, messages=messages
-                )
+
+                # Build API call parameters
+                api_params = {
+                    "model": self.model,
+                    "max_tokens": max_tokens,
+                    "messages": messages,
+                }
+                if system:
+                    api_params["system"] = system
+
+                response = await self.client.messages.create(**api_params)
                 duration = time.time() - start_time
 
                 span.set_attribute("input_tokens", response.usage.input_tokens)

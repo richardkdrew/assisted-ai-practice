@@ -56,7 +56,9 @@ class Agent:
 
             # Convert truncated messages to API format
             messages = [msg.to_dict() for msg in truncated_messages]
-            response = await self.provider.send_message(messages, self.config.max_tokens)
+            response = await self.provider.send_message(
+                messages, self.config.max_tokens, system=self.config.system_prompt
+            )
             conversation.add_message("assistant", response)
 
             span.set_attribute("response_length", len(response))
