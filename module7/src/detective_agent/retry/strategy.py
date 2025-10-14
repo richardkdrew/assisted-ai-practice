@@ -7,27 +7,16 @@ in API calls and network operations.
 
 import asyncio
 import random
-from dataclasses import dataclass
 from typing import Callable, TypeVar
 
 import httpx
 from opentelemetry.trace import Status, StatusCode
 
-from ..observability.tracer import get_tracer
+from detective_agent.config import RetryConfig
+from detective_agent.observability.tracer import get_tracer
 
 
 T = TypeVar("T")
-
-
-@dataclass
-class RetryConfig:
-    """Configuration for retry behavior."""
-
-    max_attempts: int = 3
-    initial_delay: float = 1.0  # seconds
-    max_delay: float = 60.0
-    backoff_factor: float = 2.0
-    jitter: bool = True
 
 
 def is_retryable_error(exc: Exception) -> bool:

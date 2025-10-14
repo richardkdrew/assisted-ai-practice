@@ -5,7 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from detective_agent.config import DEFAULT_SYSTEM_PROMPT, Config
+from detective_agent.config import Config
+from detective_agent.system_prompt import DEFAULT_SYSTEM_PROMPT
 
 
 def test_config_from_env_with_api_key(monkeypatch):

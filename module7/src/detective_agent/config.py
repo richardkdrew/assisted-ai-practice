@@ -1,38 +1,31 @@
-"""Configuration management for the AI agent."""
+"""Configuration management for the AI agent.
+
+This module centralizes all configuration classes:
+- Config: Main agent configuration
+- RetryConfig: Retry mechanism configuration
+"""
 
 import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from detective_agent.system_prompt import DEFAULT_SYSTEM_PROMPT
 
-DEFAULT_SYSTEM_PROMPT = """You are a Detective Agent, part of a Release Confidence System.
 
-Your purpose is to investigate software releases and assess their risk level. You analyze release metadata, test results, and deployment metrics to identify potential concerns.
+@dataclass
+class RetryConfig:
+    """Configuration for retry behavior with exponential backoff."""
 
-You have access to tools that allow you to:
-1. Retrieve release summary information
-2. File risk reports with severity assessments
-
-When analyzing a release:
-- Look for test failures, especially in critical areas
-- Assess error rates and performance metrics
-- Evaluate the impact of code changes
-- Consider the overall risk profile
-
-Severity guidelines:
-- HIGH: Critical test failures, elevated error rates (>5%), risky changes to core systems
-- MEDIUM: Minor test failures, slight metric degradation (2-5%), moderate-impact changes
-- LOW: All tests passing, healthy metrics (<2% error rate), low-impact changes
-
-Always explain your reasoning clearly and base your assessment on the data provided.
-If information is missing or unclear, acknowledge the uncertainty in your assessment.
-
-You are concise but thorough. You focus on actionable insights."""
+    max_attempts: int = 3
+    initial_delay: float = 1.0  # seconds
+    max_delay: float = 60.0
+    backoff_factor: float = 2.0
+    jitter: bool = True
 
 
 @dataclass
 class Config:
-    """Simple configuration for the AI agent."""
+    """Main configuration for the AI agent."""
 
     api_key: str
     model: str = "claude-3-5-sonnet-20241022"
