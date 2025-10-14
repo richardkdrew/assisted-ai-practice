@@ -1,6 +1,7 @@
 # Detective Agent Design Specification
 
 ## Overview
+
 A foundational LLM agent design built from first principles. This document describes the **what** and **why** of the system architecture - independent of programming language or specific technology choices.
 
 ## Use Case: Release Confidence System
@@ -11,15 +12,18 @@ A foundational LLM agent design built from first principles. This document descr
 
 **Scenario:**
 When a new release is ready for deployment, the Detective Agent:
+
 1. Retrieves a high-level release summary (code changes, test results, deployment metrics)
 2. Analyzes the summary to identify potential risks
 3. Files a risk report with severity assessment and key findings
 
 The agent has access to two tools:
+
 - **GET /release-summary**: Retrieves release metadata including changes, test results, and metrics
 - **POST /risk-report**: Files a risk assessment with severity level and identified concerns
 
 **Example Release Summary:**
+
 ```json
 {
   "version": "v2.1.0",
@@ -33,11 +37,13 @@ The agent has access to two tools:
 ```
 
 **Expected Behavior:**
+
 - High risk: Test failures in critical areas, elevated error rates, risky changes
 - Medium risk: Minor test failures, slight metric degradation
 - Low risk: All tests passing, clean metrics, low-impact changes
 
 **Future Scenario Options:**
+
 - **Progressive Investigation**: Add GET /test-details tool so agent can drill deeper when initial summary shows concerning signals
 - **Multi-Source Correlation**: Add GET /code-changes and GET /observability-traces tools to correlate changes across systems
 - **Time-Series Analysis**: Enable agent to compare current release metrics with historical baselines
@@ -93,23 +99,28 @@ The agent has access to two tools:
 ## Data Models
 
 ### Message
+
 Represents a single message in a conversation.
 
 **Properties:**
+
 - `role`: Identifies the message sender (user, assistant, system)
 - `content`: The message text content
 - `timestamp`: When the message was created
 - `metadata`: Extensible storage for provider-specific data, token counts, etc.
 
 **Design Rationale:**
+
 - Simple, immutable structure
 - Provider-agnostic (maps to all LLM APIs)
 - Metadata allows for future extensibility without breaking changes
 
 ### Conversation
+
 Represents an ongoing dialogue between user and agent.
 
 **Properties:**
+
 - `id`: Unique identifier for this conversation
 - `system_prompt`: Initial instructions/context for the agent
 - `messages`: Ordered list of messages in the conversation
@@ -117,37 +128,45 @@ Represents an ongoing dialogue between user and agent.
 - `metadata`: Provider info, model name, conversation-level stats
 
 **Design Rationale:**
+
 - Encapsulates all state needed to resume a conversation
 - System prompt separate from messages (some providers require this)
 - Metadata tracks conversation-level information (total tokens, cost, etc.)
 
 ### Tool Definition
+
 Represents a callable tool that the agent can use.
 
 **Properties:**
+
 - `name`: Unique identifier for the tool
 - `description`: What the tool does (used by LLM to decide when to call it)
 - `parameters`: JSON schema defining expected inputs
 - `handler`: Function that executes the tool logic
 
 **Design Rationale:**
+
 - Simple, declarative tool registration
 - Provider-agnostic definition (maps to different tool calling formats)
 - Schema-driven validation ensures type safety
 
 ### Tool Call
+
 Represents a request from the LLM to execute a tool.
 
 **Properties:**
+
 - `id`: Unique identifier for this tool call
 - `name`: Which tool to execute
 - `arguments`: JSON object with tool parameters
 - `timestamp`: When the call was requested
 
 ### Tool Result
+
 Represents the outcome of executing a tool.
 
 **Properties:**
+
 - `tool_call_id`: Links back to the originating tool call
 - `content`: The result (success data or error message)
 - `success`: Boolean indicating success/failure
@@ -161,6 +180,7 @@ Represents the outcome of executing a tool.
 **Purpose:** Enable swapping LLM providers without changing agent logic.
 
 **Interface:**
+
 ```
 complete(messages, temperature, max_tokens, ...) -> Message
   - Send messages to LLM provider
@@ -177,17 +197,20 @@ get_capabilities() -> ProviderCapabilities
 ```
 
 **Providers to Support:**
+
 - **OpenRouter** (Various models via OpenRouter API)
 - **Anthropic** (Claude models via Messages API)
 - **Ollama** (Local models via Ollama API)
 
 **Design Considerations:**
+
 - Keep interface minimal - don't abstract away important provider differences
 - Each provider should handle its own API format translation
 - Provider should report capabilities (some may not support tool calling, etc.)
 - Errors should be normalized (rate limit, auth, network, validation)
 
 **Error Handling:**
+
 - `AuthenticationError`: Invalid API key or credentials
 - `RateLimitError`: Provider rate limiting (should trigger retry)
 - `ValidationError`: Invalid request format
@@ -199,6 +222,7 @@ get_capabilities() -> ProviderCapabilities
 **Purpose:** Enable agent to interact with external systems and extend its capabilities.
 
 **Interface:**
+
 ```
 register_tool(definition) -> void
   - Register a new tool with the agent
@@ -222,6 +246,7 @@ format_tools_for_provider(provider) -> ProviderToolFormat
 ```
 
 **Built-in Tools:**
+
 - **Get Release Summary**: Retrieve high-level release information
   - Parameters: release_id (string)
   - Returns: Release metadata including version, changes, tests, metrics
@@ -233,6 +258,7 @@ format_tools_for_provider(provider) -> ProviderToolFormat
   - Implementation: HTTP POST to mock endpoint or file write
 
 **Tool Execution Flow:**
+
 1. LLM indicates it wants to call a tool (returns tool_use block)
 2. Agent validates tool call against registered tools
 3. Agent executes tool handler with provided arguments
@@ -241,12 +267,14 @@ format_tools_for_provider(provider) -> ProviderToolFormat
 6. LLM processes result and continues conversation
 
 **Error Handling:**
+
 - `ToolNotFoundError`: Requested tool not registered
 - `InvalidArgumentsError`: Arguments don't match schema
 - `ToolExecutionError`: Tool handler raised an exception
 - `ToolTimeoutError`: Tool execution exceeded time limit
 
 **Future Considerations:**
+
 - Async tool execution
 - Tool execution sandboxing/safety
 - Tool composition (tools calling other tools)
@@ -259,12 +287,14 @@ format_tools_for_provider(provider) -> ProviderToolFormat
 **Strategy Options:**
 
 #### A. Truncation (Simplest)
+
 - Keep system prompt + N most recent messages
 - Discard older messages when limit approached
 - **Pros**: Simple, predictable
 - **Cons**: Loses important context from earlier in conversation
 
 #### B. Sliding Window with Summarization
+
 - Keep system prompt + summary of old messages + recent messages
 - When window fills:
   1. Take oldest N messages
@@ -275,6 +305,7 @@ format_tools_for_provider(provider) -> ProviderToolFormat
 - **Cons**: Summarization costs tokens/time
 
 #### C. Importance-Based Pruning
+
 - Score messages by importance (user messages weighted higher)
 - Keep system prompt + high-importance messages + recent messages
 - Prune low-importance messages when needed
@@ -282,6 +313,7 @@ format_tools_for_provider(provider) -> ProviderToolFormat
 - **Cons**: Complex scoring, may lose temporal coherence
 
 **Implementation Approach:**
+
 ```
 manage_context(conversation, provider_limits) -> ManagedContext
   - Input: full conversation, provider's token/message limits
@@ -290,6 +322,7 @@ manage_context(conversation, provider_limits) -> ManagedContext
 ```
 
 **Token Budget Allocation:**
+
 - Reserve tokens for system prompt (fixed)
 - Reserve tokens for response (max_tokens parameter)
 - Remaining budget for conversation history
@@ -300,17 +333,20 @@ manage_context(conversation, provider_limits) -> ManagedContext
 **Purpose:** Handle transient failures gracefully without losing conversation state.
 
 **Retry Scenarios:**
+
 - Rate limiting (429 errors)
 - Network timeouts
 - Temporary server errors (500, 502, 503)
 
 **Non-Retry Scenarios:**
+
 - Authentication errors (401, 403)
 - Validation errors (400)
 - Not found (404)
 - Permanent errors
 
 **Retry Strategy:**
+
 ```
 execute_with_retry(operation, retry_config) -> Result
   - Attempt operation
@@ -323,6 +359,7 @@ execute_with_retry(operation, retry_config) -> Result
 ```
 
 **Retry Configuration:**
+
 - `max_attempts`: Maximum retry attempts (e.g., 3)
 - `initial_delay`: First retry delay (e.g., 1s)
 - `max_delay`: Cap on backoff delay (e.g., 60s)
@@ -330,6 +367,7 @@ execute_with_retry(operation, retry_config) -> Result
 - `jitter`: Add randomness to prevent thundering herd
 
 **Example Retry Timeline:**
+
 ```
 Attempt 1: Fails (429 Rate Limit)
 Wait: 1s + jitter
@@ -343,6 +381,7 @@ Attempt 3: Success
 **Purpose:** Orchestrate all components to enable conversation with LLM.
 
 **Responsibilities:**
+
 - Maintain conversation state
 - Coordinate provider calls
 - Manage context window before each call
@@ -351,6 +390,7 @@ Attempt 3: Success
 - Emit observability events
 
 **Key Operations:**
+
 ```
 send_message(content) -> AssistantResponse
   1. Create user message
@@ -385,6 +425,7 @@ new_conversation() -> void
 ```
 
 **State Management:**
+
 - Agent holds current conversation in memory
 - Conversation is mutable (messages added over time)
 - Tool definitions registered at agent initialization
@@ -398,6 +439,7 @@ new_conversation() -> void
 **Observability Layers:**
 
 #### Traces
+
 - **Conversation Trace**: Entire user interaction
 - **Agent Operation Spans**: send_message, context management, tool execution
 - **Provider Call Spans**: LLM API request/response
@@ -406,6 +448,7 @@ new_conversation() -> void
 - **Retry Spans**: Track retry attempts and backoff
 
 **Trace Attributes:**
+
 - Standard OpenTelemetry fields
 - Conversation ID
 - Message count
@@ -417,6 +460,7 @@ new_conversation() -> void
 - Retry info (attempt number, backoff time)
 
 #### Metrics
+
 - **LLM Call Duration**: Time for provider.complete()
 - **Token Usage**: Input/output tokens per call
 - **Error Rates**: By provider, by error type
@@ -427,18 +471,21 @@ new_conversation() -> void
 - **Costs**: Estimated cost per call (based on provider pricing)
 
 #### Logs
+
 - Errors with full context
 - Retry attempts with reasons
 - Context window pruning events
 - Tool execution events (calls, results, errors)
 
 **Instrumentation Approach:**
+
 - Decorators for automatic function tracing
 - Context managers for custom spans
 - Middleware for HTTP auto-instrumentation
 - Structured logging with correlation IDs
 
 **Trace Context Propagation:**
+
 - Each conversation has a trace ID
 - All operations link to conversation trace
 - Trace IDs included in saved interactions
@@ -454,6 +501,7 @@ new_conversation() -> void
 **Design Principle:** Unlike traditional software testing that verifies deterministic behavior, agent evaluations must account for the probabilistic nature of LLMs while maintaining quality standards.
 
 **Interface:**
+
 ```
 run_evaluation(test_suite) -> EvaluationResults
   - Execute test scenarios against agent
@@ -473,40 +521,47 @@ compare_to_baseline(current, baseline) -> Comparison
 **Evaluation Dimensions:**
 
 #### Tool Usage (Behavioral Validation)
+
 - Does the agent call the correct tools?
 - Are they called in a reasonable order?
 - Are parameters valid and appropriate?
 - Are tool errors handled gracefully?
 
 #### Decision Quality (Output Validation)
+
 - Does severity classification match expected levels?
 - Are key risks identified in findings?
 - Is reasoning sound given the data?
 - Does the agent avoid hallucinating information?
 
 #### Error Handling (Robustness Validation)
+
 - Does the agent handle missing data gracefully?
 - Are errors reported clearly?
 - Does it make appropriate decisions with incomplete information?
 - Does it degrade gracefully rather than fail?
 
 **Test Suite Composition:**
+
 - **Risk Assessment Scenarios**: High, medium, low risk releases with expected behaviors
 - **Edge Cases**: Missing data, boundary values, ambiguous signals
 - **Error Scenarios**: Tool failures, malformed responses, timeouts
 
 **Evaluation Approaches:**
+
 - **Ground Truth Comparison**: Compare output to known correct answers (high confidence)
 - **Rubric-Based Scoring**: Define criteria and score responses (structured assessment)
 - **LLM-as-Judge**: Use separate LLM to evaluate quality (subjective dimensions)
 
 **Regression Tracking:**
+
 - Establish baseline performance metrics
 - Track pass rates, scores, and behavior over time
 - Detect degradations (>5% drop triggers warning)
 - Monitor improvements and changes
 
 **Report Format:**
+
 ```json
 {
   "summary": {
@@ -520,6 +575,7 @@ compare_to_baseline(current, baseline) -> Comparison
 ```
 
 **Design Rationale:**
+
 - Machine-readable output enables CI/CD integration
 - Multi-dimensional scoring captures different quality aspects
 - Regression tracking prevents silent quality erosion

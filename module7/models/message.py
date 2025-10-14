@@ -26,6 +26,7 @@ class Conversation:
     messages: list[Message] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
+    trace_id: str = ""
 
     def add_message(self, role: Literal["user", "assistant"], content: str) -> None:
         """Add a message to the conversation."""

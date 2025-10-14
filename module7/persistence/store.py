@@ -6,6 +6,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from models.message import Conversation, Message
+from observability.tracer import flush_traces
 
 
 class ConversationStore:
@@ -21,6 +22,7 @@ class ConversationStore:
         file_path = self.storage_dir / f"{conversation.id}.json"
         data = {
             "id": conversation.id,
+            "trace_id": conversation.trace_id,
             "created_at": conversation.created_at.isoformat(),
             "updated_at": conversation.updated_at.isoformat(),
             "messages": [
@@ -33,6 +35,9 @@ class ConversationStore:
             ],
         }
         file_path.write_text(json.dumps(data, indent=2))
+
+        # Flush traces to ensure they're written to disk
+        flush_traces()
 
     def load(self, conversation_id: str) -> Conversation:
         """Load a conversation from disk."""
@@ -55,6 +60,7 @@ class ConversationStore:
             messages=messages,
             created_at=datetime.fromisoformat(data["created_at"]),
             updated_at=datetime.fromisoformat(data["updated_at"]),
+            trace_id=data.get("trace_id", ""),
         )
 
     def list_conversations(self) -> list[tuple[str, datetime]]:

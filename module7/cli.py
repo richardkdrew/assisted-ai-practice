@@ -4,6 +4,7 @@ import sys
 
 from agent import Agent
 from models.config import Config
+from observability.tracer import setup_tracer
 from persistence.store import ConversationStore
 from providers.anthropic import AnthropicProvider
 
@@ -66,6 +67,9 @@ def main() -> None:
     except ValueError as e:
         print(f"Configuration error: {e}")
         sys.exit(1)
+
+    # Initialize observability
+    setup_tracer(config.traces_dir)
 
     provider = AnthropicProvider(config.api_key, config.model)
     store = ConversationStore(config.conversations_dir)

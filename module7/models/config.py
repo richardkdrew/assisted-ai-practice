@@ -13,6 +13,7 @@ class Config:
     model: str = "claude-3-5-sonnet-20241022"
     max_tokens: int = 4096
     conversations_dir: Path = Path("./conversations")
+    traces_dir: Path = Path("./data/traces")
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -26,4 +27,5 @@ class Config:
             model=os.getenv("ANTHROPIC_MODEL", cls.model),
             max_tokens=int(os.getenv("MAX_TOKENS", cls.max_tokens)),
             conversations_dir=Path(os.getenv("CONVERSATIONS_DIR", cls.conversations_dir)),
+            traces_dir=Path(os.getenv("TRACES_DIR", cls.traces_dir)),
         )
