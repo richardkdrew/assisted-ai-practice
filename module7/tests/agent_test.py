@@ -5,8 +5,8 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 from detective_agent.agent import Agent
-from detective_agent.models.config import Config
-from detective_agent.models.message import Conversation
+from detective_agent.config import Config
+from detective_agent.message import Conversation
 from detective_agent.persistence.store import ConversationStore
 
 

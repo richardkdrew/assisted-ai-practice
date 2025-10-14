@@ -9,8 +9,9 @@ This package provides a conversational AI agent with:
 """
 
 from detective_agent.agent import Agent
+from detective_agent.config import Config
 from detective_agent.context import ContextManager
-from detective_agent.models import Config, Conversation, Message
+from detective_agent.message import Conversation, Message
 from detective_agent.observability import get_trace_id, get_tracer, setup_tracer
 from detective_agent.persistence import ConversationStore
 from detective_agent.providers import AnthropicProvider, BaseProvider

@@ -2,7 +2,7 @@
 
 import pytest
 
-from detective_agent.models.message import Conversation
+from detective_agent.message import Conversation
 from detective_agent.observability.tracer import get_trace_id, get_tracer
 
 

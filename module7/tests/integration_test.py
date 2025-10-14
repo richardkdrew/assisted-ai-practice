@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 from detective_agent.agent import Agent
-from detective_agent.models.config import Config
+from detective_agent.config import Config
 from detective_agent.persistence.store import ConversationStore
 from detective_agent.providers.anthropic import AnthropicProvider
 

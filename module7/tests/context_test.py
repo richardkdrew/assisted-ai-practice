@@ -3,7 +3,7 @@
 import pytest
 
 from detective_agent.context.manager import ContextManager
-from detective_agent.models.message import Message
+from detective_agent.message import Message
 
 
 @pytest.fixture
