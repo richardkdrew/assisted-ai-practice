@@ -1,5 +1,6 @@
 """Core agent logic for managing conversations."""
 
+from context.manager import ContextManager
 from models.config import Config
 from models.message import Conversation
 from observability.tracer import get_tracer, get_trace_id
@@ -16,6 +17,7 @@ class Agent:
         self.store = store
         self.config = config
         self.tracer = get_tracer()
+        self.context_manager = ContextManager(max_messages=config.max_messages)
 
     def send_message(self, conversation: Conversation, user_message: str) -> str:
         """
@@ -38,7 +40,22 @@ class Agent:
             if not hasattr(conversation, "trace_id") or not conversation.trace_id:
                 conversation.trace_id = get_trace_id()
 
-            messages = conversation.to_api_format()
+            # Apply context window management
+            truncated_messages, was_truncated = self.context_manager.truncate_messages(
+                conversation.messages
+            )
+
+            # Track context information in span
+            context_info = self.context_manager.get_context_info(conversation.messages)
+            span.set_attribute("context.total_messages", context_info["total_messages"])
+            span.set_attribute("context.was_truncated", was_truncated)
+            if was_truncated:
+                span.set_attribute(
+                    "context.messages_dropped", context_info["messages_to_drop"]
+                )
+
+            # Convert truncated messages to API format
+            messages = [msg.to_dict() for msg in truncated_messages]
             response = self.provider.send_message(messages, self.config.max_tokens)
             conversation.add_message("assistant", response)
 

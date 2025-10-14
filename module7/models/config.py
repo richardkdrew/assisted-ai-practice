@@ -14,6 +14,7 @@ class Config:
     max_tokens: int = 4096
     conversations_dir: Path = Path("./conversations")
     traces_dir: Path = Path("./data/traces")
+    max_messages: int = 6
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -28,4 +29,5 @@ class Config:
             max_tokens=int(os.getenv("MAX_TOKENS", cls.max_tokens)),
             conversations_dir=Path(os.getenv("CONVERSATIONS_DIR", cls.conversations_dir)),
             traces_dir=Path(os.getenv("TRACES_DIR", cls.traces_dir)),
+            max_messages=int(os.getenv("MAX_MESSAGES", cls.max_messages)),
         )
