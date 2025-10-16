@@ -1,5 +1,7 @@
 """Data models for conversations and tools."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Callable, Literal
@@ -7,15 +9,41 @@ from typing import Any, Callable, Literal
 
 @dataclass
 class Message:
-    """A single message in a conversation."""
+    """A single message in a conversation.
+
+    Content can be:
+    - str: Simple text content
+    - list[dict]: Complex content with tool_use or tool_result blocks
+    """
 
     role: Literal["user", "assistant"]
-    content: str
+    content: str | list[dict[str, Any]]
     timestamp: datetime = field(default_factory=datetime.now)
 
     def to_dict(self) -> dict:
         """Convert to dictionary for API calls."""
         return {"role": self.role, "content": self.content}
+
+    def get_text_content(self) -> str:
+        """Extract text content from message.
+
+        Returns:
+            Text content as string. For complex content, concatenates all text blocks.
+        """
+        if isinstance(self.content, str):
+            return self.content
+
+        # Extract text from content blocks
+        text_parts = []
+        for block in self.content:
+            if isinstance(block, dict):
+                if block.get("type") == "text":
+                    text_parts.append(block.get("text", ""))
+                elif block.get("type") == "tool_use":
+                    # Include tool use in text representation
+                    text_parts.append(f"[Tool: {block.get('name')}]")
+
+        return " ".join(text_parts)
 
 
 @dataclass
@@ -28,10 +56,36 @@ class Conversation:
     updated_at: datetime = field(default_factory=datetime.now)
     trace_id: str = ""
 
-    def add_message(self, role: Literal["user", "assistant"], content: str) -> None:
-        """Add a message to the conversation."""
+    def add_message(
+        self, role: Literal["user", "assistant"], content: str | list[dict[str, Any]]
+    ) -> None:
+        """Add a message to the conversation.
+
+        Args:
+            role: Message role (user or assistant)
+            content: Text content or list of content blocks (for tool use/results)
+        """
         self.messages.append(Message(role=role, content=content))
         self.updated_at = datetime.now()
+
+    def add_tool_result_message(self, tool_results: list[ToolResult]) -> None:
+        """Add a user message containing tool results.
+
+        Args:
+            tool_results: List of tool execution results
+        """
+        content_blocks = []
+        for result in tool_results:
+            content_blocks.append(
+                {
+                    "type": "tool_result",
+                    "tool_use_id": result.tool_call_id,
+                    "content": result.content,
+                    "is_error": not result.success,
+                }
+            )
+
+        self.add_message("user", content_blocks)
 
     def to_api_format(self) -> list[dict]:
         """Convert messages to API format."""
