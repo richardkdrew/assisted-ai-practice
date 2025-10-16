@@ -106,6 +106,15 @@ class ToolRegistry:
         """Get all registered tool definitions."""
         return list(self._tools.values())
 
+    def get_tool_definitions(self) -> list[dict[str, Any]]:
+        """
+        Get tool definitions formatted for API use.
+
+        Returns:
+            List of tool definitions in API format
+        """
+        return self.format_for_anthropic()
+
     def format_for_anthropic(self) -> list[dict[str, Any]]:
         """
         Format tools for Anthropic API.

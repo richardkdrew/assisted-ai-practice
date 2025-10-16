@@ -6,16 +6,24 @@ from detective_agent.models import Conversation
 from detective_agent.observability.tracer import get_tracer, get_trace_id
 from detective_agent.persistence.store import ConversationStore
 from detective_agent.providers.base import BaseProvider
+from detective_agent.tools.registry import ToolRegistry
 
 
 class Agent:
     """AI agent that manages conversations with an AI provider."""
 
-    def __init__(self, provider: BaseProvider, store: ConversationStore, config: Config):
+    def __init__(
+        self,
+        provider: BaseProvider,
+        store: ConversationStore,
+        config: Config,
+        tool_registry: ToolRegistry | None = None,
+    ):
         """Initialize the agent with a provider, store, and config."""
         self.provider = provider
         self.store = store
         self.config = config
+        self.tool_registry = tool_registry
         self.tracer = get_tracer()
         self.context_manager = ContextManager(max_messages=config.max_messages)
 
@@ -40,32 +48,99 @@ class Agent:
             if not hasattr(conversation, "trace_id") or not conversation.trace_id:
                 conversation.trace_id = get_trace_id()
 
-            # Apply context window management
-            truncated_messages, was_truncated = self.context_manager.truncate_messages(
-                conversation.messages
-            )
+            # Prepare tools if registry is available
+            tools = None
+            if self.tool_registry:
+                tools = self.tool_registry.get_tool_definitions()
+                span.set_attribute("tools.available", len(tools))
 
-            # Track context information in span
-            context_info = self.context_manager.get_context_info(conversation.messages)
-            span.set_attribute("context.total_messages", context_info["total_messages"])
-            span.set_attribute("context.was_truncated", was_truncated)
-            if was_truncated:
-                span.set_attribute(
-                    "context.messages_dropped", context_info["messages_to_drop"]
+            # Tool execution loop
+            max_iterations = 10
+            iteration = 0
+
+            while iteration < max_iterations:
+                iteration += 1
+                span.set_attribute("tool_loop.iteration", iteration)
+
+                # Apply context window management
+                truncated_messages, was_truncated = self.context_manager.truncate_messages(
+                    conversation.messages
                 )
 
-            # Convert truncated messages to API format
-            messages = [msg.to_dict() for msg in truncated_messages]
-            response = await self.provider.send_message(
-                messages, self.config.max_tokens, system=self.config.system_prompt
+                # Track context information in span
+                context_info = self.context_manager.get_context_info(conversation.messages)
+                span.set_attribute("context.total_messages", context_info["total_messages"])
+                span.set_attribute("context.was_truncated", was_truncated)
+                if was_truncated:
+                    span.set_attribute(
+                        "context.messages_dropped", context_info["messages_to_drop"]
+                    )
+
+                # Convert truncated messages to API format
+                messages = [msg.to_dict() for msg in truncated_messages]
+                response = await self.provider.send_message(
+                    messages, self.config.max_tokens, system=self.config.system_prompt, tools=tools
+                )
+
+                # Extract tool calls from response
+                tool_calls = self.provider.extract_tool_calls(response)
+                span.set_attribute(f"tool_loop.iteration_{iteration}.tool_calls", len(tool_calls))
+
+                # If no tool calls, we're done - extract text and add to conversation
+                if not tool_calls:
+                    response_text = self.provider.get_text_content(response)
+                    conversation.add_message("assistant", response_text)
+
+                    span.set_attribute("response_length", len(response_text))
+                    span.set_attribute("total_messages", len(conversation.messages))
+                    span.set_attribute("tool_loop.total_iterations", iteration)
+
+                    self.store.save(conversation)
+                    return response_text
+
+                # We have tool calls - add assistant message with tool_use blocks
+                # Convert content blocks to dictionaries for serialization
+                content_blocks = []
+                for block in response.content:
+                    if hasattr(block, 'type'):
+                        if block.type == "text":
+                            content_blocks.append({"type": "text", "text": block.text})
+                        elif block.type == "tool_use":
+                            content_blocks.append({
+                                "type": "tool_use",
+                                "id": block.id,
+                                "name": block.name,
+                                "input": block.input,
+                            })
+
+                conversation.add_message("assistant", content_blocks)
+
+                # Execute each tool call and collect results
+                tool_results = []
+                with self.tracer.start_as_current_span("execute_tools") as tool_span:
+                    tool_span.set_attribute("tool_count", len(tool_calls))
+
+                    for tool_call in tool_calls:
+                        tool_span.set_attribute(f"tool.{tool_call.name}.called", True)
+
+                        # Execute the tool
+                        tool_result = await self.tool_registry.execute(tool_call)
+                        tool_results.append(tool_result)
+
+                        tool_span.set_attribute(
+                            f"tool.{tool_call.name}.success", tool_result.success
+                        )
+
+                    # Add all tool results as a single message
+                    conversation.add_tool_result_message(tool_results)
+
+                # Continue loop to get next response from model with tool results
+
+            # If we hit max iterations, return what we have
+            span.set_attribute("tool_loop.max_iterations_reached", True)
+            raise RuntimeError(
+                f"Tool execution loop exceeded maximum iterations ({max_iterations})"
             )
-            conversation.add_message("assistant", response)
-
-            span.set_attribute("response_length", len(response))
-            span.set_attribute("total_messages", len(conversation.messages))
-
-            self.store.save(conversation)
-            return response
 
     def new_conversation(self) -> Conversation:
         """Create and save a new conversation."""

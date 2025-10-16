@@ -29,12 +29,14 @@ async def test_full_conversation_flow(mock_anthropic, integration_setup):
     mock_client = Mock()
     mock_responses = [
         Mock(
-            content=[Mock(text="Hello! How can I help you?")],
+            content=[Mock(type="text", text="Hello! How can I help you?")],
             usage=Mock(input_tokens=10, output_tokens=20),
+            stop_reason="end_turn",
         ),
         Mock(
-            content=[Mock(text="Python is a programming language.")],
+            content=[Mock(type="text", text="Python is a programming language.")],
             usage=Mock(input_tokens=15, output_tokens=25),
+            stop_reason="end_turn",
         ),
     ]
     mock_client.messages.create = AsyncMock(side_effect=mock_responses)
@@ -70,7 +72,9 @@ async def test_multiple_conversations(mock_anthropic, integration_setup):
 
     mock_client = Mock()
     mock_response = Mock(
-        content=[Mock(text="Response")], usage=Mock(input_tokens=10, output_tokens=20)
+        content=[Mock(type="text", text="Response")],
+        usage=Mock(input_tokens=10, output_tokens=20),
+        stop_reason="end_turn",
     )
     mock_client.messages.create = AsyncMock(return_value=mock_response)
     mock_anthropic.return_value = mock_client
