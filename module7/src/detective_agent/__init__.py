@@ -11,12 +11,13 @@ This package provides a conversational AI agent with:
 from detective_agent.agent import Agent
 from detective_agent.config import Config, RetryConfig
 from detective_agent.context import ContextManager
-from detective_agent.models import Conversation, Message
+from detective_agent.models import Conversation, Message, ToolCall, ToolDefinition, ToolResult
 from detective_agent.observability import get_trace_id, get_tracer, setup_tracer
 from detective_agent.persistence import ConversationStore
 from detective_agent.providers import AnthropicProvider, BaseProvider
 from detective_agent.retry import is_retryable_error, with_retry
 from detective_agent.system_prompt import DEFAULT_SYSTEM_PROMPT
+from detective_agent.tools import ToolRegistry
 
 __version__ = "0.1.0"
 
@@ -30,6 +31,9 @@ __all__ = [
     # Models
     "Conversation",
     "Message",
+    "ToolCall",
+    "ToolDefinition",
+    "ToolResult",
     # Providers
     "AnthropicProvider",
     "BaseProvider",
@@ -44,6 +48,8 @@ __all__ = [
     # Retry
     "is_retryable_error",
     "with_retry",
+    # Tools
+    "ToolRegistry",
     # Version
     "__version__",
 ]
