@@ -1,4 +1,15 @@
-"""Evaluation framework for agent performance."""
+"""Evaluation framework for assessing agent performance."""
 
-# Evaluation will be implemented in Phase 7
-__all__ = []
+from evals.scenarios import (
+    ALL_SCENARIOS,
+    Scenario,
+    get_scenario_by_id,
+    get_scenarios_by_severity,
+)
+
+__all__ = [
+    "Scenario",
+    "ALL_SCENARIOS",
+    "get_scenario_by_id",
+    "get_scenarios_by_severity",
+]
