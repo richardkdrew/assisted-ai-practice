@@ -2,6 +2,11 @@
 
 import asyncio
 
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
 from detective_agent import Agent, Config
 from detective_agent.persistence.store import ConversationStore
 from detective_agent.providers.anthropic import AnthropicProvider
@@ -25,6 +30,11 @@ async def main():
     """Run evaluation suite and generate reports."""
     # Setup agent with tools
     config = Config.from_env()
+
+    # Initialize observability
+    from detective_agent.observability.tracer import setup_tracer
+    setup_tracer(config.traces_dir)
+
     provider = AnthropicProvider(config.api_key, config.model)
     store = ConversationStore(config.conversations_dir)
 
@@ -62,31 +72,35 @@ async def main():
     save_report(markdown, "data/reports/evaluation_results.md")
     print("Markdown report saved to: data/reports/evaluation_results.md")
 
-    # Optionally save baseline
-    save_baseline = input("\nSave as baseline? (y/n): ")
-    if save_baseline.lower() == "y":
-        version = input("Version name: ")
-        evaluator.save_baseline(results, version)
-        print(f"Baseline saved as: data/baselines/{version}.json")
+    # Optionally save baseline (only in interactive mode)
+    try:
+        save_baseline = input("\nSave as baseline? (y/n): ")
+        if save_baseline.lower() == "y":
+            version = input("Version name: ")
+            evaluator.save_baseline(results, version)
+            print(f"Baseline saved as: data/baselines/{version}.json")
 
-    # Optionally compare to baseline
-    compare = input("\nCompare to baseline? (y/n): ")
-    if compare.lower() == "y":
-        version = input("Baseline version: ")
-        baseline = evaluator.load_baseline(version)
-        if baseline:
-            comparison = evaluator.compare_to_baseline(results, baseline)
-            print(f"\n{comparison.summary}")
-            if comparison.regressions:
-                print("\n⚠️  Regressions:")
-                for reg in comparison.regressions:
-                    print(f"  - {reg}")
-            if comparison.improvements:
-                print("\n✅ Improvements:")
-                for imp in comparison.improvements:
-                    print(f"  - {imp}")
-        else:
-            print(f"Baseline '{version}' not found")
+        # Optionally compare to baseline
+        compare = input("\nCompare to baseline? (y/n): ")
+        if compare.lower() == "y":
+            version = input("Baseline version: ")
+            baseline = evaluator.load_baseline(version)
+            if baseline:
+                comparison = evaluator.compare_to_baseline(results, baseline)
+                print(f"\n{comparison.summary}")
+                if comparison.regressions:
+                    print("\n⚠️  Regressions:")
+                    for reg in comparison.regressions:
+                        print(f"  - {reg}")
+                if comparison.improvements:
+                    print("\n✅ Improvements:")
+                    for imp in comparison.improvements:
+                        print(f"  - {imp}")
+            else:
+                print(f"Baseline '{version}' not found")
+    except EOFError:
+        # Running non-interactively, skip prompts
+        print("\nRunning in non-interactive mode - skipping baseline operations")
 
 
 if __name__ == "__main__":

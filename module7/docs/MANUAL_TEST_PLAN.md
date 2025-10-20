@@ -615,18 +615,18 @@ After the conversation, examine every component:
 cat data/conversations/<conversation-id>.json | uv run python -m json.tool | less
 ```
 
-2. **Trace analysis:**
+2. **Trace analysis (view all traces for the conversation):**
 ```bash
-cat data/traces/<trace-id>.json | uv run python -m json.tool | less
+uv run python cli.py trace <conversation-id> | less
 ```
 
-3. **Count the operations:**
+3. **Count the operations across all traces:**
 ```bash
-# Count API calls
-cat data/traces/<trace-id>.json | grep "anthropic_api_call" | wc -l
+# Count API calls across all traces for this conversation
+uv run python cli.py trace <conversation-id> 2>&1 | grep '"name".*anthropic' | wc -l
 
-# Count tool executions
-cat data/traces/<trace-id>.json | grep "execute_tool" | wc -l
+# Count tool execution spans across all traces
+uv run python cli.py trace <conversation-id> 2>&1 | grep '"name".*execute_tools' | wc -l
 ```
 
 ### Key Learnings:
@@ -651,7 +651,7 @@ cat data/traces/<trace-id>.json | grep "execute_tool" | wc -l
 
 1. **Run the evaluation suite:**
 ```bash
-uv run python examples/run_evaluation.py
+PYTHONPATH=. uv run python examples/run_evaluation.py
 ```
 
 ### What to Observe:

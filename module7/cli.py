@@ -12,6 +12,13 @@ from detective_agent.config import Config
 from detective_agent.observability.tracer import setup_tracer
 from detective_agent.persistence.store import ConversationStore
 from detective_agent.providers.anthropic import AnthropicProvider
+from detective_agent.tools.registry import ToolRegistry
+from detective_agent.tools.release_tools import (
+    get_release_summary,
+    file_risk_report,
+    GET_RELEASE_SUMMARY_SCHEMA,
+    FILE_RISK_REPORT_SCHEMA,
+)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -103,6 +110,9 @@ async def run_conversation(agent: Agent, conversation_id: str | None = None) -> 
             response = await agent.send_message(conversation, user_input)
             print(f"\nAssistant: {response}\n")
 
+        except EOFError:
+            print("\n\nGoodbye!")
+            break
         except KeyboardInterrupt:
             print("\n\nGoodbye!")
             break
@@ -121,9 +131,24 @@ def main() -> None:
     # Initialize observability
     setup_tracer(config.traces_dir)
 
+    # Initialize tool registry and register tools
+    tool_registry = ToolRegistry()
+    tool_registry.register(
+        name="get_release_summary",
+        description="Retrieve detailed information about a specific release, including changes, test results, and deployment metrics",
+        input_schema=GET_RELEASE_SUMMARY_SCHEMA,
+        handler=get_release_summary,
+    )
+    tool_registry.register(
+        name="file_risk_report",
+        description="File a risk assessment report for a release with severity level and findings",
+        input_schema=FILE_RISK_REPORT_SCHEMA,
+        handler=file_risk_report,
+    )
+
     provider = AnthropicProvider(config.api_key, config.model)
     store = ConversationStore(config.conversations_dir)
-    agent = Agent(provider, store, config)
+    agent = Agent(provider, store, config, tool_registry=tool_registry)
 
     if len(sys.argv) > 1:
         command = sys.argv[1]
