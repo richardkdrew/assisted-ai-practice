@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# uv
+uv.lock
+
+# Runtime data (keep structure, ignore content)
+data/conversations/*
+!data/conversations/.gitkeep
+data/traces/*
+!data/traces/.gitkeep
+data/reports/*
+!data/reports/.gitkeep
+data/baselines/*
+!data/baselines/.gitkeep
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ruff
+.ruff_cache/
