@@ -1,5 +1,7 @@
 """Core agent logic for managing conversations."""
 
+from opentelemetry.trace import Link, SpanContext, TraceFlags
+
 from detective_agent.config import Config
 from detective_agent.context.manager import ContextManager
 from detective_agent.models import Conversation
@@ -38,15 +40,38 @@ class Agent:
         Returns:
             The assistant's response
         """
-        with self.tracer.start_as_current_span("send_message") as span:
+        # Create span links to previous traces in this session
+        links = []
+        if conversation.trace_ids:
+            # Link to the most recent previous trace
+            for trace_id_hex in conversation.trace_ids[-3:]:  # Link to last 3 traces
+                try:
+                    trace_id_int = int(trace_id_hex, 16)
+                    span_context = SpanContext(
+                        trace_id=trace_id_int,
+                        span_id=1,  # Link to root span
+                        is_remote=True,
+                        trace_flags=TraceFlags(0x01),
+                    )
+                    links.append(Link(span_context))
+                except ValueError:
+                    pass  # Skip invalid trace IDs
+
+        with self.tracer.start_as_current_span("send_message", links=links) as span:
+            span.set_attribute("session.id", conversation.id)
             span.set_attribute("message_length", len(user_message))
             span.set_attribute("message_count", len(conversation.messages))
 
             conversation.add_message("user", user_message)
 
             # Store trace ID in conversation if not already set
+            current_trace_id = get_trace_id()
             if not hasattr(conversation, "trace_id") or not conversation.trace_id:
-                conversation.trace_id = get_trace_id()
+                conversation.trace_id = current_trace_id
+
+            # Track all trace IDs for this session
+            if current_trace_id and current_trace_id not in conversation.trace_ids:
+                conversation.trace_ids.append(current_trace_id)
 
             # Prepare tools if registry is available
             tools = None
@@ -144,9 +169,10 @@ class Agent:
 
     def new_conversation(self) -> Conversation:
         """Create and save a new conversation."""
-        with self.tracer.start_as_current_span("new_conversation"):
+        with self.tracer.start_as_current_span("new_conversation") as span:
             conversation = self.store.create_conversation()
             conversation.trace_id = get_trace_id()
+            span.set_attribute("session.id", conversation.id)
             self.store.save(conversation)
             return conversation
 

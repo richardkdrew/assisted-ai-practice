@@ -28,9 +28,9 @@ class Config:
     """Main configuration for the AI agent."""
 
     api_key: str
-    model: str = "claude-3-5-sonnet-20241022"
+    model: str = "claude-3-5-sonnet-20240620"
     max_tokens: int = 4096
-    conversations_dir: Path = Path("./conversations")
+    conversations_dir: Path = Path("./data/conversations")
     traces_dir: Path = Path("./data/traces")
     max_messages: int = 6
     system_prompt: str = DEFAULT_SYSTEM_PROMPT

@@ -55,6 +55,7 @@ class Conversation:
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
     trace_id: str = ""
+    trace_ids: list[str] = field(default_factory=list)  # All trace IDs for this session
 
     def add_message(
         self, role: Literal["user", "assistant"], content: str | list[dict[str, Any]]

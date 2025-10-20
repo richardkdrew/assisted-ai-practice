@@ -4,9 +4,9 @@ This document tracks the implementation progress through each phase defined in [
 
 ## Current Status
 
-**Current Phase:** Phase 8 - Documentation (Complete!)
-**Last Updated:** 2025-10-17
-**Overall Progress:** 8/8 phases complete (100%)
+**Current Phase:** Phase 9 - Enhancements (Complete!)
+**Last Updated:** 2025-10-20
+**Overall Progress:** 9/9 phases complete (100%)
 
 ---
 
@@ -298,6 +298,7 @@ This document tracks the implementation progress through each phase defined in [
 | 6: Tool Abstraction | ✅ Complete | 11/11 | 2025-10-15 | 2025-10-17 |
 | 7: Evaluation | ✅ Complete | 10/10 | 2025-10-17 | 2025-10-17 |
 | 8: Documentation | ✅ Complete | 5/5 | 2025-10-17 | 2025-10-17 |
+| 9: Observability Enhancements | ✅ Complete | 6/6 | 2025-10-20 | 2025-10-20 |
 
 ---
 
@@ -384,4 +385,44 @@ This document tracks the implementation progress through each phase defined in [
 - Examples demonstrate both basic usage and evaluation
 - Documentation covers 91 test suite, 91% coverage
 - All 7 core phases documented as complete
+
+---
+
+### Phase 9: Observability Enhancements ✅
+
+**Status:** Complete
+**Started:** 2025-10-20
+**Completed:** 2025-10-20
+
+**Deliverables:**
+
+- [x] Session tracking across multiple traces
+- [x] Trace linking for conversation continuity
+- [x] Enhanced CLI with trace viewing capabilities
+- [x] Partial conversation ID matching (git-style)
+- [x] Environment configuration improvements
+- [x] Test suite validation
+
+**Components Enhanced:**
+
+- [x] agent.py - Added session.id attribute and trace linking
+- [x] models.py - Added trace_ids list to track all traces in a session
+- [x] persistence/store.py - Added partial ID matching and trace_ids support
+- [x] observability/exporter.py - Added span link serialization
+- [x] cli.py - Added trace viewing functionality and .env support
+- [x] config.py - Updated default model and conversations directory
+
+**Notes:**
+
+- Implemented OpenTelemetry span links to connect related traces in a session
+- Each message now creates a new trace but links to previous traces (last 3)
+- Added session.id attribute to all spans for easy correlation
+- Conversations now track all trace_ids, not just the first one
+- Store supports partial ID matching (e.g., "conv-abc" matches "conv-abc123...")
+- CLI can display all traces for a given conversation
+- Added python-dotenv for .env file support
+- Model changed to claude-3-5-sonnet-20240620
+- Conversations directory now defaults to ./data/conversations
+- All 91 tests passing with 91% coverage
+- Fixed test that was affected by environment variable override
 

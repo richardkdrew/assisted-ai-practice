@@ -22,6 +22,17 @@ class FileSpanExporter(SpanExporter):
         try:
             for span in spans:
                 trace_id = format(span.context.trace_id, "032x")
+
+                # Export span links if present
+                links = []
+                if hasattr(span, 'links') and span.links:
+                    for link in span.links:
+                        links.append({
+                            "trace_id": format(link.context.trace_id, "032x"),
+                            "span_id": format(link.context.span_id, "016x"),
+                            "attributes": dict(link.attributes) if link.attributes else {},
+                        })
+
                 span_data = {
                     "name": span.name,
                     "span_id": format(span.context.span_id, "016x"),
@@ -33,6 +44,7 @@ class FileSpanExporter(SpanExporter):
                     "end_time": span.end_time,
                     "duration_ns": span.end_time - span.start_time if span.end_time else 0,
                     "attributes": dict(span.attributes) if span.attributes else {},
+                    "links": links,
                     "status": span.status.status_code.name if span.status else "UNSET",
                 }
 

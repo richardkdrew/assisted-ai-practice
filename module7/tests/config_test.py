@@ -12,9 +12,10 @@ from detective_agent.system_prompt import DEFAULT_SYSTEM_PROMPT
 def test_config_from_env_with_api_key(monkeypatch):
     """Test loading config from environment variables."""
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    monkeypatch.delenv("ANTHROPIC_MODEL", raising=False)  # Remove any env override
     config = Config.from_env()
     assert config.api_key == "test-key"
-    assert config.model == "claude-3-5-sonnet-20241022"
+    assert config.model == "claude-3-5-sonnet-20240620"
 
 
 def test_config_from_env_missing_api_key(monkeypatch):

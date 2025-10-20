@@ -23,6 +23,7 @@ class ConversationStore:
         data = {
             "id": conversation.id,
             "trace_id": conversation.trace_id,
+            "trace_ids": conversation.trace_ids,
             "created_at": conversation.created_at.isoformat(),
             "updated_at": conversation.updated_at.isoformat(),
             "messages": [
@@ -40,12 +41,26 @@ class ConversationStore:
         flush_traces()
 
     def load(self, conversation_id: str) -> Conversation:
-        """Load a conversation from disk."""
-        file_path = self.storage_dir / f"{conversation_id}.json"
-        if not file_path.exists():
-            raise FileNotFoundError(f"Conversation {conversation_id} not found")
+        """Load a conversation from disk.
 
-        data = json.loads(file_path.read_text())
+        Supports partial ID matching - will match any conversation ID that starts
+        with the provided string (similar to git commit SHAs).
+        """
+        # Try exact match first
+        file_path = self.storage_dir / f"{conversation_id}.json"
+        if file_path.exists():
+            data = json.loads(file_path.read_text())
+        else:
+            # Try partial match
+            matching_files = list(self.storage_dir.glob(f"{conversation_id}*.json"))
+            if not matching_files:
+                raise FileNotFoundError(f"Conversation {conversation_id} not found")
+            if len(matching_files) > 1:
+                raise ValueError(
+                    f"Ambiguous conversation ID {conversation_id}: "
+                    f"matches {len(matching_files)} conversations"
+                )
+            data = json.loads(matching_files[0].read_text())
         messages = [
             Message(
                 role=msg["role"],
@@ -61,6 +76,7 @@ class ConversationStore:
             created_at=datetime.fromisoformat(data["created_at"]),
             updated_at=datetime.fromisoformat(data["updated_at"]),
             trace_id=data.get("trace_id", ""),
+            trace_ids=data.get("trace_ids", []),
         )
 
     def list_conversations(self) -> list[tuple[str, datetime]]:
