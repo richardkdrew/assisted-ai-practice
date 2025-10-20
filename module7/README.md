@@ -9,6 +9,7 @@ The Detective Agent is an AI-powered system that analyzes software releases to i
 **Key Capabilities:**
 - 🤖 Agentic tool execution with multi-turn loops
 - 📊 Comprehensive observability with OpenTelemetry
+- 🔗 Session tracking with trace linking across conversations
 - 🔄 Automatic retry with exponential backoff
 - 💾 Persistent conversation history
 - 📏 Context window management
@@ -38,7 +39,18 @@ uv sync
 
 ### Configuration
 
-Set your Anthropic API key:
+Create a `.env` file or set environment variables:
+
+```bash
+# Copy the example
+cp .env.example .env
+
+# Edit .env with your API key
+ANTHROPIC_API_KEY="your-api-key-here"
+ANTHROPIC_MODEL="claude-3-5-sonnet-20240620"
+```
+
+Or export directly:
 
 ```bash
 export ANTHROPIC_API_KEY="your-api-key-here"
@@ -114,7 +126,7 @@ Tools are executed in a loop (max 10 iterations) until the agent has all the inf
 
 ### 📊 OpenTelemetry Observability
 
-Every conversation generates detailed traces:
+Every conversation generates detailed traces with session tracking:
 
 ```python
 # Traces include:
@@ -122,9 +134,11 @@ Every conversation generates detailed traces:
 # - Tool execution spans
 # - Context window management
 # - Retry attempts
+# - Session tracking across multiple traces
+# - Span links connecting related traces
 ```
 
-Traces are saved to `data/traces/{trace_id}.json` for debugging and analysis.
+Traces are saved to `data/traces/{trace_id}.json` for debugging and analysis. Each conversation tracks all associated trace IDs, and new traces link to previous traces in the session for full observability.
 
 ### 🔄 Automatic Retry
 
@@ -145,14 +159,17 @@ config = Config(
 
 ### 💾 Conversation Persistence
 
-Conversations are automatically saved and can be continued:
+Conversations are automatically saved and can be continued. Supports partial ID matching (git-style):
 
 ```python
 # Start a new conversation
 conversation = agent.new_conversation()
 
-# Continue existing conversation
+# Continue existing conversation (exact match)
 conversation = agent.load_conversation(conversation_id)
+
+# Or use partial ID (like git commits)
+conversation = agent.load_conversation("conv-abc")  # Matches "conv-abc123..."
 ```
 
 ### 📏 Context Window Management
@@ -229,10 +246,11 @@ Configure via environment variables:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `ANTHROPIC_API_KEY` | Your Anthropic API key | Required |
-| `ANTHROPIC_MODEL` | Claude model to use | `claude-3-5-sonnet-20241022` |
+| `ANTHROPIC_MODEL` | Claude model to use | `claude-3-5-sonnet-20240620` |
 | `MAX_TOKENS` | Max tokens per response | `4096` |
 | `MAX_MESSAGES` | Context window size (messages) | `6` |
-| `CONVERSATIONS_DIR` | Where to store conversations | `./conversations` |
+| `CONVERSATIONS_DIR` | Where to store conversations | `./data/conversations` |
+| `TRACES_DIR` | Where to store traces | `./data/traces` |
 | `SYSTEM_PROMPT` | Custom system prompt | See `system_prompt.py` |
 
 ## Development
@@ -331,7 +349,7 @@ The Detective Agent assesses software release risk by:
 
 ## Project Status
 
-✅ **Production Ready** - All 7 core phases complete:
+✅ **Production Ready** - All 9 phases complete:
 
 1. ✅ Basic Conversation
 2. ✅ Observability
@@ -340,6 +358,8 @@ The Detective Agent assesses software release risk by:
 5. ✅ System Prompt Engineering
 6. ✅ Tool Abstraction
 7. ✅ Evaluation System
+8. ✅ Documentation & Examples
+9. ✅ Observability Enhancements (Session Tracking & Trace Linking)
 
 See [docs/PROGRESS.md](docs/PROGRESS.md) for detailed status.
 
