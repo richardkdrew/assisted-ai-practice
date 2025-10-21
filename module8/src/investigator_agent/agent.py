@@ -1,5 +1,7 @@
 """Core agent logic for managing conversations."""
 
+from typing import TYPE_CHECKING
+
 from opentelemetry.trace import Link, SpanContext, TraceFlags
 
 from investigator_agent.config import Config
@@ -12,6 +14,9 @@ from investigator_agent.persistence.store import ConversationStore
 from investigator_agent.providers.base import BaseProvider
 from investigator_agent.tools.registry import ToolRegistry
 
+if TYPE_CHECKING:
+    from investigator_agent.memory.protocol import MemoryStore
+
 
 class Agent:
     """AI agent that manages conversations with an AI provider."""
@@ -22,12 +27,22 @@ class Agent:
         store: ConversationStore,
         config: Config,
         tool_registry: ToolRegistry | None = None,
+        memory_store: "MemoryStore | None" = None,
     ):
-        """Initialize the agent with a provider, store, and config."""
+        """Initialize the agent with a provider, store, and config.
+
+        Args:
+            provider: LLM provider for generating responses
+            store: Conversation persistence store
+            config: Agent configuration
+            tool_registry: Optional tool registry for tool use
+            memory_store: Optional memory store for learning from past assessments
+        """
         self.provider = provider
         self.store = store
         self.config = config
         self.tool_registry = tool_registry
+        self.memory_store = memory_store
         self.tracer = get_tracer()
         self.context_manager = ContextManager(max_messages=config.max_messages)
         self.subconversation_manager = SubConversationManager(provider=provider)
@@ -226,3 +241,46 @@ class Agent:
         """List all conversations with formatted timestamps."""
         conversations = self.store.list_conversations()
         return [(id, dt.strftime("%Y-%m-%d %H:%M:%S")) for id, dt in conversations]
+
+    def retrieve_relevant_memories(self, query: str, limit: int = 3) -> list[str]:
+        """Retrieve relevant memories for a query.
+
+        Args:
+            query: User query or feature description
+            limit: Maximum number of memories to retrieve
+
+        Returns:
+            List of formatted memory strings for context
+        """
+        if not self.memory_store:
+            return []
+
+        with self.tracer.start_as_current_span("retrieve_memories") as span:
+            span.set_attribute("memory.query", query)
+            span.set_attribute("memory.limit", limit)
+
+            try:
+                memories = self.memory_store.retrieve(query=query, limit=limit)
+                span.set_attribute("memory.results_count", len(memories))
+
+                if not memories:
+                    return []
+
+                # Format memories for context
+                formatted = []
+                for mem in memories:
+                    formatted.append(
+                        f"Previous assessment of {mem.feature_id}:\n"
+                        f"  Decision: {mem.decision}\n"
+                        f"  When: {mem.timestamp.strftime('%Y-%m-%d')}\n"
+                        f"  Justification: {mem.justification}\n"
+                        f"  Key findings: {mem.key_findings}"
+                    )
+
+                return formatted
+
+            except Exception as e:
+                # Graceful degradation - log error but don't fail
+                span.set_attribute("memory.error", str(e))
+                span.set_attribute("memory.error_type", type(e).__name__)
+                return []
