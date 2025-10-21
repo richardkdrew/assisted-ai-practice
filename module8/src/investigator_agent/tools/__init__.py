@@ -7,6 +7,12 @@ from investigator_agent.tools.analysis import (
     REVIEW_TYPES,
     get_analysis,
 )
+from investigator_agent.tools.docs import (
+    LIST_DOCS_SCHEMA,
+    READ_DOC_SCHEMA,
+    list_docs,
+    read_doc,
+)
 from investigator_agent.tools.jira import (
     GET_JIRA_DATA_SCHEMA,
     get_folder_by_feature_id,
@@ -37,4 +43,9 @@ __all__ = [
     "ALL_ANALYSIS_TYPES",
     "METRICS_TYPES",
     "REVIEW_TYPES",
+    # Documentation tools (Module 8 - Phase 3)
+    "list_docs",
+    "read_doc",
+    "LIST_DOCS_SCHEMA",
+    "READ_DOC_SCHEMA",
 ]
