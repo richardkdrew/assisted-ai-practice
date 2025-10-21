@@ -1,0 +1,34 @@
+[
+  {
+    "folder": "feature1",
+    "jira_key": "PLAT-1523",
+    "feature_id": "FEAT-MS-001",
+    "summary": "Maintenance Scheduling & Alert System",
+    "status": "Production Ready",
+    "data_quality": "COMPLETE"
+  },
+  {
+    "folder": "feature2",
+    "jira_key": "PLAT-1687",
+    "feature_id": "FEAT-QR-002",
+    "summary": "QR Code Check-in/out with Mobile App",
+    "status": "Development",
+    "data_quality": "INCOMPLETE"
+  },
+  {
+    "folder": "feature3",
+    "jira_key": "PLAT-1677",
+    "feature_id": "FEAT-RS-003",
+    "summary": "Advanced Resource Reservation System",
+    "status": "UAT",
+    "data_quality": "PARTIAL"
+  },
+  {
+    "folder": "feature4",
+    "jira_key": "COMM-445",
+    "feature_id": "FEAT-CT-004",
+    "summary": "Contribution Tracking & Community Credits",
+    "status": "Planning",
+    "data_quality": "PARTIAL"
+  }
+]
