@@ -11,7 +11,14 @@ This package provides a conversational AI agent with:
 from investigator_agent.agent import Agent
 from investigator_agent.config import Config, RetryConfig
 from investigator_agent.context import ContextManager
-from investigator_agent.models import Conversation, Message, ToolCall, ToolDefinition, ToolResult
+from investigator_agent.models import (
+    Conversation,
+    Message,
+    SubConversation,
+    ToolCall,
+    ToolDefinition,
+    ToolResult,
+)
 from investigator_agent.observability import get_trace_id, get_tracer, setup_tracer
 from investigator_agent.persistence import ConversationStore
 from investigator_agent.providers import AnthropicProvider, BaseProvider
@@ -31,6 +38,7 @@ __all__ = [
     # Models
     "Conversation",
     "Message",
+    "SubConversation",
     "ToolCall",
     "ToolDefinition",
     "ToolResult",

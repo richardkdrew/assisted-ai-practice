@@ -47,6 +47,50 @@ class Message:
 
 
 @dataclass
+class SubConversation:
+    """A sub-conversation for isolated document analysis.
+
+    Used when tool results (e.g., large documentation) exceed token thresholds.
+    The sub-conversation isolates the analysis in a separate context, then
+    returns a condensed summary to the main conversation.
+    """
+
+    id: str
+    parent_id: str  # ID of the parent Conversation
+    purpose: str  # Description of what this sub-conversation is analyzing
+    system_prompt: str  # Specialized prompt for this analysis task
+    messages: list[Message] = field(default_factory=list)
+    summary: str = ""  # Condensed results from this sub-conversation
+    created_at: datetime = field(default_factory=datetime.now)
+    completed_at: datetime | None = None  # Set when analysis is complete
+    token_count: int = 0  # Total tokens used in this sub-conversation
+
+    def add_message(
+        self, role: Literal["user", "assistant"], content: str | list[dict[str, Any]]
+    ) -> None:
+        """Add a message to the sub-conversation.
+
+        Args:
+            role: Message role (user or assistant)
+            content: Text content or list of content blocks
+        """
+        self.messages.append(Message(role=role, content=content))
+
+    def to_api_format(self) -> list[dict]:
+        """Convert messages to API format."""
+        return [msg.to_dict() for msg in self.messages]
+
+    def complete(self, summary: str) -> None:
+        """Mark the sub-conversation as complete with a summary.
+
+        Args:
+            summary: Condensed summary of the analysis results
+        """
+        self.summary = summary
+        self.completed_at = datetime.now()
+
+
+@dataclass
 class Conversation:
     """A conversation thread with messages."""
 
@@ -56,6 +100,9 @@ class Conversation:
     updated_at: datetime = field(default_factory=datetime.now)
     trace_id: str = ""
     trace_ids: list[str] = field(default_factory=list)  # All trace IDs for this session
+    sub_conversations: list[SubConversation] = field(
+        default_factory=list
+    )  # Isolated analysis contexts
 
     def add_message(
         self, role: Literal["user", "assistant"], content: str | list[dict[str, Any]]

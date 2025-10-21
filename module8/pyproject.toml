@@ -27,6 +27,7 @@ dependencies = [
     "respx>=0.22.0",
     "pytest-cov>=7.0.0",
     "python-dotenv>=1.0.0",
+    "tiktoken>=0.12.0",
 ]
 
 [project.optional-dependencies]
@@ -50,7 +51,7 @@ packages = ["src/investigator_agent"]
 [tool.pytest.ini_options]
 minversion = "8.0"
 asyncio_mode = "auto"
-testpaths = ["tests"]
+testpaths = ["tests", "src"]
 python_files = ["*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
