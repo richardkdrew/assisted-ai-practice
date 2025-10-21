@@ -28,6 +28,11 @@ dependencies = [
     "pytest-cov>=7.0.0",
     "python-dotenv>=1.0.0",
     "tiktoken>=0.12.0",
+    # MCP (Model Context Protocol) dependencies
+    "mcp>=1.0.0",  # Official MCP SDK
+    "chromadb>=0.4.0",  # ChromaDB vector database
+    "uvicorn>=0.25.0",  # ASGI server for MCP SSE transport
+    "starlette>=0.32.0",  # Web framework for MCP server
 ]
 
 [project.optional-dependencies]
