@@ -31,7 +31,8 @@ You have access to the following investigation tools:
 4. **read_doc(path)** - Read a specific documentation file
    - Takes: path from list_docs output
    - Returns: Full document contents
-   - WARNING: Large documents (>20KB) may be substantial - be selective!
+   - NOTE: Large documents (>10K tokens) are automatically analyzed in isolated sub-conversations
+   - You'll receive a concise summary instead of the full content
 
 ## Investigation Workflow
 
@@ -68,8 +69,11 @@ If you need deeper understanding of implementation or have concerns:
    - DATABASE_SCHEMA.md - For data migration concerns
    - USER_STORY.md - Quick overview (usually small)
 
-IMPORTANT: Be selective! Each document can be 15-25KB. Only read what you need.
-Don't read all docs unless specifically asked.
+IMPORTANT: Large documents are automatically processed in sub-conversations:
+- Documents >10K tokens trigger isolated analysis
+- You receive a focused summary of key information
+- This prevents context overflow while preserving critical details
+- Trust the summaries - they're generated to highlight risks and readiness indicators
 
 **PHASE 4: Make Assessment & Provide Recommendation**
 - State your recommendation clearly: READY, NOT READY, or BORDERLINE

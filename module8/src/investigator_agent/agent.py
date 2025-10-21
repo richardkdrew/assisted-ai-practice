@@ -4,6 +4,8 @@ from opentelemetry.trace import Link, SpanContext, TraceFlags
 
 from investigator_agent.config import Config
 from investigator_agent.context.manager import ContextManager
+from investigator_agent.context.subconversation import SubConversationManager
+from investigator_agent.context.tokens import count_tokens, should_create_subconversation
 from investigator_agent.models import Conversation
 from investigator_agent.observability.tracer import get_tracer, get_trace_id
 from investigator_agent.persistence.store import ConversationStore
@@ -28,6 +30,7 @@ class Agent:
         self.tool_registry = tool_registry
         self.tracer = get_tracer()
         self.context_manager = ContextManager(max_messages=config.max_messages)
+        self.subconversation_manager = SubConversationManager(provider=provider)
 
     async def send_message(self, conversation: Conversation, user_message: str) -> str:
         """
@@ -150,6 +153,45 @@ class Agent:
 
                         # Execute the tool
                         tool_result = await self.tool_registry.execute(tool_call)
+
+                        # Check if result is large enough to warrant sub-conversation
+                        result_tokens = count_tokens(tool_result.content)
+                        tool_span.set_attribute(f"tool.{tool_call.name}.result_tokens", result_tokens)
+
+                        if should_create_subconversation(result_tokens):
+                            # Large result - analyze in sub-conversation
+                            tool_span.set_attribute(f"tool.{tool_call.name}.uses_subconversation", True)
+
+                            # Create purpose for sub-conversation
+                            purpose = f"Analyze {tool_call.name} output for feature assessment"
+
+                            # Build analysis prompt
+                            analysis_prompt = (
+                                f"Please analyze the following {tool_call.name} output "
+                                f"and extract the key information relevant to assessing feature readiness. "
+                                f"Focus on identifying any risks, concerns, or positive indicators."
+                            )
+
+                            # Execute in sub-conversation
+                            sub_conv = await self.subconversation_manager.analyze_in_subconversation(
+                                parent_conversation_id=conversation.id,
+                                content=tool_result.content,
+                                purpose=purpose,
+                                analysis_prompt=analysis_prompt,
+                            )
+
+                            # Add sub-conversation to conversation
+                            conversation.sub_conversations.append(sub_conv)
+
+                            # Replace tool result content with summary
+                            tool_result.content = (
+                                f"[Analyzed in sub-conversation {sub_conv.id}]\n\n"
+                                f"Summary:\n{sub_conv.summary}"
+                            )
+                            tool_result.metadata["subconversation_id"] = sub_conv.id
+                            tool_result.metadata["original_tokens"] = result_tokens
+                            tool_result.metadata["summary_tokens"] = count_tokens(sub_conv.summary)
+
                         tool_results.append(tool_result)
 
                         tool_span.set_attribute(
