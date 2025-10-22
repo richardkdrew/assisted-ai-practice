@@ -283,21 +283,21 @@ class InvestigatorEvaluator:
         """Extract readiness decision from response text."""
         response_lower = response.lower()
 
-        # Look for explicit decision statements
-        if "ready for production" in response_lower or "production ready" in response_lower:
-            return "ready"
+        # Look for explicit decision statements (check negative first!)
         if "not ready" in response_lower or "not production-ready" in response_lower:
             return "not_ready"
         if "borderline" in response_lower or "mixed signals" in response_lower:
             return "borderline"
+        if "ready for production" in response_lower or "production ready" in response_lower:
+            return "ready"
 
         # Look for decision keywords
         import re
 
-        if re.search(r'\bready\b', response_lower):
-            return "ready"
         if re.search(r'\bnot\b.*\bready\b', response_lower):
             return "not_ready"
+        if re.search(r'\bready\b', response_lower):
+            return "ready"
 
         return None
 

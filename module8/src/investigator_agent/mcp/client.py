@@ -241,12 +241,6 @@ class MCPToolAdapter:
             # Create agent tool definition
             agent_tool_name = f"{prefix}{tool_name}" if prefix else tool_name
 
-            tool_def = ToolDefinition(
-                name=agent_tool_name,
-                description=mcp_tool.description or f"MCP tool: {tool_name}",
-                input_schema=mcp_tool.inputSchema,
-            )
-
             # Create proxy function that calls MCP server
             async def proxy_function(
                 *,
@@ -257,8 +251,13 @@ class MCPToolAdapter:
                 """Proxy function that forwards calls to MCP server."""
                 return await _mcp_client.call_tool(_original_name, kwargs)
 
-            # Register with tool registry
-            self.tool_registry.register_tool(tool_def, proxy_function)
+            # Register with tool registry using register method
+            self.tool_registry.register(
+                name=agent_tool_name,
+                description=mcp_tool.description or f"MCP tool: {tool_name}",
+                input_schema=mcp_tool.inputSchema,
+                handler=proxy_function,
+            )
 
             # Track MCP client for this tool
             self.mcp_clients[agent_tool_name] = mcp_client

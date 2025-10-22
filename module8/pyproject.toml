@@ -28,11 +28,12 @@ dependencies = [
     "pytest-cov>=7.0.0",
     "python-dotenv>=1.0.0",
     "tiktoken>=0.12.0",
+    "psutil>=5.9.0", # System and process utilities for benchmarking
     # MCP (Model Context Protocol) dependencies
-    "mcp>=1.0.0",  # Official MCP SDK
-    "chromadb>=0.4.0",  # ChromaDB vector database
-    "uvicorn>=0.25.0",  # ASGI server for MCP SSE transport
-    "starlette>=0.32.0",  # Web framework for MCP server
+    "mcp>=1.0.0", # Official MCP SDK
+    "chromadb>=0.4.0", # ChromaDB vector database
+    "uvicorn>=0.25.0", # ASGI server for MCP SSE transport
+    "starlette>=0.32.0", # Web framework for MCP server
 ]
 
 [project.optional-dependencies]
@@ -56,6 +57,9 @@ packages = ["src/investigator_agent"]
 [tool.pytest.ini_options]
 minversion = "8.0"
 asyncio_mode = "auto"
+markers = [
+    "integration: marks tests as integration tests (requires Docker services)",
+]
 testpaths = ["tests", "src"]
 python_files = ["*_test.py"]
 python_classes = ["Test*"]
