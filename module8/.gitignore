@@ -54,6 +54,15 @@ data/reports/*
 data/baselines/*
 !data/baselines/.gitkeep
 
+# Data directories (optional - uncomment to keep data out of git)
+# data/conversations/*.json
+# data/traces/*.json
+data/chromadb
+data/errors
+data/neo4j/*
+!data/neo4j/.gitkeep
+
+
 # Environment variables
 .env
 .env.local
@@ -68,3 +77,14 @@ dmypy.json
 
 # ruff
 .ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Coverage reports
+coverage.json
+lcov.info
+
+# Temporary scripts
+fix_*.py

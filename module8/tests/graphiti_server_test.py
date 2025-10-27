@@ -6,14 +6,16 @@ It does NOT require Neo4j or OpenAI to be running.
 
 import ast
 import sys
+from pathlib import Path
 
 
 def test_server_syntax():
     """Test that the server has valid Python syntax and structure."""
     print("Validating Graphiti MCP Server...")
 
-    # Read the server file
-    with open("graphiti_mcp_server.py", "r") as f:
+    # Read the server file (adjust path since we're in tests/ now)
+    server_file = Path(__file__).parent.parent / "graphiti" / "graphiti_mcp_server.py"
+    with open(server_file, "r") as f:
         source_code = f.read()
 
     # Parse the AST to validate syntax

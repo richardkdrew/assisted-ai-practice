@@ -21,24 +21,24 @@ class TestGraphitiServerSetup:
 
     def test_server_file_exists(self):
         """Test that server file exists."""
-        server_file = Path(__file__).parent / "graphiti_mcp_server.py"
+        server_file = Path(__file__).parent.parent / "graphiti" / "graphiti_mcp_server.py"
         assert server_file.exists(), "Graphiti MCP server file should exist"
 
     def test_dockerfile_exists(self):
         """Test that Dockerfile exists."""
-        dockerfile = Path(__file__).parent / "Dockerfile"
+        dockerfile = Path(__file__).parent.parent / "graphiti" / "Dockerfile"
         assert dockerfile.exists(), "Dockerfile should exist"
 
     def test_pyproject_exists(self):
         """Test that pyproject.toml exists."""
-        pyproject = Path(__file__).parent / "pyproject.toml"
+        pyproject = Path(__file__).parent.parent / "graphiti" / "pyproject.toml"
         assert pyproject.exists(), "pyproject.toml should exist"
 
     def test_server_imports(self):
         """Test that server can be imported (syntax check)."""
         import ast
 
-        server_file = Path(__file__).parent / "graphiti_mcp_server.py"
+        server_file = Path(__file__).parent.parent / "graphiti" / "graphiti_mcp_server.py"
         with open(server_file) as f:
             source = f.read()
 
@@ -50,7 +50,7 @@ class TestGraphitiServerSetup:
         """Test that server defines required functions."""
         import ast
 
-        server_file = Path(__file__).parent / "graphiti_mcp_server.py"
+        server_file = Path(__file__).parent.parent / "graphiti" / "graphiti_mcp_server.py"
         with open(server_file) as f:
             source = f.read()
 
@@ -66,7 +66,7 @@ class TestGraphitiServerSetup:
         """Test that server defines all expected Graphiti tools."""
         import ast
 
-        server_file = Path(__file__).parent / "graphiti_mcp_server.py"
+        server_file = Path(__file__).parent.parent / "graphiti" / "graphiti_mcp_server.py"
         with open(server_file) as f:
             source = f.read()
 
@@ -169,7 +169,7 @@ class TestGraphitiServerTools:
         import ast
         import json
 
-        server_file = Path(__file__).parent / "graphiti_mcp_server.py"
+        server_file = Path(__file__).parent.parent / "graphiti" / "graphiti_mcp_server.py"
         with open(server_file) as f:
             source = f.read()
 
@@ -189,7 +189,7 @@ class TestGraphitiServerTools:
 
     def test_episode_tools_have_required_fields(self):
         """Test that episode-related tools have required fields."""
-        server_file = Path(__file__).parent / "graphiti_mcp_server.py"
+        server_file = Path(__file__).parent.parent / "graphiti" / "graphiti_mcp_server.py"
         with open(server_file) as f:
             source = f.read()
 
@@ -204,7 +204,7 @@ class TestGraphitiServerTools:
 
     def test_server_has_error_handling(self):
         """Test that server has proper error handling."""
-        server_file = Path(__file__).parent / "graphiti_mcp_server.py"
+        server_file = Path(__file__).parent.parent / "graphiti" / "graphiti_mcp_server.py"
         with open(server_file) as f:
             source = f.read()
 
@@ -219,12 +219,12 @@ class TestGraphitiDeployment:
 
     def test_readme_exists(self):
         """Test that README exists."""
-        readme = Path(__file__).parent / "README.md"
+        readme = Path(__file__).parent.parent / "graphiti" / "README.md"
         assert readme.exists(), "README.md should exist"
 
     def test_readme_has_deployment_instructions(self):
         """Test that README has deployment instructions."""
-        readme = Path(__file__).parent / "README.md"
+        readme = Path(__file__).parent.parent / "graphiti" / "README.md"
         with open(readme) as f:
             content = f.read()
 
@@ -234,7 +234,7 @@ class TestGraphitiDeployment:
 
     def test_readme_has_tool_documentation(self):
         """Test that README documents all tools."""
-        readme = Path(__file__).parent / "README.md"
+        readme = Path(__file__).parent.parent / "graphiti" / "README.md"
         with open(readme) as f:
             content = f.read()
 

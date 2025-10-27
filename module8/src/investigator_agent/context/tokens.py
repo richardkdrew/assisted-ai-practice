@@ -10,7 +10,7 @@ import tiktoken
 _ENCODER = tiktoken.get_encoding("cl100k_base")
 
 # Token thresholds for triggering sub-conversations
-DEFAULT_TOOL_RESULT_THRESHOLD = 10000  # ~10K tokens triggers sub-conversation
+DEFAULT_TOOL_RESULT_THRESHOLD = 3000  # ~3K tokens triggers sub-conversation
 DEFAULT_MAX_CONTEXT_TOKENS = 150000  # Conservative limit for Claude models
 
 

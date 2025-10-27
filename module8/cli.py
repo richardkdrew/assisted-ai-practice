@@ -19,6 +19,20 @@ from investigator_agent.tools.release_tools import (
     GET_RELEASE_SUMMARY_SCHEMA,
     FILE_RISK_REPORT_SCHEMA,
 )
+from investigator_agent.tools.jira import (
+    get_jira_data,
+    GET_JIRA_DATA_SCHEMA,
+)
+from investigator_agent.tools.analysis import (
+    get_analysis,
+    GET_ANALYSIS_SCHEMA,
+)
+from investigator_agent.tools.docs import (
+    list_docs,
+    read_doc,
+    LIST_DOCS_SCHEMA,
+    READ_DOC_SCHEMA,
+)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -133,6 +147,8 @@ def main() -> None:
 
     # Initialize tool registry and register tools
     tool_registry = ToolRegistry()
+
+    # Release tools (Module 7)
     tool_registry.register(
         name="get_release_summary",
         description="Retrieve detailed information about a specific release, including changes, test results, and deployment metrics",
@@ -144,6 +160,36 @@ def main() -> None:
         description="File a risk assessment report for a release with severity level and findings",
         input_schema=FILE_RISK_REPORT_SCHEMA,
         handler=file_risk_report,
+    )
+
+    # JIRA tools (Module 8)
+    tool_registry.register(
+        name="get_jira_data",
+        description="Retrieve JIRA metadata for all features, including their IDs, summaries, status, and data quality indicators",
+        input_schema=GET_JIRA_DATA_SCHEMA,
+        handler=get_jira_data,
+    )
+
+    # Analysis tools (Module 8)
+    tool_registry.register(
+        name="get_analysis",
+        description="Retrieve analysis data (metrics or reviews) for a specific feature. Available types: performance_benchmarks, pipeline_results, security_scan_results, test_coverage_report, unit_test_results, security, stakeholders, uat",
+        input_schema=GET_ANALYSIS_SCHEMA,
+        handler=get_analysis,
+    )
+
+    # Documentation tools (Module 8)
+    tool_registry.register(
+        name="list_docs",
+        description="List all documentation files available for a specific feature",
+        input_schema=LIST_DOCS_SCHEMA,
+        handler=list_docs,
+    )
+    tool_registry.register(
+        name="read_doc",
+        description="Read the contents of a documentation file for a feature",
+        input_schema=READ_DOC_SCHEMA,
+        handler=read_doc,
     )
 
     provider = AnthropicProvider(config.api_key, config.model)

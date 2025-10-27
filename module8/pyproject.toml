@@ -125,3 +125,10 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 warn_no_return = true
 follow_imports = "normal"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.0.1",
+    "jupyter>=1.1.1",
+    "nbformat>=5.10.4",
+]

@@ -84,14 +84,16 @@ class SubConversationManager:
                 "content.size_tokens": count_tokens(content),
             },
         ):
-            response = await self.provider.generate(
+            response = await self.provider.send_message(
                 messages=sub_conv.to_api_format(),
-                system_prompt=sub_conv.system_prompt,
-                tools=[],  # No tools in sub-conversations
+                max_tokens=4096,
+                system=sub_conv.system_prompt,
+                tools=None,  # No tools in sub-conversations
             )
 
             # Add response to sub-conversation
-            sub_conv.add_message("assistant", response.content)
+            response_text = self.provider.get_text_content(response)
+            sub_conv.add_message("assistant", response_text)
 
             # Calculate token usage
             sub_conv.token_count = count_message_tokens(sub_conv.to_api_format())
@@ -123,13 +125,14 @@ class SubConversationManager:
                 "messages.count": len(sub_conv.messages),
             },
         ):
-            response = await self.provider.generate(
+            response = await self.provider.send_message(
                 messages=[{"role": "user", "content": summarization_prompt}],
-                system_prompt="You are a summarization assistant. Create concise, information-dense summaries.",
-                tools=[],
+                max_tokens=2048,
+                system="You are a summarization assistant. Create concise, information-dense summaries.",
+                tools=None,
             )
 
-        return response.content
+        return self.provider.get_text_content(response)
 
     def _build_analysis_system_prompt(self) -> str:
         """Build system prompt for document analysis."""

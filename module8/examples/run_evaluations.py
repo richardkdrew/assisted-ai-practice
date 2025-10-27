@@ -72,13 +72,13 @@ async def setup_agent(with_memory: bool = False) -> Agent:
 
     # Register tools
     tool_registry = ToolRegistry()
-    tool_registry.register_tool(
+    tool_registry.register(
         name="get_jira_data",
         description="Retrieves metadata for all features",
         input_schema={"type": "object", "properties": {}, "required": []},
         handler=get_jira_data,
     )
-    tool_registry.register_tool(
+    tool_registry.register(
         name="get_analysis",
         description="Retrieves analysis data for a feature",
         input_schema={
@@ -91,7 +91,7 @@ async def setup_agent(with_memory: bool = False) -> Agent:
         },
         handler=get_analysis,
     )
-    tool_registry.register_tool(
+    tool_registry.register(
         name="list_docs",
         description="Lists documentation files for a feature",
         input_schema={
@@ -101,7 +101,7 @@ async def setup_agent(with_memory: bool = False) -> Agent:
         },
         handler=list_docs,
     )
-    tool_registry.register_tool(
+    tool_registry.register(
         name="read_doc",
         description="Reads a documentation file",
         input_schema={
